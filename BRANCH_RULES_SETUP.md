@@ -71,6 +71,8 @@ After importing both rulesets, you should see:
 
 You can click on each to review the applied rules.
 
+**Note on Bypass Actors**: The rulesets include `actor_id: 5` for repository administrators to bypass rules. GitHub will typically map this automatically, but if you see any warnings during import, you can adjust the bypass permissions in the GitHub UI after import.
+
 ## Alternative: Using GitHub API
 
 If you prefer to use the GitHub API:

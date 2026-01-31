@@ -71,7 +71,16 @@ The `bypass_actors` section specifies who can bypass these rules:
 - `actor_id: 5` with `RepositoryRole` typically refers to repository administrators
 - `bypass_mode: always` means they can always bypass
 
-You may need to adjust `actor_id` based on your repository's specific configuration.
+**Important**: The `actor_id: 5` is a common default for repository admin role, but this may vary depending on your specific repository configuration. When importing these rulesets:
+
+1. GitHub will automatically map the role if it exists
+2. If the role mapping fails, you can adjust it in the GitHub UI after import
+3. Alternatively, remove the `bypass_actors` section entirely if you want no bypasses
+
+To find the correct `actor_id` for your repository:
+- Navigate to Settings → Collaborators and teams
+- Use the GitHub API: `GET /repos/{owner}/{repo}/collaborators` to see role IDs
+- Or simply let GitHub handle the mapping during import
 
 ## Common Rule Types
 
