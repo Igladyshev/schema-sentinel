@@ -9,7 +9,8 @@
 /resources/SDP v.0.1.3(dev) -> SDP v.0.1.1(dev)).md
 /resources/SDP v.0.1.4(cert) -> SDP v.0.1.4(non_prod)).md
 /resources/SDP v.0.1.4(non_prod) -> SDP v.0.1.4(cert)).md
-.DS_Store/*
+.DS_Store
+**/.DS_Store
 
 # Credentials and secrets - NEVER COMMIT
 .env
