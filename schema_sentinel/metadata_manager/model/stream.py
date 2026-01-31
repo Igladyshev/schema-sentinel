@@ -30,9 +30,7 @@ class Stream(CommonBase):
             session.commit()
 
     def exists(self) -> str:
-        return select(Stream).filter_by(
-            stream_id=self.stream_id
-        )
+        return select(Stream).filter_by(stream_id=self.stream_id)
 
     def __get_id__(self) -> str:
         id = json.loads(self.schema_id)

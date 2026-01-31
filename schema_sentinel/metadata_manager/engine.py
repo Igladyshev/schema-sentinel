@@ -32,11 +32,7 @@ class DBEngineStrategy(ABC):
         self.private_key = config.get("private_key") if "private_key" in config else b""
         self.role = config.get("role")
         self.engine = None
-        self.private_key_passphrase = (
-            config.get("private_key_passphrase")
-            if "private_key_passphrase" in config
-            else ""
-        )
+        self.private_key_passphrase = config.get("private_key_passphrase") if "private_key_passphrase" in config else ""
         self.default_schema = config.get("schema")
         self.connect_mode = config.get("connect_mode")
         self.env = env

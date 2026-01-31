@@ -3,7 +3,15 @@ import typer
 import logging as log
 import pandas as pd
 
-from schema_sentinel import RESOURCES_PATH, get_engine, get_metadata_engine, validate, load_comparator, get_user, load_db
+from schema_sentinel import (
+    RESOURCES_PATH,
+    get_engine,
+    get_metadata_engine,
+    validate,
+    load_comparator,
+    get_user,
+    load_db,
+)
 from schema_sentinel.markdown_utils.markdown import comparison_to_markdown, db_to_markdown
 from schema_sentinel.metadata_manager.model.comparison import Comparison
 from schema_sentinel.metadata_manager.metadata import save_metadata, db_timestamp_to_string, compare
@@ -26,37 +34,37 @@ def init_metadata(metadata_db: str = "metadata.db"):
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
 
-@app.command()
-def db_doc (env: str,
-            version: str,
-            database_name: str = "MY_DATABASE",
-            metadata_db: str = "metadata.db"):
 
+@app.command()
+def db_doc(env: str, version: str, database_name: str = "MY_DATABASE", metadata_db: str = "metadata.db"):
     database, session = load_db(database_name=database_name, environment=env, version=version, metadata_db=metadata_db)
     document = db_to_markdown(database=database, session=session)
     document.dump(f"{database.__name__()}", RESOURCES_PATH)
 
 
 @app.command()
-def comparison_report (source_env: str,
-                target_env: str,
-                database_name: str = "MY_DATABASE",
-                metadata_db: str = "metadata.db",
-                src_version: str = "0.1.0",
-                trg_version: str = "0.1.0"):
-
+def comparison_report(
+    source_env: str,
+    target_env: str,
+    database_name: str = "MY_DATABASE",
+    metadata_db: str = "metadata.db",
+    src_version: str = "0.1.0",
+    trg_version: str = "0.1.0",
+):
     one, two, session = load_comparator(source_env, target_env, database_name, metadata_db, src_version, trg_version)
     document = comparison_to_markdown(one, two, session)
     document.dump(f"{one.__name__()} -> {two.__name__()}", RESOURCES_PATH)
 
 
 @app.command()
-def sql_compare(source_env: str,
-                target_env: str,
-                database_name: str = "MY_DATABASE",
-                metadata_db: str = "metadata.db",
-                src_version: str = "0.1.0",
-                trg_version: str = "0.1.0"):
+def sql_compare(
+    source_env: str,
+    target_env: str,
+    database_name: str = "MY_DATABASE",
+    metadata_db: str = "metadata.db",
+    src_version: str = "0.1.0",
+    trg_version: str = "0.1.0",
+):
     """
     Compares two databases metadata previously loaded into metadata store. Generates the Markdown document
 
@@ -83,23 +91,27 @@ def sql_compare(source_env: str,
 
     left: {} = compare(one, two, session)
 
-    Comparison.save_comparison(comparison_dict=left,
-                    src_database_id=one.database_id,
-                    trg_database_id=two.database_id,
-                    session=session,
-                    db_timestamp_to_string=db_timestamp_to_string,
-                    user=get_user())
+    Comparison.save_comparison(
+        comparison_dict=left,
+        src_database_id=one.database_id,
+        trg_database_id=two.database_id,
+        session=session,
+        db_timestamp_to_string=db_timestamp_to_string,
+        user=get_user(),
+    )
 
     document = comparison_to_markdown(one, two, session)
     document.dump(f"{one.__get_name__()} -> {two.__get_name__()})", RESOURCES_PATH)
 
     right: {} = compare(two, one, session)
-    Comparison.save_comparison(comparison_dict=right,
-                    src_database_id=two.database_id,
-                    trg_database_id=one.database_id,
-                    session=session,
-                    db_timestamp_to_string=db_timestamp_to_string,
-                    user=get_user())
+    Comparison.save_comparison(
+        comparison_dict=right,
+        src_database_id=two.database_id,
+        trg_database_id=one.database_id,
+        session=session,
+        db_timestamp_to_string=db_timestamp_to_string,
+        user=get_user(),
+    )
 
     document = comparison_to_markdown(two, one, session)
     document.dump(f"{two.__get_name__()} -> {one.__get_name__()})", RESOURCES_PATH)
@@ -107,28 +119,23 @@ def sql_compare(source_env: str,
 
 @app.command()
 def load_metadata(
-        environment: str,
-        version: str = "0.1.0",
-        database_name: str = "MY_DATABASE",
-        metadata_db: str = "metadata.db"):
-
-    (engine, schemas, database_name) = get_engine(
-        env=environment, resources_path=RESOURCES_PATH, alias=database_name
-    )
+    environment: str, version: str = "0.1.0", database_name: str = "MY_DATABASE", metadata_db: str = "metadata.db"
+):
+    (engine, schemas, database_name) = get_engine(env=environment, resources_path=RESOURCES_PATH, alias=database_name)
     if environment == "local":
         environment = engine.env
 
     metadata_engine: SqLiteAqlAlchemyEngine = get_metadata_engine(metadata_db=metadata_db)
 
     save_metadata(
-         engine=engine,
-         environment=environment,
-         database_name=database_name,
-         schemas=schemas,
-         meta_engine=metadata_engine,
-         version=version)
+        engine=engine,
+        environment=environment,
+        database_name=database_name,
+        schemas=schemas,
+        meta_engine=metadata_engine,
+        version=version,
+    )
 
 
 if __name__ == "__main__":
     app()
-

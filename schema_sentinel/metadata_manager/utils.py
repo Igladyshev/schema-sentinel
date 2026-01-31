@@ -19,6 +19,7 @@ def get_config(env: str, resources_path: str) -> ConfigParser:
     config.read_file(open(os.path.join(resources_path, f"db-{env}.properties")), "r")
     return config
 
+
 def snake_case_split(s) -> str:
     """
     The function would split a word in snake_case to separate words with first capital letter.
@@ -41,7 +42,7 @@ def camel_case_split(s):
     idx = list(map(str.isupper, s))
     # mark change of case
     l = [0]
-    for (i, (x, y)) in enumerate(zip(idx, idx[1:])):
+    for i, (x, y) in enumerate(zip(idx, idx[1:])):
         if x and not y:  # "Ul"
             l.append(i)
         elif not x and y:  # "lU"
@@ -49,6 +50,7 @@ def camel_case_split(s):
     l.append(len(s))
     # for "lUl", index of "U" will pop twice, have to filer it
     return " ".join([s[x:y] for x, y in zip(l, l[1:]) if x < y])
+
 
 GET_SCHEMA_DISCREPANCY_SQL = f"""
 SELECT

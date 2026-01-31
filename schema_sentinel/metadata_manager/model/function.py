@@ -42,9 +42,7 @@ class Function(CommonBase):
             session.commit()
 
     def exists(self) -> str:
-        return select(Function).filter_by(
-            function_id=self.function_id
-        )
+        return select(Function).filter_by(function_id=self.function_id)
 
     def __get_id__(self) -> str:
         id = json.loads(self.schema_id)
@@ -53,7 +51,7 @@ class Function(CommonBase):
         return json.dumps(id)
 
     def __data_type__(self) -> str:
-        if self.data_type in ['VARCHAR', 'TEXT']:
+        if self.data_type in ["VARCHAR", "TEXT"]:
             data_type = f"{self.data_type}({self.character_maximum_length})"
         elif self.data_type == "NUMBER":
             data_type = f"{self.data_type}({self.numeric_precision}, {self.numeric_scale})"

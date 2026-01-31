@@ -1,20 +1,22 @@
 class ChangeSet:
-    def __init__(self,
-                 id,
-                 author,
-                 file_name,
-                 run_manually=False,
-                 depends_on=None,
-                 md5sum=None,
-                 date_executed=None,
-                 index=0,
-                 contexts=None,
-                 approved_by=None,
-                 jira_ticket=None,
-                 jira_description=None,
-                 tag=None,
-                 description=None,
-                 run_always=False):
+    def __init__(
+        self,
+        id,
+        author,
+        file_name,
+        run_manually=False,
+        depends_on=None,
+        md5sum=None,
+        date_executed=None,
+        index=0,
+        contexts=None,
+        approved_by=None,
+        jira_ticket=None,
+        jira_description=None,
+        tag=None,
+        description=None,
+        run_always=False,
+    ):
         self.id = id
         self.author = author
         self.file_name = file_name

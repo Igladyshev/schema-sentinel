@@ -6,14 +6,14 @@ from ..engine import DBEngineStrategy, SfAlchemyEngine
 
 
 def get_table_constraints(database: str, engine: SfAlchemyEngine) -> pd.DataFrame:
-    statement = f"""select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_CATALOG = '{database.replace('"', '')}'"""
+    statement = f"""select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_CATALOG = '{database.replace('"', "")}'"""
     success, result = engine.execute(statement=statement, columns=["name"])
     return result
 
 
 def get_schemas(database: Database, engine: SfAlchemyEngine) -> pd.DataFrame:
-    database_name = database.database_name.replace('"', '')
-    statement = f"""select * from INFORMATION_SCHEMA.SCHEMATA WHERE CATALOG_NAME = '{database_name.replace('"', '')}'"""
+    database_name = database.database_name.replace('"', "")
+    statement = f"""select * from INFORMATION_SCHEMA.SCHEMATA WHERE CATALOG_NAME = '{database_name.replace('"', "")}'"""
     success, result = engine.execute(statement=statement, columns=["name"])
     return result
 
@@ -36,7 +36,7 @@ def get_stages(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
 
 def get_table_constraints(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
     statement = f"""
-select * from INFORMATION_SCHEMA.table_constraints where constraint_catalog='{database_name.replace('"', '')}'
+select * from INFORMATION_SCHEMA.table_constraints where constraint_catalog='{database_name.replace('"', "")}'
 order by constraint_catalog, constraint_schema, table_name, constraint_type, constraint_name"""
     success, result = engine.execute(statement=statement, columns=["name"])
     return result
@@ -44,7 +44,7 @@ order by constraint_catalog, constraint_schema, table_name, constraint_type, con
 
 def get_referential_constraints(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
     statement = f"""
-select * from INFORMATION_SCHEMA.referential_constraints where constraint_catalog='{database_name.replace('"', '')}'
+select * from INFORMATION_SCHEMA.referential_constraints where constraint_catalog='{database_name.replace('"', "")}'
 order by constraint_schema, constraint_name;"""
     success, result = engine.execute(statement=statement, columns=["name"])
     result.columns = result.columns.str.lower()
@@ -59,8 +59,7 @@ def get_views(database_name: str, engine: DBEngineStrategy) -> pd.DataFrame:
 
 
 def get_procedures(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
-    success, result = engine.execute(statement=get_procedures_sql(database=database_name),
-                                     columns=["name"])
+    success, result = engine.execute(statement=get_procedures_sql(database=database_name), columns=["name"])
     result.columns = result.columns.str.lower()
     return result
 
@@ -88,7 +87,7 @@ def get_columns_sql(database):
         select  
             *
         from information_schema.columns
-        WHERE table_catalog='{database.replace('"', '')}'
+        WHERE table_catalog='{database.replace('"', "")}'
         order by table_schema, table_name, ordinal_position;"""
     return statement
 
@@ -141,7 +140,7 @@ def get_procedures_sql(database: str):
                 TO_VARCHAR(LAST_ALTERED::TIMESTAMP_TZ, 'YYYY-MM-DD HH:mi:SS TZHTZM') AS last_altered,
                 comment
             FROM INFORMATION_SCHEMA.PROCEDURES
-            WHERE PROCEDURE_CATALOG = '{database_name.replace('"', '')}'
+            WHERE PROCEDURE_CATALOG = '{database_name.replace('"', "")}'
             ORDER BY PROCEDURE_SCHEMA, PROCEDURE_NAME"""
     return statement
 
@@ -183,7 +182,7 @@ def get_functions_sql(database):
                 installed_packages,
                 is_memoizable
             from information_schema.functions
-            where function_catalog = '{database_name.replace('"', '')}'
+            where function_catalog = '{database_name.replace('"', "")}'
             ORDER BY FUNCTION_SCHEMA, FUNCTION_NAME"""
     return statement
 
@@ -208,7 +207,7 @@ def get_pipes(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
         comment,
         pattern    
     from INFORMATION_SCHEMA.PIPES 
-    WHERE PIPE_CATALOG = '{database_name.replace('"', '')}'"""
+    WHERE PIPE_CATALOG = '{database_name.replace('"', "")}'"""
     success, pipes = engine.execute(statement=statement, columns=["name"])
     return pipes
 
@@ -222,7 +221,7 @@ def get_database(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
     statement = f"""
 select database_owner, is_transient, comment, created, ifnull(last_altered, created) as last_altered, 
     to_varchar(retention_time) as "retention_time"  
-from INFORMATION_SCHEMA.databases WHERE DATABASE_NAME='{database_name.replace('"', '')}'"""
+from INFORMATION_SCHEMA.databases WHERE DATABASE_NAME='{database_name.replace('"', "")}'"""
     success, database_df = engine.execute(statement=statement, columns=["name"])
     return database_df.iloc[0]
 
@@ -328,5 +327,5 @@ from information_schema.columns
 where column_default is not null
 and table_catalog = '{database_name}'"""
     conn.execute(text(statement))
-    df = pd.read_sql(text(GET_CONSTRAINTS_SQL.replace('$DB_NAME', database_name)), conn)
+    df = pd.read_sql(text(GET_CONSTRAINTS_SQL.replace("$DB_NAME", database_name)), conn)
     return df

@@ -28,12 +28,16 @@ class ColumnConstraint(CommonBase):
             session.commit()
 
     def exists(self) -> str:
-        return select(ColumnConstraint).filter_by(
-            column_constraint_id=self.column_constraint_id
-        )
+        return select(ColumnConstraint).filter_by(column_constraint_id=self.column_constraint_id)
 
     def __get_id__(self) -> str:
         pk_column_id = json.loads(self.pk_column_id)
         fk_column_id = json.loads(self.fk_column_id)
-        return json.dumps({"pk_column_id": pk_column_id, "pk_name": self.pk_name,
-                           "fk_column_id": fk_column_id, "fk_name:": self.fk_name})
+        return json.dumps(
+            {
+                "pk_column_id": pk_column_id,
+                "pk_name": self.pk_name,
+                "fk_column_id": fk_column_id,
+                "fk_name:": self.fk_name,
+            }
+        )

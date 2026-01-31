@@ -31,17 +31,15 @@ class Column(CommonBase):
             session.commit()
 
     def exists(self) -> str:
-        return select(Column).filter_by(
-            column_id=self.column_id
-        )
+        return select(Column).filter_by(column_id=self.column_id)
 
     def __get_id__(self) -> str:
         id = json.loads(self.table_id)
         id["column_name"] = self.column_name
         return json.dumps(id)
-    
+
     def __data_type__(self) -> str:
-        if self.data_type in ['VARCHAR', 'TEXT']:
+        if self.data_type in ["VARCHAR", "TEXT"]:
             data_type = f"{self.data_type}({self.character_maximum_length})"
         elif self.data_type == "NUMBER":
             data_type = f"{self.data_type}({self.numeric_precision}, {self.numeric_scale})"

@@ -18,22 +18,17 @@ class Database(CommonBase):
     retention_time = db.Column(db.String)
 
     def save(self, session) -> None:
-
         if not session.execute(self.exists()).first():
             session.add(self)
             session.commit()
 
     def exists(self) -> str:
-        return select(Database).filter_by(
-            database_id=self.database_id)
+        return select(Database).filter_by(database_id=self.database_id)
 
     def __get_id__(self) -> str:
-        return json.dumps({
-            "database_name": self.database_name,
-            "version": self.version,
-            "environment": self.environment
-        })
-        
+        return json.dumps(
+            {"database_name": self.database_name, "version": self.version, "environment": self.environment}
+        )
+
     def __get_name__(self) -> str:
         return f"{self.database_name} v.{self.version}({self.environment})"
-    

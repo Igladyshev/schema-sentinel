@@ -15,6 +15,7 @@ from schema_sentinel.metadata_manager.model.task import Task
 from schema_sentinel.metadata_manager.model.view import View
 from . import CommonBase
 
+
 class Comparison(CommonBase):
     __tablename__ = "comparisons"
     object_type = db.Column(db.String, primary_key=True)
@@ -35,25 +36,24 @@ class Comparison(CommonBase):
 
     @staticmethod
     def is_empty(comparison_value) -> bool:
-        return not ("differences" in comparison_value.keys() and comparison_value["differences"] != {}
-                    or comparison_value["right"] is None)
-
+        return not (
+            "differences" in comparison_value.keys()
+            and comparison_value["differences"] != {}
+            or comparison_value["right"] is None
+        )
 
     @staticmethod
-    def save_comparison(comparison_dict: Dict,
-                        src_database_id: str,
-                        trg_database_id: str,
-                        session,
-                        db_timestamp_to_string,
-                        user: str):
-    
+    def save_comparison(
+        comparison_dict: Dict, src_database_id: str, trg_database_id: str, session, db_timestamp_to_string, user: str
+    ):
         i = 0
         for db_object_type in comparison_dict.keys():
             for comparison_key in comparison_dict[db_object_type].keys():
                 if Comparison.is_empty(comparison_dict[db_object_type][comparison_key]):
                     continue
                 comp_val = json.dumps(
-                    {"key": comparison_key, "comparison": comparison_dict[db_object_type][comparison_key]})
+                    {"key": comparison_key, "comparison": comparison_dict[db_object_type][comparison_key]}
+                )
                 comparison = Comparison(
                     object_type=db_object_type,
                     comparison_key=comparison_key,
@@ -61,21 +61,22 @@ class Comparison(CommonBase):
                     target_database_id=trg_database_id,
                     comparison_value=comp_val,
                     created=db_timestamp_to_string(datetime.now()),
-                    comparison_performed_by=user
+                    comparison_performed_by=user,
                 )
                 comparison.save(session=session)
                 log.debug(f"saved comparison={comparison.diffs}")
- 
+
     @property
     def one_diffs(self) -> pd.DataFrame:
-        
         if not self.comparison_value:
             return pd.DataFrame(columns=["Attribute", "Left", "Right"])
         diffs = json.loads(self.comparison_value)
 
         comparison_key = diffs["key"] if "key" in diffs.keys() else self.comparison_key
         object_name = comparison_key.split(" ")[0]
-        comparison_database_key = comparison_key.split(" ")[1].replace("[", "").replace("]", "") if ' ' in comparison_key else comparison_key
+        comparison_database_key = (
+            comparison_key.split(" ")[1].replace("[", "").replace("]", "") if " " in comparison_key else comparison_key
+        )
         data = {}
         if "comparison" in diffs.keys():
             comparison = diffs["comparison"]
@@ -83,7 +84,7 @@ class Comparison(CommonBase):
             left_object_type = comparison["left"] if "left" in comparison.keys() else self.object_type
             right_object_type = comparison["right"] if "right" in comparison.keys() and comparison["right"] else None
             data = comparison["differences"] if "differences" in comparison.keys() else {}
-        
+
         data_array = []
         if data:
             for attribute in data.keys():
@@ -91,26 +92,36 @@ class Comparison(CommonBase):
                 right = data[attribute][1] if not attribute.endswith("definition") else ""
                 data_array.append([attribute, left, right])
         else:
-            data_array.append([''] * 3)
+            data_array.append([""] * 3)
 
         diff_df = pd.DataFrame(data=data_array, columns=["Attribute", "Left", "Right"])
-        diff_df.insert(loc=0, column="DB Key",
-                       value=almost_empty_array_of(comparison_database_key, len(data_array)),
-                       allow_duplicates=True)
-        diff_df.insert(loc=1, column="Left Object",
-                       value=almost_empty_array_of(left_object_type, len(data_array)),
-                       allow_duplicates=True)
-        diff_df.insert(loc=2, column="Right Object",
-                       value=almost_empty_array_of(right_object_type if right_object_type else "Not present",
-                                                   len(data_array)),
-                       allow_duplicates=True)
-        diff_df.insert(loc=3, column="Object Name",
-                       value=almost_empty_array_of([object_name], len(data_array)),
-                       allow_duplicates=True)
+        diff_df.insert(
+            loc=0,
+            column="DB Key",
+            value=almost_empty_array_of(comparison_database_key, len(data_array)),
+            allow_duplicates=True,
+        )
+        diff_df.insert(
+            loc=1,
+            column="Left Object",
+            value=almost_empty_array_of(left_object_type, len(data_array)),
+            allow_duplicates=True,
+        )
+        diff_df.insert(
+            loc=2,
+            column="Right Object",
+            value=almost_empty_array_of(right_object_type if right_object_type else "Not present", len(data_array)),
+            allow_duplicates=True,
+        )
+        diff_df.insert(
+            loc=3,
+            column="Object Name",
+            value=almost_empty_array_of([object_name], len(data_array)),
+            allow_duplicates=True,
+        )
         return diff_df
 
     def both_diffs(self, session) -> pd.DataFrame:
-        
         if not self.comparison_value:
             return pd.DataFrame(columns=["Attribute", "Left", "Right"])
         diffs = json.loads(self.comparison_value)
@@ -119,7 +130,7 @@ class Comparison(CommonBase):
         object_name = self.object_type
         comparison_database_key = comparison_key.split(" ")[1].replace("[", "").replace("]", "")
         comparison_object_name = comparison_key.split(" ")[0]
-        
+
         data = {}
         if "comparison" in diffs.keys():
             comparison = diffs["comparison"]
@@ -127,33 +138,39 @@ class Comparison(CommonBase):
             left_object_type = comparison["left"]
             right_object_type = comparison["right"]
             data = comparison["differences"]
-        
+
         data_array = []
         if data:
-            
             for attribute in data.keys():
                 if not attribute.endswith("definition"):
                     left = data[attribute][0]
                     right = data[attribute][1]
                     data_array.append([attribute, left, right])
                 else:
-                    
                     left_object_id = f"{self.source_database_id}.{comparison_object_name}"
                     right_object_id = f"{self.target_database_id}.{comparison_object_name}"
-                    left_code, right_code = ''
+                    left_code, right_code = ""
 
                     if left_object_type == DbObjectType.PROCEDURE.value:
-                        left_object:Procedure = session.query(Procedure).filter(Procedure.procedure_id == left_object_id).one()
+                        left_object: Procedure = (
+                            session.query(Procedure).filter(Procedure.procedure_id == left_object_id).one()
+                        )
                         left_code = get_code(comparison_object_name, left_object, Procedure)
-                        right_object: Procedure = session.query(Procedure).filter(Procedure.procedure_id == left_object_id).one()
+                        right_object: Procedure = (
+                            session.query(Procedure).filter(Procedure.procedure_id == left_object_id).one()
+                        )
                         right_code = get_code(comparison_object_name, right_object, Procedure)
-                        
+
                     elif left_object_type == DbObjectType.FUNCTION.value:
-                        left_object: Function = session.query(Function).filter(Function.function_id == left_object_id).one()
+                        left_object: Function = (
+                            session.query(Function).filter(Function.function_id == left_object_id).one()
+                        )
                         left_code = get_code(comparison_object_name, left_object, Function)
-                        right_object: Function = session.query(Function).filter(Function.function_id == right_object_id).one()
+                        right_object: Function = (
+                            session.query(Function).filter(Function.function_id == right_object_id).one()
+                        )
                         right_code = get_code(comparison_object_name, right_object, Function)
-                        
+
                     elif left_object_type == DbObjectType.VIEW.value:
                         left_object: View = session.query(View).filter(View.view_id == left_object_id).one()
                         left_code = get_code(comparison_object_name, left_object, View)
@@ -164,32 +181,44 @@ class Comparison(CommonBase):
                         left_code = get_code(comparison_object_name, left_object, Task)
                         right_object: Task = session.query(Task).filter(Task.task_id == right_object_id).one()
                         right_code = get_code(comparison_object_name, right_object, Task)
-                    data_array.append([attribute, left_code, right_code])        
-                    
+                    data_array.append([attribute, left_code, right_code])
+
         else:
-            data_array.append([''] * 3)
+            data_array.append([""] * 3)
 
         diff_df = pd.DataFrame(data=data_array, columns=["Attribute", "Left", "Right"])
-        diff_df.insert(loc=0, column="DB Key",
-                       value=almost_empty_array_of(comparison_database_key, len(data_array)),
-                       allow_duplicates=True)
-        diff_df.insert(loc=1, column="Left Object",
-                       value=almost_empty_array_of(left_object_type, len(data_array)),
-                       allow_duplicates=True)
-        diff_df.insert(loc=2, column="Right Object",
-                       value=almost_empty_array_of(right_object_type if right_object_type else "Not present",
-                                                   len(data_array)),
-                       allow_duplicates=True)
-        diff_df.insert(loc=3, column="Object Name",
-                       value=almost_empty_array_of([object_name], len(data_array)),
-                       allow_duplicates=True)
+        diff_df.insert(
+            loc=0,
+            column="DB Key",
+            value=almost_empty_array_of(comparison_database_key, len(data_array)),
+            allow_duplicates=True,
+        )
+        diff_df.insert(
+            loc=1,
+            column="Left Object",
+            value=almost_empty_array_of(left_object_type, len(data_array)),
+            allow_duplicates=True,
+        )
+        diff_df.insert(
+            loc=2,
+            column="Right Object",
+            value=almost_empty_array_of(right_object_type if right_object_type else "Not present", len(data_array)),
+            allow_duplicates=True,
+        )
+        diff_df.insert(
+            loc=3,
+            column="Object Name",
+            value=almost_empty_array_of([object_name], len(data_array)),
+            allow_duplicates=True,
+        )
         return diff_df
 
+
 def almost_empty_array_of(value: str, elements_number: int = 1) -> [str]:
-     array = [''] * elements_number
-     array[0] = value
-     return array
- 
+    array = [""] * elements_number
+    array[0] = value
+    return array
+
 
 def get_code(comparison_object_name, db_object, klass) -> str:
     if klass == Procedure:
@@ -222,4 +251,4 @@ AS
         return f"""CREATE OR REPLACE VIEW {comparison_object_name}
 AS
     {db_object.view_definition}
-"""     
+"""

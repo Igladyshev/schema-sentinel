@@ -31,5 +31,3 @@ class Schema(CommonBase):
         id = json.loads(self.database_id)
         id["schema_name"] = self.schema_name
         return json.dumps(id)
-
-

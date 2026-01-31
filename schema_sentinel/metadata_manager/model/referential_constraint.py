@@ -33,5 +33,9 @@ class ReferentialConstraint(CommonBase):
         )
 
     def __get_id__(self) -> str:
-        return json.dumps({"foreign_key_constraint_id": json.loads(self.foreign_key_constraint_id),
-                           "unique_constraint_id": json.loads(self.unique_constraint_id)})
+        return json.dumps(
+            {
+                "foreign_key_constraint_id": json.loads(self.foreign_key_constraint_id),
+                "unique_constraint_id": json.loads(self.unique_constraint_id),
+            }
+        )

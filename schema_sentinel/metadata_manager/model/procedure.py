@@ -32,18 +32,16 @@ class Procedure(CommonBase):
             session.commit()
 
     def exists(self) -> str:
-        return select(Procedure).filter_by(
-            procedure_id=self.procedure_id
-        )
+        return select(Procedure).filter_by(procedure_id=self.procedure_id)
 
     def __get_id__(self) -> str:
         id = json.loads(self.schema_id)
         id["procedure_name"] = self.procedure_name
         id["argument_signature"] = self.argument_signature
         return json.dumps(id)
-    
+
     def __data_type__(self) -> str:
-        if self.data_type in ['VARCHAR', 'TEXT']:
+        if self.data_type in ["VARCHAR", "TEXT"]:
             data_type = f"{self.data_type}({self.character_maximum_length})"
         elif self.data_type == "NUMBER":
             data_type = f"{self.data_type}({self.numeric_precision}, {self.numeric_scale})"
