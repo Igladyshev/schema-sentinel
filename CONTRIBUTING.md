@@ -5,6 +5,7 @@ First off, thank you for considering contributing to SQL Comparison! It's people
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
+- [Branching Strategy](#branching-strategy)
 - [How Can I Contribute?](#how-can-i-contribute)
 - [Development Setup](#development-setup)
 - [Pull Request Process](#pull-request-process)
@@ -29,6 +30,20 @@ This project and everyone participating in it is governed by our commitment to f
 - Public or private harassment
 - Publishing others' private information without explicit permission
 - Other conduct which could reasonably be considered inappropriate in a professional setting
+
+## Branching Strategy
+
+We use a simple two-branch strategy for this project:
+
+- **`master`** - Protected production branch with strict rules (requires PR reviews and all CI checks)
+- **`dev`** - Development branch for feature integration (lighter protection, allows direct pushes)
+
+For detailed information about our branching workflow, branch protection rules, and best practices, see [BRANCHING.md](BRANCHING.md).
+
+**Quick workflow:**
+1. Create feature branches from `dev`: `git checkout -b feature/your-feature`
+2. Open PRs to merge features into `dev`
+3. When ready for release, create PR from `dev` to `master`
 
 ## How Can I Contribute?
 

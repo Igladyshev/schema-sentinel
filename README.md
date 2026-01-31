@@ -223,16 +223,16 @@ We welcome contributions! This is an open source project and we'd love your help
 ### How to Contribute
 
 1. **Fork the repository**
-2. **Create a feature branch** (`git checkout -b feature/amazing-feature`)
+2. **Create a feature branch** from `dev` (`git checkout -b feature/amazing-feature`)
 3. **Make your changes**
 4. **Add tests** for your changes
 5. **Ensure tests pass** (`pytest`)
 6. **Format code** (`ruff format .`)
 7. **Commit changes** (`git commit -m 'feat: add amazing feature'`)
 8. **Push to branch** (`git push origin feature/amazing-feature`)
-9. **Open a Pull Request**
+9. **Open a Pull Request** to merge into `dev` branch
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines and [BRANCHING.md](BRANCHING.md) for our branching strategy.
 
 ### Development Guidelines
 
