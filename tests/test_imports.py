@@ -1,6 +1,5 @@
 """Basic tests to verify package installation and imports."""
 
-import pytest
 
 
 def test_package_import():
@@ -12,10 +11,10 @@ def test_package_import():
 
 def test_core_dependencies():
     """Test that core dependencies are available."""
-    import sqlalchemy
+    import alembic
     import pandas
     import snowflake.connector
-    import alembic
+    import sqlalchemy
 
     assert sqlalchemy.__version__.startswith("1.4")
     assert pandas.__version__ is not None
@@ -25,8 +24,8 @@ def test_core_dependencies():
 
 def test_metadata_manager_imports():
     """Test that metadata_manager modules can be imported."""
-    from schema_sentinel.metadata_manager import engine, metadata, enums
-    from schema_sentinel.metadata_manager.model import database, table, column
+    from schema_sentinel.metadata_manager import engine, enums, metadata
+    from schema_sentinel.metadata_manager.model import column, database, table
 
     assert engine is not None
     assert metadata is not None

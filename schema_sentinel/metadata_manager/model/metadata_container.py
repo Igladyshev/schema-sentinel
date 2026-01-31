@@ -2,31 +2,30 @@ import json
 import logging as log
 
 import pandas as pd
-from typing import List, Dict
 
+from ..enums import DbObjectType
 from . import CommonBase
-from .constraint import Constraint
-from .database import Database
-from .schema import Schema
-from .table import Table
-from .view import View
 from .column import Column
 from .column_constraint import ColumnConstraint
+from .constraint import Constraint
+from .database import Database
 from .function import Function
 from .pipe import Pipe
 from .procedure import Procedure
 from .referential_constraint import ReferentialConstraint
+from .schema import Schema
 from .stage import Stage
 from .stream import Stream
+from .table import Table
 from .table_constraint import TableConstraint
 from .task import Task
-from ..enums import DbObjectType
+from .view import View
 
 
 class MetaData:
     database_object: Database
-    schemas: Dict[str, Schema] = []
-    schemas_to_include: List[str]
+    schemas: dict[str, Schema] = []
+    schemas_to_include: list[str]
     tables: pd.DataFrame = None
     columns: pd.DataFrame = None
     views: pd.DataFrame = None
@@ -40,9 +39,9 @@ class MetaData:
     constraints: pd.DataFrame = None
     stages: pd.DataFrame = None
     column_constraints: pd.DataFrame = None
-    metadata: Dict[str, Dict[str, CommonBase]] = {}
+    metadata: dict[str, dict[str, CommonBase]] = {}
 
-    def __init__(self, database_object: Database, schemas_to_include: List[str], db_timestamp_to_string):
+    def __init__(self, database_object: Database, schemas_to_include: list[str], db_timestamp_to_string):
         self.database_object = database_object
         self.metadata[DbObjectType.DATABASE] = {database_object.database_id: database_object}
         log.info(f"Metadata schemas to include are {schemas_to_include}")
@@ -50,31 +49,31 @@ class MetaData:
         self.db_timestamp_to_string = db_timestamp_to_string
 
     def save(self, session):
-        log.info(f"Save tables")
+        log.info("Save tables")
         self.save_tables(session=session)
-        log.info(f"Save columns")
+        log.info("Save columns")
         self.save_columns(session=session)
-        log.info(f"Save constraints")
+        log.info("Save constraints")
         self.save_constraints(session=session)
-        log.info(f"Save column constraints")
+        log.info("Save column constraints")
         self.save_column_constraints(session=session)
-        log.info(f"Save functions")
+        log.info("Save functions")
         self.save_functions(session=session)
-        log.info(f"Save pipes")
+        log.info("Save pipes")
         self.save_pipes(session=session)
-        log.info(f"Save procedures")
+        log.info("Save procedures")
         self.save_procedures(session=session)
-        log.info(f"Save referential constraints")
+        log.info("Save referential constraints")
         self.save_referential_constraints(session=session)
-        log.info(f"Save stages")
+        log.info("Save stages")
         self.save_stages(session=session)
-        log.info(f"Save streams")
+        log.info("Save streams")
         self.save_streams(session=session)
-        log.info(f"Save table_constraints")
+        log.info("Save table_constraints")
         self.save_table_constraints(session=session)
-        log.info(f"Save tasks")
+        log.info("Save tasks")
         self.save_tasks(session=session)
-        log.info(f"Save views")
+        log.info("Save views")
         self.save_views(session=session)
 
     def database_id(self) -> str:
@@ -144,7 +143,7 @@ class MetaData:
 
     def save_tables(self, session) -> bool:
         self.metadata[DbObjectType.TABLE] = {}
-        for index, df in self.tables.iterrows():
+        for _index, df in self.tables.iterrows():
             table = Table(
                 schema_id=self.get_schema_id(df["table_schema"]),
                 table_id=self.get_table_id(df["table_schema"], df["table_name"]),
@@ -175,7 +174,7 @@ class MetaData:
 
     def save_column_constraints(self, session) -> bool:
         self.metadata[DbObjectType.COLUMN_CONSTRAINT] = {}
-        for index, df in self.column_constraints.iterrows():
+        for _index, df in self.column_constraints.iterrows():
             column_constraint = ColumnConstraint(
                 pk_column_id=self.get_column_id(df["pk_schema_name"], df["pk_table_name"], df["pk_column_name"]),
                 pk_constraint_id=self.get_constraint_id(df["pk_schema_name"], df["pk_name"]),
@@ -200,7 +199,7 @@ class MetaData:
 
     def save_referential_constraints(self, session) -> bool:
         self.metadata[DbObjectType.REFERENTIAL_CONSTRAINT] = {}
-        for index, df in self.referential_constraints.iterrows():
+        for _index, df in self.referential_constraints.iterrows():
             referential_constraint = ReferentialConstraint(
                 foreign_key_constraint_id=self.get_constraint_id(df["constraint_schema"], df["constraint_name"]),
                 unique_constraint_id=self.get_constraint_id(
@@ -225,7 +224,7 @@ class MetaData:
 
     def save_table_constraints(self, session) -> bool:
         self.metadata[DbObjectType.TABLE_CONSTRAINT] = {}
-        for index, df in self.table_constraints.iterrows():
+        for _index, df in self.table_constraints.iterrows():
             table_constraint = TableConstraint(
                 table_id=self.get_table_id(df["table_schema"], df["table_name"]),
                 table_constraint_name=df["constraint_name"],
@@ -246,7 +245,7 @@ class MetaData:
 
     def save_constraints(self, session) -> bool:
         self.metadata[DbObjectType.CONSTRAINT] = {}
-        for index, df in self.constraints.iterrows():
+        for _index, df in self.constraints.iterrows():
             constraint = Constraint(
                 table_id=self.get_table_id(df["schema_name"], df["table_name"]),
                 constraint_name=df["constraint_name"],
@@ -265,7 +264,7 @@ class MetaData:
 
     def save_tasks(self, session) -> bool:
         self.metadata[DbObjectType.TASK] = {}
-        for index, df in self.tasks.iterrows():
+        for _index, df in self.tasks.iterrows():
             try:
                 task = Task(
                     id=str(df["id"]),
@@ -303,7 +302,7 @@ class MetaData:
     def save_streams(self, session) -> bool:
         self.metadata[DbObjectType.STREAM] = {}
         failed_rows = []
-        for index, df in self.streams.iterrows():
+        for _index, df in self.streams.iterrows():
             try:
                 stream = Stream(
                     schema_id=self.get_schema_id(df["schema_name"]),
@@ -337,7 +336,7 @@ class MetaData:
 
     def save_stages(self, session) -> bool:
         self.metadata[DbObjectType.STAGE] = {}
-        for index, df in self.stages.iterrows():
+        for _index, df in self.stages.iterrows():
             stage = Stage(
                 schema_id=self.get_schema_id(df["schema_name"]),
                 stage_id=self.get_stage_id(df["schema_name"], df["name"]),
@@ -362,7 +361,7 @@ class MetaData:
 
     def save_pipes(self, session) -> bool:
         self.metadata[DbObjectType.SCHEMA] = {}
-        for index, df in self.pipes.iterrows():
+        for _index, df in self.pipes.iterrows():
             pipe = Pipe(
                 schema_id=self.get_schema_id(df["pipe_schema"]),
                 pipe_id=self.get_pipe_id(df["pipe_schema"], df["pipe_name"]),
@@ -384,7 +383,7 @@ class MetaData:
 
     def save_functions(self, session) -> bool:
         self.metadata[DbObjectType.FUNCTION] = {}
-        for index, df in self.functions.iterrows():
+        for _index, df in self.functions.iterrows():
             function = Function(
                 schema_id=self.get_schema_id(df["function_schema"]),
                 function_id=self.get_function_id(df["function_schema"], df["function_name"], df["argument_signature"]),
@@ -422,7 +421,7 @@ class MetaData:
 
     def save_procedures(self, session) -> bool:
         self.metadata[DbObjectType.PROCEDURE] = {}
-        for index, df in self.procedures.iterrows():
+        for _index, df in self.procedures.iterrows():
             procedure = Procedure(
                 procedure_id=self.get_procedure_id(
                     df["procedure_schema"], df["procedure_name"], df["argument_signature"]
@@ -452,7 +451,7 @@ class MetaData:
         self.metadata[DbObjectType.COLUMN] = {}
         failed_rows = []
         saved_rows = []
-        for index, df in self.columns.iterrows():
+        for _index, df in self.columns.iterrows():
             column: Column = Column(
                 column_id=self.get_column_id(df["table_schema"], df["table_name"], df["column_name"]),
                 table_id=self.get_table_id(df["table_schema"], df["table_name"]),
@@ -492,7 +491,7 @@ class MetaData:
 
     def save_views(self, session) -> bool:
         self.metadata[DbObjectType.VIEW] = {}
-        for index, df in self.views.iterrows():
+        for _index, df in self.views.iterrows():
             view = View(
                 schema_id=self.get_schema_id(df["schema_name"]),
                 view_id=self.get_view_id(df["schema_name"], df["name"]),
@@ -512,7 +511,7 @@ class MetaData:
 
     def save_schemas(self, schemas_df: pd.DataFrame, session):
         self.metadata[DbObjectType.SCHEMA] = {}
-        for index, schema in schemas_df.iterrows():
+        for _index, schema in schemas_df.iterrows():
             schema_object = Schema(
                 database_id=self.database_object.database_id,
                 schema_id=self.get_schema_id(schema["schema_name"]),

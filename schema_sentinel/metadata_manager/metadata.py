@@ -198,7 +198,7 @@ def diff_df(df1, df2, how="left"):
         raise ValueError("Two dataframe columns must match")
 
     if df1.equals(df2):
-        names = [x for x in df1.columns]
+        names = list(df1.columns)
         return pd.DataFrame(columns=names)
     elif how == "right":
         return pd.concat([df2, df1, df1]).drop_duplicates(keep=False)

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Dict
 
 
 @dataclass
@@ -14,15 +13,15 @@ class SqlDataType:
     notes: str
 
 
-def load_data_types() -> Dict[str, SqlDataType]:
+def load_data_types() -> dict[str, SqlDataType]:
     """
     Function loads a dictionary of SQL Data Types
     :return: Dict[SqlDataType]
     """
-    data_types: Dict[str, SqlDataType]
+    data_types: dict[str, SqlDataType] = {}
     for category in SQL_DATA_TYPE.keys():
         sql_data_type_category: SqlDataTypeCategory = SqlDataTypeCategory(category)
-        data_types[category] = list()
+        data_types[category] = []
         for data_type in SQL_DATA_TYPE[category]:
             sql_data_type = SqlDataType(
                 name=data_type["name"],
@@ -32,7 +31,7 @@ def load_data_types() -> Dict[str, SqlDataType]:
             data_types[category].append(sql_data_type)
 
 
-SQL_DATA_TYPE: Dict = {
+SQL_DATA_TYPE: dict = {
     "Numeric Data Types": [
         {"name": "NUMBER", "notes": "Default precision and scale are (38,0)."},
         {"name": "DECIMAL", "notes": "Synonymous with NUMBER. Default precision and scale are (38,0)."},

@@ -1,6 +1,8 @@
 import json
+
 import sqlalchemy as db
 from sqlalchemy import select
+
 from . import CommonBase
 
 

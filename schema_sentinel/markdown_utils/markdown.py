@@ -1,11 +1,10 @@
+import datetime
 import getpass
 import logging as log
 import os
 
-from snakemd import Document
-import datetime
 import pandas as pd
-
+from snakemd import Document
 from sqlalchemy.sql.elements import and_
 
 from ..metadata_manager.model.column import Column

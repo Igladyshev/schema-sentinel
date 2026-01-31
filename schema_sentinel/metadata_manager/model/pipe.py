@@ -1,7 +1,7 @@
 import json
 
 import sqlalchemy as db
-from sqlalchemy import select, ForeignKey
+from sqlalchemy import ForeignKey, select
 
 from . import CommonBase
 

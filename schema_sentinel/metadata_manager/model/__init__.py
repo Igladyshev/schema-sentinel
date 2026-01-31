@@ -94,8 +94,8 @@ class CommonBase(Base):
         pass
 
     def __get_header__(self) -> list:
-        header = list()
-        for attribute, value in self.__dict__.items():
+        header = []
+        for attribute, _value in self.__dict__.items():
             if attribute.startswith("_"):
                 continue
             header.append(attribute)
@@ -109,7 +109,9 @@ class CommonBase(Base):
             row.append(value)
         return row
 
-    def __get_df__(self, columns=["Attribute", "Value"]) -> pd.DataFrame:
+    def __get_df__(self, columns=None) -> pd.DataFrame:
+        if columns is None:
+            columns = ["Attribute", "Value"]
         data = []
 
         for attribute, value in self.__dict__.items():

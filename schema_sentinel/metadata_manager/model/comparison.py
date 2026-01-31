@@ -1,18 +1,17 @@
 import json
 import logging as log
-import numpy as np
 from datetime import datetime
-from typing import Dict
 
 import pandas as pd
 import sqlalchemy as db
-from sqlalchemy import select, ForeignKey
+from sqlalchemy import ForeignKey, select
+
 from schema_sentinel.metadata_manager.enums import DbObjectType
 from schema_sentinel.metadata_manager.model.function import Function
-
 from schema_sentinel.metadata_manager.model.procedure import Procedure
 from schema_sentinel.metadata_manager.model.task import Task
 from schema_sentinel.metadata_manager.model.view import View
+
 from . import CommonBase
 
 
@@ -44,9 +43,8 @@ class Comparison(CommonBase):
 
     @staticmethod
     def save_comparison(
-        comparison_dict: Dict, src_database_id: str, trg_database_id: str, session, db_timestamp_to_string, user: str
+        comparison_dict: dict, src_database_id: str, trg_database_id: str, session, db_timestamp_to_string, user: str
     ):
-        i = 0
         for db_object_type in comparison_dict.keys():
             for comparison_key in comparison_dict[db_object_type].keys():
                 if Comparison.is_empty(comparison_dict[db_object_type][comparison_key]):

@@ -1,9 +1,11 @@
-from configparser import ConfigParser
 import os
+import random
+import string
+from configparser import ConfigParser
 
 
 def get_html(file_name):
-    with open(file_name, "r") as file:
+    with open(file_name) as file:
         html = file.read()
     return html
 
@@ -41,18 +43,18 @@ def camel_case_split(s):
     """
     idx = list(map(str.isupper, s))
     # mark change of case
-    l = [0]
+    indices = [0]
     for i, (x, y) in enumerate(zip(idx, idx[1:])):
         if x and not y:  # "Ul"
-            l.append(i)
+            indices.append(i)
         elif not x and y:  # "lU"
-            l.append(i + 1)
-    l.append(len(s))
+            indices.append(i + 1)
+    indices.append(len(s))
     # for "lUl", index of "U" will pop twice, have to filer it
-    return " ".join([s[x:y] for x, y in zip(l, l[1:]) if x < y])
+    return " ".join([s[x:y] for x, y in zip(indices, indices[1:]) if x < y])
 
 
-GET_SCHEMA_DISCREPANCY_SQL = f"""
+GET_SCHEMA_DISCREPANCY_SQL = """
 SELECT
     "SCHEMA_DISCREPANCY_ID",
     "ENVIRONMENT",
@@ -156,10 +158,6 @@ def get_alias(table_name: str) -> str:
     alias = "".join(x[0].upper() for x in table_name.split("_"))
     alias += get_random_string(1)
     return alias
-
-
-import random
-import string
 
 
 def get_random_string(length):

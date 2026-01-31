@@ -1,11 +1,12 @@
-from typing import List
+
 import pandas as pd
 from sqlalchemy import text
-from .database import Database
+
 from ..engine import DBEngineStrategy, SfAlchemyEngine
+from .database import Database
 
 
-def get_table_constraints(database: str, engine: SfAlchemyEngine) -> pd.DataFrame:
+def get_table_constraints_old(database: str, engine: SfAlchemyEngine) -> pd.DataFrame:
     statement = f"""select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_CATALOG = '{database.replace('"', "")}'"""
     success, result = engine.execute(statement=statement, columns=["name"])
     return result
@@ -18,8 +19,8 @@ def get_schemas(database: Database, engine: SfAlchemyEngine) -> pd.DataFrame:
     return result
 
 
-def to_lower_case(string_array: List) -> List:
-    return list(map(lambda x: x.lower(), string_array))
+def to_lower_case(string_array: list) -> list:
+    return [x.lower() for x in string_array]
 
 
 def get_imported_keys(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
@@ -84,7 +85,7 @@ def get_tables(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
 
 def get_columns_sql(database):
     statement = f"""
-        select  
+        select
             *
         from information_schema.columns
         WHERE table_catalog='{database.replace('"', "")}'
@@ -95,10 +96,10 @@ def get_columns_sql(database):
 def get_tables_sql(database):
     database_name = database.replace('"', "")
     statement = f"""
-        select 
+        select
             table_catalog,
-            table_schema, 
-            table_name, 
+            table_schema,
+            table_name,
             table_owner,
             table_type,
             is_transient,
@@ -122,7 +123,7 @@ def get_tables_sql(database):
 def get_procedures_sql(database: str):
     database_name = database.replace('"', "")
     statement = f"""
-            SELECT 
+            SELECT
                 procedure_catalog,
                 procedure_schema,
                 procedure_name,
@@ -131,7 +132,7 @@ def get_procedures_sql(database: str):
                 data_type,
                 character_maximum_length,
                 character_octet_length,
-                numeric_precision, 
+                numeric_precision,
                 numeric_precision_radix,
                 numeric_scale,
                 procedure_language,
@@ -148,7 +149,7 @@ def get_procedures_sql(database: str):
 def get_functions_sql(database):
     database_name = database.replace('"', "")
     statement = f"""
-            select 
+            select
                 function_schema,
                 function_name,
                 function_owner,
@@ -177,7 +178,7 @@ def get_functions_sql(database):
                 packages,
                 imports,
                 handler,
-                target_path, 
+                target_path,
                 runtime_version,
                 installed_packages,
                 is_memoizable
@@ -194,19 +195,19 @@ def get_tasks(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
 
 def get_pipes(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
     statement = f"""
-    select 
+    select
         pipe_catalog,
         pipe_schema,
         pipe_name,
         pipe_owner,
-        definition, 
+        definition,
         is_autoingest_enabled,
         notification_channel_name,
         created,
         last_altered,
         comment,
-        pattern    
-    from INFORMATION_SCHEMA.PIPES 
+        pattern
+    from INFORMATION_SCHEMA.PIPES
     WHERE PIPE_CATALOG = '{database_name.replace('"', "")}'"""
     success, pipes = engine.execute(statement=statement, columns=["name"])
     return pipes
@@ -219,18 +220,18 @@ def get_streams(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
 
 def get_database(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
     statement = f"""
-select database_owner, is_transient, comment, created, ifnull(last_altered, created) as last_altered, 
-    to_varchar(retention_time) as "retention_time"  
+select database_owner, is_transient, comment, created, ifnull(last_altered, created) as last_altered,
+    to_varchar(retention_time) as "retention_time"
 from INFORMATION_SCHEMA.databases WHERE DATABASE_NAME='{database_name.replace('"', "")}'"""
     success, database_df = engine.execute(statement=statement, columns=["name"])
     return database_df.iloc[0]
 
 
 GET_CONSTRAINTS_SQL = """
-select 
+select
     'PRIMARY KEY' as "constraint_type",
     "database_name",
-    "schema_name", 
+    "schema_name",
     "table_name",
     "constraint_name",
     listagg("column_name", ', ') within group(order by "key_sequence") as "constraint_details",
@@ -240,16 +241,16 @@ select
     max("created_on") as "created"
 from primary_keys
 group by "database_name",
-    "schema_name", 
+    "schema_name",
     "table_name",
     "constraint_name"
 
-union all 
+union all
 
-select 
+select
     'UNIQUE KEY' as "constraint_type",
     "database_name",
-    "schema_name", 
+    "schema_name",
     "table_name",
     "constraint_name",
     listagg("column_name", ', ') within group(order by "key_sequence") as "constraint_details",
@@ -259,22 +260,22 @@ select
     max("created_on") as "created"
 from unique_keys
 group by "database_name",
-    "schema_name", 
+    "schema_name",
     "table_name",
     "constraint_name"
 
 union all
 
-select 
+select
     *
 from default_constraints
 
 union all
 
-select 
+select
     'FOREIGN KEY' as "constraint_type",
     "fk_database_name",
-    "fk_schema_name", 
+    "fk_schema_name",
     "fk_table_name",
     "fk_name",
     listagg("fk_column_name", ', ') within group(order by "key_sequence") as "constraint_details",
@@ -284,7 +285,7 @@ select
     max("created_on") as "created"
 from imported_keys ik
 group by "fk_database_name",
-    "fk_schema_name", 
+    "fk_schema_name",
     "fk_table_name",
     "fk_name",
     "pk_database_name",
@@ -312,7 +313,7 @@ select * from table(result_scan(last_query_id()));"""
     conn.execute(text(statement))
     statement = f"""
 create or replace temporary table default_constraints as
-select 
+select
     'DEFAULT CONSTRAINT' as constraint_type,
     table_catalog,
     table_schema,

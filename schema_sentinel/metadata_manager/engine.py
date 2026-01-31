@@ -1,19 +1,17 @@
 import logging as log
 import os
 from abc import ABC, abstractmethod
-from typing import Dict
+from configparser import ConfigParser
 
 import pandas as pd
 import snowflake.connector
-from sqlalchemy.engine import Engine
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from snowflake.sqlalchemy import URL
-from sqlalchemy import create_engine, MetaData, text
+from sqlalchemy import MetaData, create_engine, text
+from sqlalchemy.engine import Engine
 
 from .enums import ConnectMode
-from configparser import ConfigParser
-import json
 
 
 class DBEngineStrategy(ABC):
@@ -24,7 +22,7 @@ class DBEngineStrategy(ABC):
     env: str = "dev"
     url: str = None
 
-    def __init__(self, config: Dict, env: str = "dev"):
+    def __init__(self, config: dict, env: str = "dev"):
         self.account = config.get("account")
         self.user = config.get("user")
         self.warehouse = config.get("warehouse")
@@ -76,7 +74,7 @@ class SqLiteAqlAlchemyEngine(DBEngineStrategy):
     engine: Engine = None
     url: str = None
 
-    def __int__(self, config: Dict, env: str, url: str):
+    def __int__(self, config: dict, env: str, url: str):
         config["url"] = url
         super().__init__(env=None, config=config)
 
