@@ -1,0 +1,53 @@
+#!/bin/bash
+# EXAMPLE SCRIPT - DO NOT USE IN PRODUCTION
+# This is a template for loading environment-specific configurations
+# NEVER commit real credentials to version control
+
+set -e
+
+# Parse command-line arguments
+for argument in "$@"
+do
+    key=$(echo "$argument" | cut -f1 -d=)
+    value=$(echo "$argument" | cut -f2 -d=)
+
+    if [[ $key == *"--"* ]]; then
+        v="${key/--/}"
+        declare "$v"="${value}"
+   fi
+done
+
+# Example: Load credentials from AWS Secrets Manager or environment variables
+# Replace these examples with your actual secret management solution
+
+case $env in
+  dev | DEV)
+    # In practice, use: aws secretsmanager get-secret-value or similar
+    echo "Loading DEV environment configuration..."
+    export AWS_PROFILE="${AWS_PROFILE:-default}"
+    ;;
+  staging | STAGING)
+    echo "Loading STAGING environment configuration..."
+    export AWS_PROFILE="${AWS_PROFILE:-staging}"
+    ;;
+  prod | PROD)
+    echo "Loading PROD environment configuration..."
+    export AWS_PROFILE="${AWS_PROFILE:-production}"
+    ;;
+  *)
+    echo "Unknown environment: $env"
+    echo "Usage: ./load-env.sh --env=<dev|staging|prod>"
+    exit 1
+    ;;
+esac
+
+# Example: Retrieve secrets from AWS Secrets Manager
+# Uncomment and modify based on your secret management solution
+# export SNOWFLAKE_PRIVATE_KEY=$(aws secretsmanager get-secret-value \
+#   --secret-id "your-org/snowflake/private-key" \
+#   --query SecretString --output text)
+# export SNOWFLAKE_PRIVATE_KEY_PASSPHRASE=$(aws secretsmanager get-secret-value \
+#   --secret-id "your-org/snowflake/passphrase" \
+#   --query SecretString --output text)
+
+echo "Environment $env configured successfully"

@@ -1,0 +1,49 @@
+# Example Database Configuration
+# This is a template for database connection properties
+# Create your own db-{environment}.properties files based on this template
+
+[DB_CONNECTION]
+# Snowflake account identifier (e.g., xy12345.us-east-1)
+account = your_account.region
+
+# Username for authentication
+# For SSO, use your email (e.g., user@example.com)
+# For key-pair auth, use your Snowflake username
+username = your_username
+
+# Database to connect to
+database = MY_DATABASE
+
+# Warehouse for compute resources
+warehouse = COMPUTE_WH
+
+# Default schema
+schema = PUBLIC
+
+# Role to use for operations
+role = ANALYST_ROLE
+
+# Whether to use SQLAlchemy connection
+use_sql_alchemy = True
+
+[DB_MIGRATIONS]
+# Action to take when changeset is updated
+# Options: ERROR, WARN, IGNORE
+updated_change_set_action = ERROR
+
+# Action to take on exceptions
+# Options: RAISE, WARN, IGNORE
+exception_action = RAISE
+
+[ERD_VIEWER]
+# Theme for ERD diagrams
+# Options: Common Gray, Modern Blue, Classic, etc.
+theme = Common Gray
+
+[GENERAL]
+# Comma-separated list of schemas to include in operations
+schemas = PUBLIC,STAGING,ANALYTICS
+
+# Environment identifier
+# Options: dev, staging, prod
+env = dev

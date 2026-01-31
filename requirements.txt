@@ -1,0 +1,12 @@
+setuptools~=68.0.0
+pandas~=2.0.3
+cryptography~=40.0.2
+sqlalchemy~=1.4.49
+typer~=0.9.0
+alembic~=1.8.1
+snowflake-connector-python==3.0.3
+snowflake-sqlalchemy==1.4.7
+sql-formatter==0.6.2
+sqlparse==0.4.4
+snakemd~=2.0
+sqlalchemy-json~=0.7.0

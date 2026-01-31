@@ -1,0 +1,76 @@
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>{{ report_title }}</title>
+    <style>
+        @page {
+            margin: 0.5cm;
+            @top-right{
+                content: "Page " counter(page) " of " counter(pages);
+            }
+        }
+        body {
+            font-family: Helvetica, Monaco, Courier, monospace;
+            font-size: 10pt
+        }
+
+        table { page-break-after:auto; }
+        tr    { page-break-inside:avoid; page-break-after:auto; }
+        td    { page-break-inside:avoid; page-break-after:auto; }
+
+        @media print {
+            thead {display: table-header-group;}
+            tfoot {display: table-footer-group;}
+            body {margin: 0;}
+        }
+        table, thead, th, td {
+            border: 0.05cm solid black;
+        }
+        td {
+            font-size: small;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        .header_cell {
+            font-size: small;
+            font-weight: bolder;
+            font-style: italic;
+        }
+        .header_cell_no_border {
+            font-size: small;
+            font-weight: bolder;
+            font-style: italic;
+        }
+        .footer {
+            font-size: small;
+            font-weight: bolder;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+<table>
+    <thead>
+    <tr>
+        <td colspan={{ columns_number }}>
+            <div class="header_cell">{{ report_title }} {{ community }}<div>
+                <div class="header_cell">System Software {{ system_version }}</div>
+                <div class="header_cell">{{ row_count }} rows of {{ total_row_count }}</div>
+                <div class="header_cell_no_border">Issue Date: {{ issue_date }}</div>
+        </td>
+    </tr>
+    <tr>
+        {% for h in headers %}
+        <th>{{ h }}</th>
+        {% endfor %}
+    </thead>
+    <tbody>
+    {{ table_html }}
+    </tbody>
+</table>
+
+</body>
+</html>
+
