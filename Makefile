@@ -31,6 +31,9 @@ lint:  ## Run linting checks
 format:  ## Format code
 	ruff format .
 
+docs:  ## Generate API documentation
+	pdoc schema_sentinel -o docs
+
 setup-env:  ## Set up virtual environment with uv
 	uv venv
 	@echo "Virtual environment created. Activate it with:"

@@ -84,9 +84,9 @@ def db_to_markdown(database: Database,
     doc: Document = Document()
 
     # Get author from environment or use system username
-    author = os.getenv(\"REPORT_AUTHOR\", getpass.getuser())
+    author = os.getenv("REPORT_AUTHOR", getpass.getuser())
 
-    doc.add_raw(f\"\"\"
+    doc.add_raw(f"""
     ---
     author: {author}
     date:   {datetime.datetime.now().strftime('%a %m %y')}
