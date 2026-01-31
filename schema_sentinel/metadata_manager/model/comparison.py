@@ -7,12 +7,12 @@ from typing import Dict
 import pandas as pd
 import sqlalchemy as db
 from sqlalchemy import select, ForeignKey
-from sql_comparison.metadata_manager.enums import DbObjectType
-from sql_comparison.metadata_manager.model.function import Function
+from schema_sentinel.metadata_manager.enums import DbObjectType
+from schema_sentinel.metadata_manager.model.function import Function
 
-from sql_comparison.metadata_manager.model.procedure import Procedure
-from sql_comparison.metadata_manager.model.task import Task
-from sql_comparison.metadata_manager.model.view import View
+from schema_sentinel.metadata_manager.model.procedure import Procedure
+from schema_sentinel.metadata_manager.model.task import Task
+from schema_sentinel.metadata_manager.model.view import View
 from . import CommonBase
 
 class Comparison(CommonBase):

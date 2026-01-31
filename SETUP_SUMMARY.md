@@ -2,7 +2,7 @@
 
 ## ✅ Environment Setup Complete!
 
-Your `sql-comparison` project is now set up with modern Python tooling using `uv`.
+Your `schema-sentinel` project is now set up with modern Python tooling using `uv`.
 
 ## What Was Done
 
@@ -87,7 +87,7 @@ The project is now ready for development! The environment is configured with:
 
 ## Next Steps
 
-1. **Explore the codebase**: Review existing modules in `sql_comparison/`
+1. **Explore the codebase**: Review existing modules in `schema_sentinel/`
 2. **Set up database connections**: Configure your Snowflake credentials
 3. **Run existing notebooks**: Check the Jupyter notebooks to understand the workflow
 4. **Add tests**: Create test files in `tests/` directory
@@ -96,7 +96,7 @@ The project is now ready for development! The environment is configured with:
 
 ## Environment Information
 
-- **Virtual Environment**: `/home/igladyshev/projects/sql-comparison/.venv/`
+- **Virtual Environment**: `/home/igladyshev/projects/schema-sentinel/.venv/`
 - **Python Version**: 3.13.11
 - **Package Manager**: uv 0.9.28
 - **Total Packages**: 150 installed
@@ -118,7 +118,7 @@ uv pip install <package-name>
 make clean
 
 # Run with coverage
-pytest --cov=sql_comparison --cov-report=html
+pytest --cov=schema_sentinel --cov-report=html
 
 # View coverage report
 open htmlcov/index.html  # macOS

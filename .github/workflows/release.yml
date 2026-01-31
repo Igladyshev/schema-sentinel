@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/sql-comparison
+      url: https://pypi.org/p/schema-sentinel
     permissions:
       id-token: write
 

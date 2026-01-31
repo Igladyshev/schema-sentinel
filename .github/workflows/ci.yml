@@ -35,7 +35,7 @@ jobs:
     - name: Run tests
       run: |
         source .venv/bin/activate
-        pytest --cov=sql_comparison --cov-report=xml --cov-report=term-missing
+        pytest --cov=schema_sentinel --cov-report=xml --cov-report=term-missing
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
@@ -102,5 +102,5 @@ jobs:
     - name: Type check with mypy
       run: |
         source .venv/bin/activate
-        mypy sql_comparison/ --ignore-missing-imports
+        mypy schema_sentinel/ --ignore-missing-imports
       continue-on-error: true

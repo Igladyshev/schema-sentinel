@@ -3,10 +3,10 @@ import pytest
 
 
 def test_package_import():
-    """Test that the sql_comparison package can be imported."""
-    import sql_comparison
+    """Test that the schema_sentinel package can be imported."""
+    import schema_sentinel
 
-    assert sql_comparison.PROJECT_NAME == "sql-comparison"
+    assert schema_sentinel.PROJECT_NAME == "schema-sentinel"
 
 
 def test_core_dependencies():
@@ -24,8 +24,8 @@ def test_core_dependencies():
 
 def test_metadata_manager_imports():
     """Test that metadata_manager modules can be imported."""
-    from sql_comparison.metadata_manager import engine, metadata, enums
-    from sql_comparison.metadata_manager.model import database, table, column
+    from schema_sentinel.metadata_manager import engine, metadata, enums
+    from schema_sentinel.metadata_manager.model import database, table, column
 
     assert engine is not None
     assert metadata is not None
@@ -37,6 +37,6 @@ def test_metadata_manager_imports():
 
 def test_markdown_utils_imports():
     """Test that markdown_utils modules can be imported."""
-    from sql_comparison.markdown_utils import markdown
+    from schema_sentinel.markdown_utils import markdown
 
     assert markdown is not None

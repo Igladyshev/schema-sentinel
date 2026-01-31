@@ -48,7 +48,7 @@ ruff check .
 ruff check --fix .
 
 # Type checking
-mypy sql_comparison/
+mypy schema_sentinel/
 
 # Run all pre-commit hooks
 pre-commit run --all-files
@@ -70,8 +70,8 @@ jupyter nbconvert --to script notebook.ipynb
 ## Project Structure
 
 ```
-sql-comparison/
-├── sql_comparison/              # Main package
+schema-sentinel/
+├── schema_sentinel/              # Main package
 │   ├── __init__.py             # Package initialization
 │   ├── markdown_utils/          # Markdown generation
 │   │   ├── __init__.py
@@ -158,7 +158,7 @@ LOG_LEVEL=INFO                   # Logging level (DEBUG, INFO, WARNING, ERROR)
 
 ### Adding a New Database Object Type
 
-1. Create a new model in `sql_comparison/metadata_manager/model/`
+1. Create a new model in `schema_sentinel/metadata_manager/model/`
 2. Add extraction logic in `metadata.py`
 3. Update comparison logic in `changeset.py`
 4. Add templates in `resources/datacompy/templates/`
@@ -201,7 +201,7 @@ Create test files in the `tests/` directory:
 ```python
 # tests/test_metadata.py
 import pytest
-from sql_comparison.metadata_manager.model.table import Table
+from schema_sentinel.metadata_manager.model.table import Table
 
 def test_table_creation():
     table = Table(name="test_table", schema_name="public")

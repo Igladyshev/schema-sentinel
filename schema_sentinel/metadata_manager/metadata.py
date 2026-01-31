@@ -6,19 +6,19 @@ import pandas as pd
 from sqlalchemy import and_
 from sqlalchemy.orm import sessionmaker
 
-from sql_comparison.metadata_manager.model import compare_obj
-from sql_comparison.metadata_manager.model.column import Column
-from sql_comparison.metadata_manager.model.column_constraint import ColumnConstraint
-from sql_comparison.metadata_manager.model.constraint import Constraint
-from sql_comparison.metadata_manager.model.database import Database
-from sql_comparison.metadata_manager.model.function import Function
-from sql_comparison.metadata_manager.model.procedure import Procedure
-from sql_comparison.metadata_manager.model.schema import Schema
-from sql_comparison.metadata_manager.model.stream import Stream
-from sql_comparison.metadata_manager.model.table import Table
-from sql_comparison.metadata_manager.model.table_constraint import TableConstraint
-from sql_comparison.metadata_manager.model.task import Task
-from sql_comparison.metadata_manager.model.view import View
+from schema_sentinel.metadata_manager.model import compare_obj
+from schema_sentinel.metadata_manager.model.column import Column
+from schema_sentinel.metadata_manager.model.column_constraint import ColumnConstraint
+from schema_sentinel.metadata_manager.model.constraint import Constraint
+from schema_sentinel.metadata_manager.model.database import Database
+from schema_sentinel.metadata_manager.model.function import Function
+from schema_sentinel.metadata_manager.model.procedure import Procedure
+from schema_sentinel.metadata_manager.model.schema import Schema
+from schema_sentinel.metadata_manager.model.stream import Stream
+from schema_sentinel.metadata_manager.model.table import Table
+from schema_sentinel.metadata_manager.model.table_constraint import TableConstraint
+from schema_sentinel.metadata_manager.model.task import Task
+from schema_sentinel.metadata_manager.model.view import View
 
 from .engine import SfAlchemyEngine, SqLiteAqlAlchemyEngine
 from .enums import DbObjectType

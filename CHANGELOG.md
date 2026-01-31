@@ -37,5 +37,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic comparison functionality
 - Metadata models for database objects
 
-[Unreleased]: https://github.com/Igladyshev/sql-comparison/compare/v2.0.5...HEAD
-[2.0.5]: https://github.com/Igladyshev/sql-comparison/releases/tag/v2.0.5
+[Unreleased]: https://github.com/Igladyshev/schema-sentinel/compare/v2.0.5...HEAD
+[2.0.5]: https://github.com/Igladyshev/schema-sentinel/releases/tag/v2.0.5

@@ -3,13 +3,13 @@ import typer
 import logging as log
 import pandas as pd
 
-from sql_comparison import RESOURCES_PATH, get_engine, get_metadata_engine, validate, load_comparator, get_user, load_db
-from sql_comparison.markdown_utils.markdown import comparison_to_markdown, db_to_markdown
-from sql_comparison.metadata_manager.model.comparison import Comparison
-from sql_comparison.metadata_manager.metadata import save_metadata, db_timestamp_to_string, compare
-from sql_comparison.metadata_manager.model import Base
+from schema_sentinel import RESOURCES_PATH, get_engine, get_metadata_engine, validate, load_comparator, get_user, load_db
+from schema_sentinel.markdown_utils.markdown import comparison_to_markdown, db_to_markdown
+from schema_sentinel.metadata_manager.model.comparison import Comparison
+from schema_sentinel.metadata_manager.metadata import save_metadata, db_timestamp_to_string, compare
+from schema_sentinel.metadata_manager.model import Base
 
-from sql_comparison.metadata_manager.engine import SqLiteAqlAlchemyEngine, get_config_dict, SfAlchemyEngine
+from schema_sentinel.metadata_manager.engine import SqLiteAqlAlchemyEngine, get_config_dict, SfAlchemyEngine
 
 app = typer.Typer()
 

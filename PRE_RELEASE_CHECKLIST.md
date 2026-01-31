@@ -58,7 +58,7 @@ Use this checklist before making your first public release or pushing to a publi
   ```
 - [ ] Run type checking
   ```bash
-  mypy sql_comparison
+  mypy schema_sentinel
   ```
 - [ ] Test with generic configuration to ensure it works
 
@@ -140,7 +140,7 @@ Once all items are checked:
 # Settings → Danger Zone → Change repository visibility → Make public
 
 # Or push to a new public repository
-git remote add public https://github.com/yourusername/sql-comparison.git
+git remote add public https://github.com/yourusername/schema-sentinel.git
 git push public master
 ```
 

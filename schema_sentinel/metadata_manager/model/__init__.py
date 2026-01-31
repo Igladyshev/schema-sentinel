@@ -32,9 +32,9 @@ ATTRIBUTES_TO_EXCLUDE = [
     "bytes",
     "row_count",
 ]
-PROJECT_NAME = "sql-comparison"
+PROJECT_NAME = "schema-sentinel"
 TEMP_DIR = os.getenv("TEMP") if os.name == "nt" else "/tmp"
-LOG_FILE = os.path.join(TEMP_DIR, "sql-comparison.log")
+LOG_FILE = os.path.join(TEMP_DIR, "schema-sentinel.log")
 LOG_LEVEL = os.getenv("LOG_LEVEL") if os.getenv("LOG_LEVEL") is not None else "INFO"
 
 PROJECT_HOME = os.path.dirname(os.path.join(os.path.abspath("./"), PROJECT_NAME))

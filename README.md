@@ -1,6 +1,6 @@
 # SQL Comparison
 
-[![CI](https://github.com/Igladyshev/sql-comparison/actions/workflows/ci.yml/badge.svg)](https://github.com/Igladyshev/sql-comparison/actions/workflows/ci.yml)
+[![CI](https://github.com/Igladyshev/schema-sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/Igladyshev/schema-sentinel/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
@@ -41,8 +41,8 @@ Perfect for **data engineers**, **DBAs**, and **analytics teams** working with *
 
 ```bash
 # Clone the repository
-git clone https://github.com/Igladyshev/sql-comparison.git
-cd sql-comparison
+git clone https://github.com/Igladyshev/schema-sentinel.git
+cd schema-sentinel
 
 # Install uv (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh  # Linux/macOS
@@ -82,7 +82,7 @@ uv pip install -e ".[dev,jupyter]"
 ### Basic Usage
 
 ```python
-from sql_comparison.metadata_manager import extract_metadata, compare_metadata
+from schema_sentinel.metadata_manager import extract_metadata, compare_metadata
 
 # Extract metadata from source environment
 source_metadata = extract_metadata(
@@ -140,7 +140,7 @@ make lint
 pytest
 
 # Run with coverage
-pytest --cov=sql_comparison --cov-report=html
+pytest --cov=schema_sentinel --cov-report=html
 
 # Run specific test file
 pytest tests/test_metadata.py
@@ -156,7 +156,7 @@ ruff format .
 ruff check .
 
 # Type checking
-mypy sql_comparison/
+mypy schema_sentinel/
 
 # Run all pre-commit hooks
 pre-commit run --all-files
@@ -167,8 +167,8 @@ pre-commit run --all-files
 ## 🏗️ Architecture
 
 ```
-sql-comparison/
-├── sql_comparison/              # Main package
+schema-sentinel/
+├── schema_sentinel/              # Main package
 │   ├── __init__.py             # Package initialization
 │   ├── markdown_utils/          # Markdown report generation
 │   │   └── markdown.py
@@ -283,15 +283,15 @@ This project is being actively developed and prepared for production use. We're 
 
 ## 💬 Support & Community
 
-- **Issues**: [GitHub Issues](https://github.com/Igladyshev/sql-comparison/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/Igladyshev/sql-comparison/discussions)
+- **Issues**: [GitHub Issues](https://github.com/Igladyshev/schema-sentinel/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Igladyshev/schema-sentinel/discussions)
 - **Questions**: Use the `question` issue template
 
 ## 📈 Stats
 
-![GitHub stars](https://img.shields.io/github/stars/Igladyshev/sql-comparison?style=social)
-![GitHub forks](https://img.shields.io/github/forks/Igladyshev/sql-comparison?style=social)
-![GitHub watchers](https://img.shields.io/github/watchers/Igladyshev/sql-comparison?style=social)
+![GitHub stars](https://img.shields.io/github/stars/Igladyshev/schema-sentinel?style=social)
+![GitHub forks](https://img.shields.io/github/forks/Igladyshev/schema-sentinel?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/Igladyshev/schema-sentinel?style=social)
 
 ---
 

@@ -1,9 +1,9 @@
 from setuptools import setup
 
-setup(name='sql-comparison',
+setup(name='schema-sentinel',
       version='2.0.5',
       description='SQL Comparison tool',
-      packages=['sql_comparison'],
+      packages=['schema_sentinel'],
       install_requires=[
           'click==8.1.3',
           'pandas==2.0.1',

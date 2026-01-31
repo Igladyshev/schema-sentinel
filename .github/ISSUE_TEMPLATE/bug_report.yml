@@ -61,12 +61,12 @@ body:
       placeholder: |
         - OS: [e.g. Ubuntu 22.04, Windows 11, macOS 13]
         - Python version: [e.g. 3.9.10]
-        - sql-comparison version: [e.g. 2.1.0]
+        - schema-sentinel version: [e.g. 2.1.0]
         - Database: [e.g. Snowflake 7.8.0]
       value: |
         - OS:
         - Python version:
-        - sql-comparison version:
+        - schema-sentinel version:
         - Database:
     validations:
       required: true

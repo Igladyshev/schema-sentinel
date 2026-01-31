@@ -82,11 +82,11 @@ Unsure where to begin? Look for issues labeled:
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/sql-comparison.git
-cd sql-comparison
+git clone https://github.com/YOUR_USERNAME/schema-sentinel.git
+cd schema-sentinel
 
 # Add upstream remote
-git remote add upstream https://github.com/Igladyshev/sql-comparison.git
+git remote add upstream https://github.com/Igladyshev/schema-sentinel.git
 
 # Install uv (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -111,7 +111,7 @@ pre-commit install
 pytest
 
 # Run with coverage
-pytest --cov=sql_comparison --cov-report=html
+pytest --cov=schema_sentinel --cov-report=html
 
 # Run specific test file
 pytest tests/test_imports.py
@@ -133,7 +133,7 @@ ruff check .
 ruff check --fix .
 
 # Type checking
-mypy sql_comparison/
+mypy schema_sentinel/
 ```
 
 ## Pull Request Process
@@ -278,7 +278,7 @@ def test_table_metadata_extraction(sample_database_config):
 
 When adding support for a new database:
 
-1. Create engine class in `sql_comparison/metadata_manager/engine.py`
+1. Create engine class in `schema_sentinel/metadata_manager/engine.py`
 2. Implement metadata extraction queries
 3. Add comprehensive tests with mocked database
 4. Update documentation

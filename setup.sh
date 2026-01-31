@@ -1,5 +1,5 @@
 #!/bin/bash
-# Quick setup script for sql-comparison project
+# Quick setup script for schema-sentinel project
 
 # Colors for output
 GREEN='\033[0;32m'

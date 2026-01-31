@@ -126,14 +126,14 @@ Focus on these first:
 
 ```bash
 # Run all tests
-pytest -v --cov=sql_comparison --cov-report=html
+pytest -v --cov=schema_sentinel --cov-report=html
 
 # Check code quality
 ruff check .
 ruff format --check .
 
 # Type checking
-mypy sql_comparison/
+mypy schema_sentinel/
 
 # Security check
 pip-audit  # Install with: uv pip install pip-audit

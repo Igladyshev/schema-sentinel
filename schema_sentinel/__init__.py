@@ -8,14 +8,14 @@ from sqlalchemy import and_
 from sqlalchemy.dialects import registry
 from sqlalchemy.orm import sessionmaker
 
-from sql_comparison.metadata_manager.engine import SfAlchemyEngine, SqLiteAqlAlchemyEngine, get_config_dict
-from sql_comparison.metadata_manager.enums import ConnectMode, Environment
-from sql_comparison.metadata_manager.model.database import Database
-from sql_comparison.metadata_manager.utils import get_config
+from schema_sentinel.metadata_manager.engine import SfAlchemyEngine, SqLiteAqlAlchemyEngine, get_config_dict
+from schema_sentinel.metadata_manager.enums import ConnectMode, Environment
+from schema_sentinel.metadata_manager.model.database import Database
+from schema_sentinel.metadata_manager.utils import get_config
 
-PROJECT_NAME = "sql-comparison"
+PROJECT_NAME = "schema-sentinel"
 TEMP_DIR = os.getenv("TEMP") if os.name == "nt" else "/tmp"
-LOG_FILE = os.path.join(TEMP_DIR, "sql-comparison.log")
+LOG_FILE = os.path.join(TEMP_DIR, "schema-sentinel.log")
 LOG_LEVEL = os.getenv("LOG_LEVEL") if os.getenv("LOG_LEVEL") is not None else "INFO"
 
 PROJECT_HOME = os.path.dirname(os.path.join(os.path.abspath("./"), PROJECT_NAME))

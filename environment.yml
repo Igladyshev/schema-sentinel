@@ -1,4 +1,4 @@
-name: sql-comparison
+name: schema-sentinel
 dependencies:
 - python=3.9
 - pip

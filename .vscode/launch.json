@@ -16,7 +16,7 @@
       "name": "Python: Module",
       "type": "debugpy",
       "request": "launch",
-      "module": "sql_comparison",
+      "module": "schema_sentinel",
       "console": "integratedTerminal",
       "justMyCode": false
     },

@@ -19,18 +19,18 @@ This document summarizes the changes made to remove proprietary information and 
 
 **Modified Files:**
 
-#### `sql_comparison/__init__.py`
+#### `schema_sentinel/__init__.py`
 - ✅ Removed hardcoded `@caesars.com` email domain
 - ✅ Added configurable `get_user()` function that respects `SNOWFLAKE_USER` and `SNOWFLAKE_EMAIL_DOMAIN` environment variables
-- ✅ Updated log file path from `sdp-migrations.log` to `sql-comparison.log`
+- ✅ Updated log file path from `sdp-migrations.log` to `schema-sentinel.log`
 - ✅ Changed default metadata DB from `sdp-metadata.db` to `metadata.db`
 
-#### `sql_comparison/markdown_utils/markdown.py`
+#### `schema_sentinel/markdown_utils/markdown.py`
 - ✅ Removed hardcoded `@caesars.com` in report author field
 - ✅ Added `REPORT_AUTHOR` environment variable support
 - ✅ Falls back to system username if not configured
 
-#### `sql_comparison.py`
+#### `schema_sentinel.py`
 - ✅ Replaced all `SDP` database name defaults with `MY_DATABASE`
 - ✅ Updated metadata DB defaults from `sdp-metadata.db` to `metadata.db`
 - ✅ Removed redundant `@caesars.com` concatenation
@@ -40,7 +40,7 @@ This document summarizes the changes made to remove proprietary information and 
 
 ### 3. Business Logic Sanitization
 
-#### `sql_comparison/metadata_manager/utils.py`
+#### `schema_sentinel/metadata_manager/utils.py`
 **Removed:**
 - ❌ Company Snowflake account identifiers (`WHSDPUSDEV`, `WHSDPUSNONPROD`, etc.)
 - ❌ Internal database mappings (`NJ_Dev`, `NJ_Test`, `NJ_Cert`, `NJ_Prod`)
@@ -124,7 +124,7 @@ If you were using this project with company-specific settings, you'll need to:
 
 3. **Update code references:**
    - Replace `database_name="SDP"` with your actual database name
-   - Update `ACCOUNT_MAP` in `sql_comparison/metadata_manager/utils.py` with your accounts
+   - Update `ACCOUNT_MAP` in `schema_sentinel/metadata_manager/utils.py` with your accounts
    - Customize `CUSTOM_VIEW_FILTERS` if you need row-level security
 
 ---
