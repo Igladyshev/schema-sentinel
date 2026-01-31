@@ -1,7 +1,6 @@
 """Basic tests to verify package installation and imports."""
 
 
-
 def test_package_import():
     """Test that the schema_sentinel package can be imported."""
     import schema_sentinel
