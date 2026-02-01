@@ -63,8 +63,9 @@ class MPMConfig:
                     except ValueError as e:
                         # Log warning for invalid date format to help identify data inconsistencies
                         log.warning(
-                            f"Failed to parse start_date '{value}' in expected format 'YYYY-MM-DD HH:MM:SS': {e}. "
-                            "Value will remain as string, which may cause type inconsistency issues."
+                            f"Failed to parse date field '{key}' with value '{value}' in expected format "
+                            f"'YYYY-MM-DD HH:MM:SS': {e}. Value will remain as string, which may cause "
+                            "type inconsistency issues."
                         )
                 elif isinstance(value, (dict, list)):
                     self._normalize_dates(value)
