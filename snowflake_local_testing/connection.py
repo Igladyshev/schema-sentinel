@@ -52,17 +52,30 @@ class SnowflakeConnectionManager:
 
         self.account = account or os.getenv("SNOWFLAKE_ACCOUNT")
         self.user = user or os.getenv("SNOWFLAKE_USER")
-        self.password = password or os.getenv("SNOWFLAKE_PASSWORD")
         self.warehouse = warehouse or os.getenv("SNOWFLAKE_WAREHOUSE")
         self.database = database or os.getenv("SNOWFLAKE_DATABASE")
         self.schema = schema or os.getenv("SNOWFLAKE_SCHEMA")
         self.role = role or os.getenv("SNOWFLAKE_ROLE")
-        self.private_key_path = private_key_path or os.getenv("SNOWFLAKE_PRIVATE_KEY_PATH")
-        self.private_key_passphrase = private_key_passphrase or os.getenv("SNOWFLAKE_PRIVATE_KEY_PASSPHRASE")
         self.authenticator = authenticator or os.getenv("SNOWFLAKE_AUTHENTICATOR")
+
+        # Store sensitive credentials temporarily - will be cleared after first use
+        self._password = password or os.getenv("SNOWFLAKE_PASSWORD")
+        self._private_key_path = private_key_path or os.getenv("SNOWFLAKE_PRIVATE_KEY_PATH")
+        self._private_key_passphrase = private_key_passphrase or os.getenv("SNOWFLAKE_PRIVATE_KEY_PASSPHRASE")
 
         self._connection: SnowflakeConnection | None = None
         self._private_key: bytes | None = None
+
+    def __repr__(self) -> str:
+        """Safe string representation that doesn't expose credentials."""
+        return (
+            f"SnowflakeConnectionManager("
+            f"account={self.account!r}, "
+            f"user={self.user!r}, "
+            f"warehouse={self.warehouse!r}, "
+            f"database={self.database!r}, "
+            f"schema={self.schema!r})"
+        )
 
     def _load_private_key(self) -> bytes:
         """
@@ -75,10 +88,10 @@ class SnowflakeConnectionManager:
             FileNotFoundError: If private key file doesn't exist
             ValueError: If private key cannot be parsed
         """
-        if not self.private_key_path:
+        if not self._private_key_path:
             raise ValueError("Private key path not provided")
 
-        key_path = Path(self.private_key_path).expanduser()
+        key_path = Path(self._private_key_path).expanduser()
         if not key_path.exists():
             raise FileNotFoundError(f"Private key file not found: {key_path}")
 
@@ -87,8 +100,8 @@ class SnowflakeConnectionManager:
 
         # Parse the private key with optional passphrase
         passphrase = None
-        if self.private_key_passphrase:
-            passphrase = self.private_key_passphrase.encode()
+        if self._private_key_passphrase:
+            passphrase = self._private_key_passphrase.encode()
 
         try:
             private_key = serialization.load_pem_private_key(
@@ -141,30 +154,43 @@ class SnowflakeConnectionManager:
             connection_params["role"] = self.role
 
         # Determine authentication method (priority order)
-        if self.private_key_path:
+        if self._private_key_path:
             # Key pair authentication
             if not self._private_key:
                 self._private_key = self._load_private_key()
+                # Clear passphrase after use
+                self._private_key_passphrase = None
             connection_params["private_key"] = self._private_key
+            # Clear private key path after use
+            self._private_key_path = None
         elif self.authenticator:
             # External authenticator (e.g., externalbrowser, oauth)
             connection_params["authenticator"] = self.authenticator
-        elif self.password:
+        elif self._password:
             # Password authentication
-            connection_params["password"] = self.password
+            connection_params["password"] = self._password
+            # Clear password after use
+            self._password = None
         else:
             raise ValueError(
                 "No valid authentication method provided. Please provide password, private_key_path, or authenticator."
             )
 
         self._connection = snowflake.connector.connect(**connection_params)
+        # Clear connection params dict to ensure password/key are not retained
+        connection_params.clear()
         return self._connection
 
     def disconnect(self) -> None:
-        """Close the Snowflake connection."""
+        """Close the Snowflake connection and clear sensitive data."""
         if self._connection:
             self._connection.close()
             self._connection = None
+        # Clear any remaining sensitive data
+        self._password = None
+        self._private_key_passphrase = None
+        self._private_key = None
+        self._private_key_path = None
 
     @contextmanager
     def get_connection(self):
