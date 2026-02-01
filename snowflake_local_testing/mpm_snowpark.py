@@ -102,13 +102,22 @@ class MPMSnowparkSaver:
         Safely quote a Snowflake identifier by escaping double quotes.
 
         Per Snowflake documentation, double quotes in identifiers must be escaped
-        by doubling them (e.g., " becomes "").
+        by doubling them (e.g., " becomes ""). Quoted identifiers in Snowflake
+        can contain any characters (including spaces, special characters, reserved
+        keywords, etc.), so no additional validation or filtering is needed.
+
+        This implementation follows Snowflake's documented best practices and
+        prevents SQL injection by ensuring identifiers cannot break out of the
+        quoted context.
 
         Args:
             identifier: The identifier to quote
 
         Returns:
             Properly quoted identifier safe for use in SQL statements
+
+        References:
+            https://docs.snowflake.com/en/sql-reference/identifiers-syntax
         """
         return f'"{identifier.replace('"', '""')}"'
 
