@@ -1,5 +1,6 @@
 """MPM YAML configuration parser and validator."""
 
+import logging as log
 import re
 from datetime import datetime
 from pathlib import Path
@@ -59,9 +60,13 @@ class MPMConfig:
                     # Convert to datetime object
                     try:
                         obj[key] = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
-                    except ValueError:
-                        # If parsing fails, leave as-is
-                        pass
+                    except ValueError as e:
+                        # Log warning for invalid date format to help identify data inconsistencies
+                        log.warning(
+                            f"Failed to parse date field '{key}' with value '{value}' in expected format "
+                            f"'YYYY-MM-DD HH:MM:SS': {e}. Value will remain as string, which may cause "
+                            "type inconsistency issues."
+                        )
                 elif isinstance(value, (dict, list)):
                     self._normalize_dates(value)
         elif isinstance(obj, list):
