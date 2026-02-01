@@ -1,0 +1,1747 @@
+deployment_version: 0.0.5
+domain_code: BS
+warehouse:
+  auto_suspend: 120
+  max_cluster_count: 4
+  scaling_policy: STANDARD
+  warehouse_size: MEDIUM
+  warehouse_type: SNOWPARK-OPRIMIZED
+internal_stage: GENERIC_REPORTING.BS_005.REPORTING
+external_stage: GENERIC_REPORTING.REPORTING.PRODUCTION
+domain_timezone: US / Eastern
+communities:
+- id: 8571101
+  name: Baha_Mar_Casino
+- id: 8421102
+  name: Atlantis_Paradise_Island_Atlantis_Casino
+actions:
+- action_type: REPORT
+  action_code: retail_liability_ticket_report
+  abbreviation: RSPLTR
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_liability_bets
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Sport_Liability_Ticket.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sport_Pool_Liability_Ticket/{ed_year}/{ed_month}/{ed_day}/retail-sport-pool-liability-ticket-report-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Liability Ticket Report
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: SENSOR
+  action_code: retail_liability_bets
+  abbreviation: RLBS
+  dataset: retail_liability_bets
+  source_system: BE
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: SDP
+    query: SELECT exists (SELECT 1 FROM   SDP.RETAIL_MART.RETAIL_LIABILITY_BETS S
+      WHERE  domain_code = '{{ DomainCd }}' and   GAMING_DATE >= dateadd(day,-1,'{{
+      To_date }}'::date) );
+- action_type: REPORT
+  action_code: retail_liability_ticket_report_per_community
+  abbreviation: RSPLTRC
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_liability_ticket_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Sport_Liability_Ticket_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sport_Pool_Liability_Ticket/{ed_year}/{ed_month}/{ed_day}/sports-pool-retail-liability-report-{community}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Liability Ticket Report Per Community
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_recap_all_report
+  abbreviation: RSPRRE
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_recap_sports_aggregate
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_All_Recap.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Recap_Daily_All/{ed_year}/{ed_month}/{ed_day}/sports-pool-retail-report-recap-all-daily-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Recap Report
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: SENSOR
+  action_code: retail_recap_sports_aggregate
+  abbreviation: RRSAS
+  dataset: retail_recap_sports_aggregate
+  source_system: BE
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: SDP
+    query: SELECT exists (SELECT 1 FROM   SDP.RETAIL_MART.RETAIL_RECAP_SPORTS_AGGREGATE
+      S JOIN SDP.CORE.DOMAIN D ON D.DOMAIN_ID=S.DOMAIN_ID WHERE  domain_code = '{{
+      DomainCd }}' and   report_date >= dateadd(day,-1,'{{ To_date }}'::date) );
+- action_type: REPORT
+  action_code: retail_recap_all_report_month_to_date
+  abbreviation: RSPRRMTD
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_month_to_date_5am
+  header_information: null
+  parents:
+  - retail_recap_all_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Monthly/RPT_Retail_All_Recap_MTD.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Recap_All_Month_To_Date/{ed_year}/{ed_month}/{ed_day}/sports-pool-retail-recap-all-report-month-to-date-{fd_year}-{fd_month}-{fd_day}-to-{ed_year}-{ed_month}-{ed_day}.csv
+  report_name: Retail Sports Pool Recap Month To Date Report
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_recap_report_month_to_date_per_community
+  abbreviation: RSPRRMTDC
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_month_to_date_5am
+  header_information: null
+  parents:
+  - retail_recap_all_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Monthly/RPT_Retail_Recap_MTD_per
+      community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Recap_Month_To_Date_Per_Community/{ed_year}/{ed_month}/{ed_day}/sports-pool-retail-recap-report-{community}-month-to-date-{fd_year}-{fd_month}-{fd_day}-to-{ed_year}-{ed_month}-{ed_day}.csv
+  report_name: Retail Sports Pool Recap Month To Date Report Per Community
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_recap_report_per_community
+  abbreviation: RRR
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_recap_all_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Recap_Daily_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Recap_Daily_Per_Community/{ed_year}/{ed_month}/{ed_day}/sports-pool-retail-recap-report-{community}-daily-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Retail Sports Pool Recap Report Per Community
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_cancelled_ticket_report
+  abbreviation: RSPCR
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_recap_bets
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Cancelled_Ticket.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Cancelled_Ticket/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-cancelled-ticket-report-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Cancelled Report
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: SENSOR
+  action_code: retail_recap_bets
+  abbreviation: RRBS
+  dataset: retail_recap_bets
+  source_system: BE
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: SDP
+    query: SELECT exists (SELECT 1 FROM   SDP.RETAIL_MART.RETAIL_RECAP_BETS S JOIN
+      SDP.CORE.DOMAIN D ON D.DOMAIN_ID=S.DOMAIN_ID WHERE  domain_code = '{{ DomainCd
+      }}' and   report_date >= dateadd(day,-1,'{{ To_date }}'::date) );
+- action_type: REPORT
+  action_code: retail_sports_pool_cancelled_ticket_report_per_community
+  abbreviation: RSPCRC
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_sports_pool_cancelled_ticket_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Cancelled_Ticket_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Cancelled_Ticket_Per_Community/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-cancelled-ticket-report-{community}-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Cancelled Report Per Community
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_expired_ticket_report
+  abbreviation: RSPER
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_recap_bets
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Sports_Pool_Expired_Ticket.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Expired_Ticket/{ed_year}/{ed_month}/{ed_day}/retail-expired-ticket-report-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Expired Report
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_expired_ticket_report_per_community
+  abbreviation: RSPERPC
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_sports_pool_expired_ticket_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Sports_Pool_Expired_Ticket_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Expired_Ticket_Per_Community/{ed_year}/{ed_month}/{ed_day}/retail-expired-ticket-report-{community}-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Expired Report Per Community
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_pending_voidscancels_lifetime_to_date
+  abbreviation: RSPPVLTDR
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_recap_bets
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Pending_VoidsCancels_Lifetime_To_Date.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Pending_VoidsCancels_Lifetime_To_Date/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-pending-voidscancels-lifetime-to-date-report-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Pending Voids/cancels Lifetime To Date Report
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-03-01 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_pending_voidscancels_lifetime_to_date_per_community
+  abbreviation: RSPPVLTDRPC
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_sports_pool_pending_voidscancels_lifetime_to_date
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Pending_VoidsCancels_Lifetime_To_Date_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Pending_VoidsCancels_Lifetime_To_Date_Per_Community/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-pending-voidscancels-Lifetime-To-Date-report-{community}-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Pending Voids/cancels Lifetime To Date Report Per
+    Community
+  schedule:
+    crontab: 45 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-03-01 13:45:00
+- action_type: REPORT
+  action_code: retail_sports_pool_pending_voidscancels_report
+  abbreviation: RSPPVR
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_recap_bets
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Pending_VoidsCancels.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Pending_VoidsCancels/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-pending-voidscancels-report-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Pending Voids/cancels Report
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_pending_voidscancels_report_per_community
+  abbreviation: RSPPVRPC
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_sports_pool_pending_voidscancels_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Pending_VoidsCancels_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Pending_VoidsCancels_Per_Community/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-pending-voidscancels-report-{community}-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Pending Voids/cancels Report Per Community
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_resettlement_report
+  abbreviation: RSPRRESE
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_sport_pool_resettlement
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/Retail_SP_Resettlement.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Resettlement_Ticket/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-resettlement-ticket-report-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Resettlement Report
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: SENSOR
+  action_code: retail_sport_pool_resettlement
+  abbreviation: RSPRS
+  dataset: retail_sport_pool_resettlement
+  source_system: BE
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: SDP
+    query: SELECT (SELECT case when max(ifnull(ifnull(SETTLED_AT_LOCAL,PLACED_AT_LOCAL),
+      w.SYSTEM_UPDATE_DATETIME)) > '{{ To_date }}' then true else false end FROM sdp.core.bet
+      w join sdp.core.domain d ON w.domain_id = d.domain_id WHERE  domain_code = '{{
+      DomainCd }}' ) and (SELECT case when max(MESSAGE_TIME_LOCAL)> '{{ To_date }}'
+      then true else false end FROM sdp.core.bet_asset_flow w join sdp.core.domain
+      d ON w.domain_id = d.domain_id WHERE  domain_code = '{{ DomainCd }}' ) and (
+      SELECT case when count(*)>0 then true else false end FROM AUDIT.TASK_STEP_EXECUTION
+      WHERE TASK_STEP_NAME = ' MERGE_RETAIL_SPORT_POOL_RESETTLEMENT_DATA ' AND TASK_STEP_STATUS
+      = 'COMPLETED' AND TASK_STEP_EXECUTION_STATUS = 'SUCCESS' and EXECUTION_DATE
+      >= '{{ To_date }}' ) ;
+- action_type: REPORT
+  action_code: retail_sports_pool_resettlement_report_per_community
+  abbreviation: RSPRRESEC
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_sports_pool_resettlement_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/Retail_SP_Resettlement_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Resettlement_Ticket_Per_Community/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-resettlement-ticket-report-{community}-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Resettlement Report Per Community
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_results_report
+  abbreviation: RSPRRESU
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_sport_pool_transaction
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Sports_Pool_Results_Ticket.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Results/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-results-ticket-report-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Results Report
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: SENSOR
+  action_code: retail_sport_pool_transaction
+  abbreviation: RSPTS
+  dataset: retail_sport_pool_transaction
+  source_system: BE
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: SDP
+    query: SELECT exists (SELECT 1 FROM   SDP.RETAIL_MART.RETAIL_SPORT_POOL_TRANSACTION
+      S JOIN SDP.CORE.DOMAIN D ON D.DOMAIN_ID=S.DOMAIN_ID WHERE  domain_code = '{{
+      DomainCd }}' and   GAMING_DATE >= dateadd(day,-1,'{{ To_date }}'::date) );
+- action_type: REPORT
+  action_code: retail_sports_pool_results_report_per_community
+  abbreviation: RSPRRPC
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_sports_pool_results_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Sports_Pool_Results_Ticket_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Results_Per_Community/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-results-ticket-report-{community}-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Results Report Per Community
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_transaction_report
+  abbreviation: RSPTR
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_sport_pool_transaction
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Sport_Transaction.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sport_Pool_Transaction/{ed_year}/{ed_month}/{ed_day}/retail-sport-pool-transaction-report-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Transaction Report
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_transaction_report_per_community
+  abbreviation: RSPTRPC
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_sports_pool_transaction_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Sport_Transaction_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sport_Pool_Transaction_Per_Community/{ed_year}/{ed_month}/{ed_day}/retail-sport-pool-transaction-report-{community}-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Transaction Report Per Community
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_voided_ticket_report
+  abbreviation: RSPVR
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_recap_bets
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Sports_Voided_Ticket.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Voided_Ticket/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-voided-ticket-report-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Voided Report
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_voided_ticket_report_per_community
+  abbreviation: RSPVRC
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_sports_pool_voided_ticket_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Sports_Voided_Ticket_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Voided_Ticket_Per_Community/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-voided-{community}-ticket-report-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Sports Pool Voided Report Per Community
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_unpaid_ticket_report
+  abbreviation: RUTR
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_recap_bets
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Unpaid_Ticket.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Unpaid_Ticket/{ed_year}/{ed_month}/{ed_day}/retail-unpaid-ticket-report-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Unpaid Ticket Report
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_unpaid_ticket_report_per_community
+  abbreviation: RUTRPC
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - retail_unpaid_ticket_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Daily/RPT_Retail_Unpaid_Ticket_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Unpaid_Ticket_Per_Community/{ed_year}/{ed_month}/{ed_day}/retail-unpaid-ticket-report-{community}-{fd_year}-{fd_month}-{fd_day}.csv
+  report_name: Retail Unpaid Ticket Report Per Community
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_voided_ticket_report_month_to_date
+  abbreviation: RSPVRMTD
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_month_to_date_5am
+  header_information: null
+  parents:
+  - retail_sports_pool_voided_ticket_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Monthly/RPT_Retail_Sports_Voided_Ticket_MTD.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Voided_Ticket_Month_To_Date/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-voided-ticket-report-{fd_year}-{fd_month}-{fd_day}-to-{ed_year}-{ed_month}-{ed_day}.csv
+  report_name: Retail Sports Pool Voided Report MTD
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_voided_ticket_report_month_to_date_per_community
+  abbreviation: RSPVRPCMTD
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_month_to_date_5am
+  header_information: null
+  parents:
+  - retail_sports_pool_voided_ticket_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Monthly/RPT_Retail_Sports_Voided_Ticket_MTD_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Voided_Ticket_Month_To_Date_Per_Community/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-voided-ticket-report-{community}-month-to-date-{fd_year}-{fd_month}-{fd_day}-to-{ed_year}-{ed_month}-{ed_day}.csv
+  report_name: Retail Sports Pool Voided Report Per Community MTD
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-11-29 15:05:00
+- action_type: REPORT
+  action_code: retail_sports_pool_cancelled_ticket_report_month_to_date
+  abbreviation: RSPCRMTD
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_month_to_date_5am
+  header_information: null
+  parents:
+  - retail_sports_pool_cancelled_ticket_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Monthly/RPT_Retail_Cancelled_Ticket_MTD.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Cancelled_Ticket_MTD/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-cancelled-ticket-report-month-to-date-{fd_year}-{fd_month}-{fd_day}-to-{ed_year}-{ed_month}-{ed_day}.csv
+  report_name: Retail Sports Pool Cancelled Report MTD
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-23 13:15:00
+- action_type: REPORT
+  action_code: retail_sports_pool_cancelled_ticket_report_month_to_date_per_community
+  abbreviation: RSPCRPCMTD
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_month_to_date_6am
+  header_information: null
+  parents:
+  - retail_sports_pool_cancelled_ticket_report
+  pii_information: {}
+  query_reference:
+    database_name: SDP
+    query: ./scripts/WH/US_ALL/05_Queries/Reports_BOP/Retail/Monthly/RPT_Retail_Cancelled_Ticket_MTD_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Retail_Sports_Pool_Cancelled_Ticket_Month_To_Date_Per_Community/{ed_year}/{ed_month}/{ed_day}/retail-sports-pool-cancelled-ticket-report-{community}-month-to-date-{fd_year}-{fd_month}-{fd_day}-to-{ed_year}-{ed_month}-{ed_day}.csv
+  report_name: Retail Sports Pool Cancelled Report Per Community MTD
+  schedule:
+    crontab: 15 13 * * *
+    timezone: Etc/UTC
+  start_date: 2024-11-29 15:05:00
+- action_type: REPORT
+  action_code: rosi_big_transactions_report_all
+  abbreviation: RBTRA
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - business_activity
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/Rosi_Generic_Reporting/RPT_Big_Transactions_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Big_Transactions_All/{ed_year}/{ed_month}/{ed_day}/Rosi-Big-Transactions-Report-BS-{ed_month}-{ed_day}-{ed_year}.pdf
+  report_name: Rosi Big Transactions Report
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:15:00
+- action_type: SENSOR
+  action_code: business_activity
+  abbreviation: BAS
+  dataset: business_activity
+  source_system: money_management
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: NJ_Prod
+    query: call "Audit".IS_ROSI_INGESTION_COMPLETE('{{DomainCd}}', REPLACE('{{SourceSystemCd}}',
+      '_{{ state }}', ''), '{{ DataSetNm }}' , '{{To_date}}','{{DomainCd}}');
+- action_type: REPORT
+  action_code: rosi_big_transactions_report_per_community
+  abbreviation: RBTR
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - rosi_big_transactions_report_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Big_Transactions_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Big_Transactions_Per_Community/{ed_year}/{ed_month}/{ed_day}/Rosi-Big-Transactions-Report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Big Transactions Report Per Community
+  schedule:
+    crontab: 30 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:30:00
+- action_type: REPORT
+  action_code: rosi_bill_denominations_all
+  abbreviation: RBDRA
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - business_activity
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/Rosi_Generic_Reporting/RPT_Rosi_Bill_Denominations_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Bill_Denominations_All/{ed_year}/{ed_month}/{ed_day}/Rosi-Bill-Denominations-Report-BS-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Bill Denominations Report
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:15:00
+- action_type: REPORT
+  action_code: rosi_bill_denominations_per_community
+  abbreviation: RBDR
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - rosi_bill_denominations_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Bill_Denominations_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Bill_Denominations_Per_Community/{ed_year}/{ed_month}/{ed_day}/Rosi-Bill-Denominations-Report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Bill Denominations Report Per Community
+  schedule:
+    crontab: 30 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:30:00
+- action_type: REPORT
+  action_code: rosi_cash_balances_all
+  abbreviation: RCBRA
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - account
+  - accountbalance
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Cash_Balances_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Cash_Balances_All/{ed_year}/{ed_month}/{ed_day}/Rosi-Cash-Balances-Report-BS-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Cash Balances Report
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:15:00
+- action_type: SENSOR
+  action_code: account
+  abbreviation: AS
+  dataset: account
+  source_system: ROSI
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: NJ_Prod
+    query: SELECT "Audit".is_etl_completed('{{ DataSetNm }}', '{{ SourceSystemCd }}',
+      '{{ To_date }}') as is_completed;
+- action_type: SENSOR
+  action_code: accountbalance
+  abbreviation: AS
+  dataset: accountbalance
+  source_system: ROSI
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: NJ_Prod
+    query: SELECT "Audit".is_etl_completed('{{ DataSetNm }}', '{{ SourceSystemCd }}',
+      '{{ To_date }}') as is_completed;
+- action_type: REPORT
+  action_code: rosi_cash_balances_per_community
+  abbreviation: RCBR
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - rosi_cash_balances_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Cash_Balances_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Cash_Balances_Per_Community/{ed_year}/{ed_month}/{ed_day}/Rosi-Cash-Balances-Report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Cash Balances Report Per Community
+  schedule:
+    crontab: 30 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:30:00
+- action_type: REPORT
+  action_code: rosi_daily_transactions_report_all
+  abbreviation: RDTRA
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - account
+  - businessactivity
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Daily_Transactions_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Daily_Transactions_All/{ed_year}/{ed_month}/{ed_day}/Rosi-Daily-Transactions-Report-All-BS-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Daily Transactions Report
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:15:00
+- action_type: SENSOR
+  action_code: businessactivity
+  abbreviation: BS
+  dataset: businessactivity
+  source_system: ROSI
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: NJ_Prod
+    query: SELECT "Audit".is_etl_completed('{{ DataSetNm }}', '{{ SourceSystemCd }}',
+      '{{ To_date }}') as is_completed;
+- action_type: REPORT
+  action_code: rosi_daily_transactions_report_per_community
+  abbreviation: RDTR
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - rosi_daily_transactions_report_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Daily_Transactions_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Daily_Transactions_Per_Community/{ed_year}/{ed_month}/{ed_day}/rosi-daily-transactions-report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Daily Transactions Report Per Community
+  schedule:
+    crontab: 30 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:30:00
+- action_type: REPORT
+  action_code: rosi_electronic_accounting_report_all
+  abbreviation: REARA
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - business_activity
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/Rosi_Generic_Reporting/RPT_Electronic_Accounting_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Electronic_Accounting_All/{ed_year}/{ed_month}/{ed_day}/Rosi-Electronic-Accounting-Report-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Electronic Accounting Report
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:15:00
+- action_type: REPORT
+  action_code: rosi_electronic_accounting_report_per_community
+  abbreviation: REAR
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - rosi_electronic_accounting_report_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Electronic_Accounting_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Electronic_Accounting_Per_Community/{ed_year}/{ed_month}/{ed_day}/Rosi-Electronic-Accounting-Report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Electronic Accounting Report Per Community
+  schedule:
+    crontab: 30 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:30:00
+- action_type: REPORT
+  action_code: rosi_irs_paids_all
+  abbreviation: RIPR
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - activity_tax
+  - activity_tax_line
+  - business_activity
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/Rosi_Generic_Reporting/RPT_Rosi_IRS_Paids_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_IRS_Paids_All/{ed_year}/{ed_month}/{ed_day}/Rosi-IRS-Paids-Report-All-BS-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Irs Paids Report
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:15:00
+- action_type: SENSOR
+  action_code: activity_tax
+  abbreviation: ATS
+  dataset: activity_tax
+  source_system: money_management
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: NJ_Prod
+    query: call "Audit".IS_ROSI_INGESTION_COMPLETE('{{DomainCd}}', REPLACE('{{SourceSystemCd}}',
+      '_{{ state }}', ''), '{{ DataSetNm }}' , '{{To_date}}','{{DomainCd}}');
+- action_type: SENSOR
+  action_code: activity_tax_line
+  abbreviation: ATLS
+  dataset: activity_tax_line
+  source_system: money_management
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: NJ_Prod
+    query: call "Audit".IS_ROSI_INGESTION_COMPLETE('{{DomainCd}}', REPLACE('{{SourceSystemCd}}',
+      '_{{ state }}', ''), '{{ DataSetNm }}' , '{{To_date}}','{{DomainCd}}');
+- action_type: REPORT
+  action_code: rosi_irs_paids_per_community
+  abbreviation: RIPRC
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - rosi_irs_paids_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_IRS_Paids_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_IRS_Paids_Per_Community/{ed_year}/{ed_month}/{ed_day}/Rosi-IRS-Paids-Report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi IRS Paids Report Per Community
+  schedule:
+    crontab: 30 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:30:00
+- action_type: REPORT
+  action_code: rosi_irs_paids_report_month_to_date
+  abbreviation: RIPMTDR
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_month_to_date_5am
+  header_information: null
+  parents:
+  - rosi_irs_paids_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_IRS_Paids_MTD_YTD.sql
+    query_version: v2020.03.206459.0
+  report_file_name_pattern: BS/Rosi_IRS_Paids_All_Month_To_Date/{ed_year}/{ed_month}/{ed_day}/Rosi-IRS-Paids-Report-All-MTD-BS-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Irs Paids Month To Date Report
+  schedule:
+    crontab: 45 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-12-01 14:45:00
+- action_type: REPORT
+  action_code: rosi_irs_paids_report_year_to_date
+  abbreviation: RIPYTDR
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_year_to_date_5am
+  header_information: null
+  parents:
+  - rosi_irs_paids_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_IRS_Paids_MTD_YTD.sql
+    query_version: v2020.03.206459.0
+  report_file_name_pattern: BS/Rosi_IRS_Paids_All_Year_To_Date/{ed_year}/{ed_month}/{ed_day}/Rosi-IRS-Paids-Report-All-YTD-BS-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Irs Paids Year To Date Report
+  schedule:
+    crontab: 45 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-12-01 14:45:00
+- action_type: REPORT
+  action_code: rosi_patron_kiosk_activity_report_per_community
+  abbreviation: RPKAR
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - player
+  - businessactivity
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Patron_Kiosk_Activity_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Patron_Kiosk_Activity_Per_Community/{ed_year}/{ed_month}/{ed_day}/Rosi-Patron-Kiosk-Activity-Report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Patron Kiosk Activity Report Per Community
+  schedule:
+    crontab: 0 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-04-10 14:00:00
+- action_type: SENSOR
+  action_code: player
+  abbreviation: PS
+  dataset: player
+  source_system: ROSI
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 0 14 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: NJ_Prod
+    query: SELECT "Audit".is_etl_completed('{{ DataSetNm }}', '{{ SourceSystemCd }}',
+      '{{ To_date }}') as is_completed;
+- action_type: REPORT
+  action_code: rosi_teller_balance_by_cage_report_all
+  abbreviation: RTBBCRA
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - business_activity
+  - account
+  - account_balance
+  - running_account_balance
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/Rosi_Generic_Reporting/RPT_Rosi_Teller_Balance_By_Cage_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Teller_Balance_By_Cage_All/{ed_year}/{ed_month}/{ed_day}/Rosi-Teller-Balance-By-Cage-Report-All-BS-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Teller Balance By Cage Report
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:15:00
+- action_type: SENSOR
+  action_code: account_balance
+  abbreviation: ABS
+  dataset: account_balance
+  source_system: money_management
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: NJ_Prod
+    query: call "Audit".IS_ROSI_INGESTION_COMPLETE('{{DomainCd}}', REPLACE('{{SourceSystemCd}}',
+      '_{{ state }}', ''), '{{ DataSetNm }}' , '{{To_date}}','{{DomainCd}}');
+- action_type: SENSOR
+  action_code: running_account_balance
+  abbreviation: RABS
+  dataset: running_account_balance
+  source_system: money_management
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: NJ_Prod
+    query: call "Audit".IS_ROSI_INGESTION_COMPLETE('{{DomainCd}}', REPLACE('{{SourceSystemCd}}',
+      '_{{ state }}', ''), '{{ DataSetNm }}' , '{{To_date}}','{{DomainCd}}');
+- action_type: REPORT
+  action_code: rosi_teller_balance_by_cage_report_per_community
+  abbreviation: RTBBCR
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - rosi_teller_balance_by_cage_report_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Teller_Balance_By_Cage_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Teller_Balance_By_Cage_Per_Community/{ed_year}/{ed_month}/{ed_day}/Rosi-Teller-Balance-By-Cage-Report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Teller Balance by Cage Report Per Community
+  schedule:
+    crontab: 30 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:30:00
+- action_type: REPORT
+  action_code: rosi_teller_balance_by_kiosk_report_all
+  abbreviation: RTBBKRA
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - business_activity
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/Rosi_Generic_Reporting/RPT_Rosi_Teller_Balance_By_Kiosk_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Teller_Balance_By_Kiosk_All/{ed_year}/{ed_month}/{ed_day}/Rosi-Teller-Balance-By-Kiosk-Report-All-BS-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Teller Balance By Kiosk Report
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:15:00
+- action_type: REPORT
+  action_code: rosi_teller_balance_by_kiosk_report_per_community
+  abbreviation: RTBBKR
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - rosi_teller_balance_by_kiosk_report_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Teller_Balance_By_Kiosk_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Teller_Balance_By_Kiosk_Per_Community/{ed_year}/{ed_month}/{ed_day}/Rosi-Teller-Balance-By-Kiosk-Report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Teller Balance By Kiosk Report Per Community
+  schedule:
+    crontab: 30 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:30:00
+- action_type: REPORT
+  action_code: rosi_teller_balance_report_all
+  abbreviation: RTBRA
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - business_activity
+  - account
+  - account_balance
+  - running_account_balance
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/Rosi_Generic_Reporting/RPT_Rosi_Teller_Balance_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Report-Rosi-Teller-Balance-Report-All/{ed_year}/{ed_month}/{ed_day}/Rosi-Teller-Balance-Report-All-BS-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Teller Balance Report
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:15:00
+- action_type: REPORT
+  action_code: rosi_teller_balance_report_per_community
+  abbreviation: RTBR
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - rosi_teller_balance_report_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Teller_Balance_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Teller_Balance_Per_Community/{ed_year}/{ed_month}/{ed_day}/Rosi-Teller-Balance-Report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Teller Balance Report Per Community
+  schedule:
+    crontab: 30 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:30:00
+- action_type: REPORT
+  action_code: rosi_voucher_weekly_all
+  abbreviation: RVWRA
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_week_5am
+  header_information: null
+  parents:
+  - voucher
+  - businessactivity
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Voucher_Weekly_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Voucher_Weekly_All/{ed_year}/{ed_month}/{ed_day}/Rosi-Voucher-Weekly-Report-BS-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Voucher Weekly Report
+  schedule:
+    crontab: 15 14 * * 1
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:15:00
+- action_type: SENSOR
+  action_code: voucher
+  abbreviation: VS
+  dataset: voucher
+  source_system: ROSI
+  date_range_function: get_current_week_5am
+  schedule:
+    crontab: 15 14 * * 1
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: NJ_Prod
+    query: SELECT "Audit".is_etl_completed('{{ DataSetNm }}', '{{ SourceSystemCd }}',
+      '{{ To_date }}') as is_completed;
+- action_type: REPORT
+  action_code: rosi_voucher_weekly_per_community
+  abbreviation: RVWR
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_week_5am
+  header_information: null
+  parents:
+  - rosi_voucher_weekly_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Voucher_Weekly_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Voucher_Weekly_Per_Community/{ed_year}/{ed_month}/{ed_day}/Rosi-Voucher-Weekly-Report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Voucher Weekly Report Per Community
+  schedule:
+    crontab: 30 14 * * 1
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:30:00
+- action_type: REPORT
+  action_code: rosi_vouchers_created_all
+  abbreviation: VCRA
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - business_activity
+  - voucher
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/Rosi_Generic_Reporting/RPT_Rosi_Vouchers_Created_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Vouchers_Created_All/{ed_year}/{ed_month}/{ed_day}/rosi-vouchers-created-report-All-BS-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Vouchers Created Report
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:15:00
+- action_type: REPORT
+  action_code: rosi_vouchers_created_per_community
+  abbreviation: VCR
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - rosi_vouchers_created_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Vouchers_Created_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Vouchers_Created_Per_Community/{ed_year}/{ed_month}/{ed_day}/rosi-vouchers-created-report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Vouchers Created Report Per Community
+  schedule:
+    crontab: 30 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:30:00
+- action_type: REPORT
+  action_code: rosi_vouchers_expired_all
+  abbreviation: VERA
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - business_activity
+  - voucher
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/Rosi_Generic_Reporting/RPT_Rosi_Vouchers_Expired_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Vouchers_Expired_All/{ed_year}/{ed_month}/{ed_day}/rosi-vouchers-expired-report-All-BS-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Vouchers Expired Report
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:15:00
+- action_type: REPORT
+  action_code: rosi_vouchers_expired_per_community
+  abbreviation: VER
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - rosi_vouchers_expired_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Vouchers_Expired_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Vouchers_Expired_Per_Community/{ed_year}/{ed_month}/{ed_day}/rosi-vouchers-expired-report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Vouchers Expired Report Per Community
+  schedule:
+    crontab: 30 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:30:00
+- action_type: REPORT
+  action_code: rosi_vouchers_paidout_all
+  abbreviation: VPRA
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - business_activity
+  - voucher
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/Rosi_Generic_Reporting/RPT_Rosi_Vouchers_PaidOut_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Vouchers_PaidOut_All/{ed_year}/{ed_month}/{ed_day}/rosi-vouchers-paidout-report-BS-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Vouchers PaidOut Report
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:15:00
+- action_type: REPORT
+  action_code: rosi_vouchers_paidout_per_community
+  abbreviation: VPR
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - rosi_vouchers_paidout_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Vouchers_PaidOut_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Vouchers_PaidOut_Per_Community/{ed_year}/{ed_month}/{ed_day}/rosi-vouchers-paidout-report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Vouchers PaidOut Report Per Community
+  schedule:
+    crontab: 30 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:30:00
+- action_type: REPORT
+  action_code: rosi_vouchers_unpaid_all
+  abbreviation: VURA
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - business_activity
+  - voucher
+  - voucher_audit
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/Rosi_Generic_Reporting/RPT_Rosi_Vouchers_Unpaid_All.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Vouchers_Unpaid_All/{ed_year}/{ed_month}/{ed_day}/rosi-vouchers-unpaid-report-All-BS-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Vouchers Unpaid Report
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:15:00
+- action_type: SENSOR
+  action_code: voucher_audit
+  abbreviation: VAS
+  dataset: voucher_audit
+  source_system: money_management
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 15 14 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: NJ_Prod
+    query: call "Audit".IS_ROSI_INGESTION_COMPLETE('{{DomainCd}}', REPLACE('{{SourceSystemCd}}',
+      '_{{ state }}', ''), '{{ DataSetNm }}' , '{{To_date}}','{{DomainCd}}');
+- action_type: REPORT
+  action_code: rosi_vouchers_unpaid_per_community
+  abbreviation: VUR
+  communities:
+  - Baha_Mar_Casino
+  - Atlantis_Paradise_Island_Atlantis_Casino
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - rosi_vouchers_unpaid_all
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report/Rosi/RPT_Rosi_Vouchers_Unpaid_Per_Community.sql
+    query_version: v2.6.1_1.9_1.0
+  report_file_name_pattern: BS/Rosi_Vouchers_Unpaid_Per_Community/{ed_year}/{ed_month}/{ed_day}/rosi-vouchers-unpaid-report-{community}-{ed_month}-{ed_day}-{ed_year}.csv
+  report_name: Rosi Vouchers Unpaid Report Per Community
+  schedule:
+    crontab: 30 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-08-26 14:30:00
+- action_type: REPORT
+  action_code: taxable_handle_recap_vs_trans_month_to_date_report
+  abbreviation: THRMTD
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_month_to_date_5am
+  header_information: null
+  parents:
+  - taxable_handle_recap_vs_trans_report
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report_Variances/TaxableHandle_Recap_Trans.sql
+    query_version: v2023.12.1_1.9_1.0
+  report_file_name_pattern: BS/TaxableHandleRecapVsTrans_Month_To_Date/{ed_year}/{ed_month}/{ed_day}/TaxableHandleRecapVsTrans_Month_To_Date_Report_{fd_month}-{fd_day}-{fd_year}.csv
+  report_name: Taxable Handle Recap vs. Transactions Month To Date Report
+  schedule:
+    crontab: 30 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-07-01 14:30:00
+- action_type: REPORT
+  action_code: taxable_handle_recap_vs_trans_report
+  abbreviation: THR
+  communities: []
+  consumer_tags:
+    AML: false
+    Finance: true
+    Regulatory: false
+  date_range_function: get_current_date_5am
+  header_information: null
+  parents:
+  - betting
+  pii_information: {}
+  query_reference:
+    database_name: NJ_Prod
+    query: ./scripts/WH/US_ALL/05_Queries/Report_Variances/TaxableHandle_Recap_Trans.sql
+    query_version: v2023.12.1_1.9_1.0
+  report_file_name_pattern: BS/Taxable_Handle_Recap_Vs_Trans/{ed_year}/{ed_month}/{ed_day}/Taxable_handle_recap_vs_trans_report_{fd_month}-{fd_day}-{fd_year}.csv
+  report_name: Taxable Handle Recap vs. Transactions Report
+  schedule:
+    crontab: 0 14 * * *
+    timezone: Etc/UTC
+  start_date: 2024-01-29 14:00:00
+- action_type: SENSOR
+  action_code: betting
+  abbreviation: BS
+  dataset: betting
+  source_system: BE
+  date_range_function: get_current_date_5am
+  schedule:
+    crontab: 0 14 * * *
+    timezone: Etc/UTC
+  parents: []
+  query_reference:
+    database_name: NJ_Prod
+    query: SELECT "Audit".is_etl_completed('{{ DataSetNm }}', '{{ SourceSystemCd }}',
+      '{{ To_date }}') as is_completed;
