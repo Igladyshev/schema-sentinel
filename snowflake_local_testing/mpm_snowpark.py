@@ -138,8 +138,8 @@ class MPMSnowparkSaver:
         # Properly quote identifiers to prevent SQL injection
         quoted_database = self._quote_identifier(self.database)
         quoted_schema = self._quote_identifier(self.schema)
-        self.session.sql(f'CREATE DATABASE IF NOT EXISTS {quoted_database}').collect()
-        self.session.sql(f'CREATE SCHEMA IF NOT EXISTS {quoted_database}.{quoted_schema}').collect()
+        self.session.sql(f"CREATE DATABASE IF NOT EXISTS {quoted_database}").collect()
+        self.session.sql(f"CREATE SCHEMA IF NOT EXISTS {quoted_database}.{quoted_schema}").collect()
 
     def _get_full_table_name(self, table_name: str) -> str:
         """
