@@ -7,7 +7,7 @@ name = "schema-sentinel"
 version = "2.1.0"
 description = "Compare database metadata across environments - built for Snowflake data engineers"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.13"
 license = {text = "Apache-2.0"}
 authors = [
     {name = "Igor Gladyshev", email = "92756539+Igladyshev@users.noreply.github.com"},
@@ -36,10 +36,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Database",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -102,7 +99,7 @@ packages = ["schema_sentinel"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
+target-version = "py313"
 extend-exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
@@ -130,7 +127,7 @@ python_functions = ["test_*"]
 addopts = "-v --cov=schema_sentinel --cov-report=term-missing"
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.13"
 warn_return_any = false
 warn_unused_configs = false
 disallow_untyped_defs = false
