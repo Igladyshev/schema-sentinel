@@ -1,15 +1,15 @@
 """Snowflake connection management utilities."""
 
 import os
-from typing import Optional
 from contextlib import contextmanager
 from pathlib import Path
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
+from typing import Optional
 
 import snowflake.connector
-from snowflake.connector import SnowflakeConnection
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 from dotenv import load_dotenv
+from snowflake.connector import SnowflakeConnection
 
 
 class SnowflakeConnectionManager:
@@ -93,9 +93,7 @@ class SnowflakeConnectionManager:
 
         try:
             private_key = serialization.load_pem_private_key(
-                private_key_data,
-                password=passphrase,
-                backend=default_backend()
+                private_key_data, password=passphrase, backend=default_backend()
             )
         except Exception as e:
             raise ValueError(f"Failed to load private key: {e}")
@@ -104,7 +102,7 @@ class SnowflakeConnectionManager:
         pkb = private_key.private_bytes(
             encoding=serialization.Encoding.DER,
             format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption()
+            encryption_algorithm=serialization.NoEncryption(),
         )
 
         return pkb
@@ -125,10 +123,7 @@ class SnowflakeConnectionManager:
             ValueError: If required credentials are missing or invalid
         """
         if not self.account or not self.user:
-            raise ValueError(
-                "Missing required Snowflake credentials. "
-                "Please provide at least account and user."
-            )
+            raise ValueError("Missing required Snowflake credentials. Please provide at least account and user.")
 
         # Prepare connection parameters
         connection_params: dict[str, str | bytes] = {
@@ -160,8 +155,7 @@ class SnowflakeConnectionManager:
             connection_params["password"] = self.password
         else:
             raise ValueError(
-                "No valid authentication method provided. "
-                "Please provide password, private_key_path, or authenticator."
+                "No valid authentication method provided. Please provide password, private_key_path, or authenticator."
             )
 
         self._connection = snowflake.connector.connect(**connection_params)

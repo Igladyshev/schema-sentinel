@@ -1,12 +1,10 @@
 """Unit tests for MPM schema validation."""
 
-import pytest
-import json
 from pathlib import Path
-from jsonschema import ValidationError
 
-from snowflake_local_testing.schema import MPM_SCHEMA
-from snowflake_local_testing.mpm_parser import MPMConfig
+import pytest
+
+from tests.snowflake_local_testing.mpm_parser import MPMConfig
 
 
 @pytest.fixture
@@ -18,10 +16,12 @@ def valid_yaml_path():
 @pytest.fixture
 def temp_yaml_file(tmp_path):
     """Factory for creating temporary YAML files."""
+
     def _create_yaml(content: str) -> Path:
         yaml_file = tmp_path / "test_config.yaml"
         yaml_file.write_text(content)
         return yaml_file
+
     return _create_yaml
 
 
@@ -111,7 +111,9 @@ actions:
         yaml_file = temp_yaml_file(yaml_content)
         is_valid, error = MPMConfig.validate_yaml_file(yaml_file)
         assert is_valid is False
-        assert error is not None and (isinstance(error, str) and ("pattern" in error.lower() or "does not match" in error.lower()))
+        assert error is not None and (
+            isinstance(error, str) and ("pattern" in error.lower() or "does not match" in error.lower())
+        )
 
     def test_invalid_action_type(self, temp_yaml_file):
         """Test validation fails with invalid action_type."""
@@ -146,7 +148,9 @@ actions:
         is_valid, error = MPMConfig.validate_yaml_file(yaml_file)
         assert is_valid is False
         # Schema validates action structure differently - checks required fields first
-        assert error is not None and ("required" in error.lower() or "invalid_type" in error.lower() or "enum" in error.lower())
+        assert error is not None and (
+            "required" in error.lower() or "invalid_type" in error.lower() or "enum" in error.lower()
+        )
 
     def test_missing_communities(self, temp_yaml_file):
         """Test validation fails when communities list is empty."""
@@ -180,7 +184,9 @@ actions:
         yaml_file = temp_yaml_file(yaml_content)
         is_valid, error = MPMConfig.validate_yaml_file(yaml_file)
         assert is_valid is False
-        assert error is not None and ("non-empty" in error.lower() or "minitems" in error.lower() or "too short" in error.lower())
+        assert error is not None and (
+            "non-empty" in error.lower() or "minitems" in error.lower() or "too short" in error.lower()
+        )
 
     def test_invalid_crontab_pattern(self, temp_yaml_file):
         """Test validation fails with invalid crontab pattern."""

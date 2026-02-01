@@ -1,9 +1,10 @@
 """Unit tests for MPM parser functionality."""
 
-import pytest
 from pathlib import Path
 
-from snowflake_local_testing.mpm_parser import MPMConfig
+import pytest
+
+from tests.snowflake_local_testing.mpm_parser import MPMConfig
 
 
 @pytest.fixture
@@ -74,7 +75,7 @@ class TestDeploymentInfo:
     def test_get_deployment_info_structure(self, mpm_config):
         """Test deployment info has correct structure."""
         deployment = mpm_config.get_deployment_info()
-        
+
         required_fields = [
             "deployment_version",
             "domain_code",
@@ -83,10 +84,10 @@ class TestDeploymentInfo:
             "external_stage",
             "domain_timezone",
         ]
-        
+
         for field in required_fields:
             assert field in deployment, f"Missing field: {field}"
-        
+
         # Verify warehouse is a nested object with correct structure
         assert isinstance(deployment["warehouse"], dict)
         assert "auto_suspend" in deployment["warehouse"]
@@ -95,7 +96,7 @@ class TestDeploymentInfo:
     def test_get_deployment_info_values(self, mpm_config):
         """Test deployment info has correct values."""
         deployment = mpm_config.get_deployment_info()
-        
+
         assert deployment["deployment_version"] == "BS_005"
         assert deployment["domain_code"] == "BS"
         # Access warehouse fields from nested object
@@ -118,7 +119,7 @@ class TestCommunitiesList:
     def test_get_communities_list_structure(self, mpm_config):
         """Test communities have correct structure."""
         communities = mpm_config.get_communities_list()
-        
+
         for community in communities:
             assert "deployment_version" in community
             assert "domain_code" in community
@@ -128,13 +129,13 @@ class TestCommunitiesList:
     def test_get_communities_list_values(self, mpm_config):
         """Test communities have correct values."""
         communities = mpm_config.get_communities_list()
-        
+
         # First community
         assert communities[0]["deployment_version"] == "BS_005"
         assert communities[0]["domain_code"] == "BS"
         assert communities[0]["community_id"] == 8571101
         assert communities[0]["community_name"] == "Baha_Mar_Casino"
-        
+
         # Second community
         assert communities[1]["community_id"] == 8421102
         assert communities[1]["community_name"] == "Atlantis_Paradise_Island_Atlantis_Casino"
@@ -151,7 +152,7 @@ class TestSensorActions:
     def test_get_sensor_actions_structure(self, mpm_config):
         """Test sensor actions have correct structure."""
         sensors = mpm_config.get_sensor_actions()
-        
+
         required_fields = [
             "deployment_version",
             "domain_code",
@@ -165,7 +166,7 @@ class TestSensorActions:
             "parents",  # Nested list
             "query_reference",  # Nested object
         ]
-        
+
         for sensor in sensors:
             for field in required_fields:
                 assert field in sensor, f"Missing field: {field} in sensor {sensor.get('action_code')}"
@@ -177,13 +178,10 @@ class TestSensorActions:
     def test_get_sensor_actions_values(self, mpm_config):
         """Test specific sensor action values."""
         sensors = mpm_config.get_sensor_actions()
-        
+
         # Find a specific sensor to test
-        retail_liability_sensor = next(
-            (s for s in sensors if s["action_code"] == "retail_liability_bets"),
-            None
-        )
-        
+        retail_liability_sensor = next((s for s in sensors if s["action_code"] == "retail_liability_bets"), None)
+
         assert retail_liability_sensor is not None
         assert retail_liability_sensor["action_type"] == "SENSOR"
         assert retail_liability_sensor["abbreviation"] == "RLBS"
@@ -195,7 +193,7 @@ class TestSensorActions:
     def test_sensor_actions_only_sensors(self, mpm_config):
         """Test that only SENSOR type actions are returned."""
         sensors = mpm_config.get_sensor_actions()
-        
+
         for sensor in sensors:
             assert sensor["action_type"] == "SENSOR"
 
@@ -211,7 +209,7 @@ class TestReportActions:
     def test_get_report_actions_structure(self, mpm_config):
         """Test report actions have correct structure."""
         reports = mpm_config.get_report_actions()
-        
+
         required_fields = [
             "deployment_version",
             "domain_code",
@@ -229,7 +227,7 @@ class TestReportActions:
             "header_information",  # Nested object
             "pii_information",  # Nested object
         ]
-        
+
         for report in reports:
             for field in required_fields:
                 assert field in report, f"Missing field: {field} in report {report.get('action_code')}"
@@ -240,13 +238,10 @@ class TestReportActions:
     def test_get_report_actions_values(self, mpm_config):
         """Test specific report action values."""
         reports = mpm_config.get_report_actions()
-        
+
         # Find a specific report to test
-        liability_report = next(
-            (r for r in reports if r["action_code"] == "retail_liability_ticket_report"),
-            None
-        )
-        
+        liability_report = next((r for r in reports if r["action_code"] == "retail_liability_ticket_report"), None)
+
         assert liability_report is not None
         assert liability_report["action_type"] == "REPORT"
         assert liability_report["abbreviation"] == "RSPLTR"
@@ -261,20 +256,19 @@ class TestReportActions:
     def test_report_actions_only_reports(self, mpm_config):
         """Test that only REPORT type actions are returned."""
         reports = mpm_config.get_report_actions()
-        
+
         for report in reports:
             assert report["action_type"] == "REPORT"
 
     def test_report_with_communities(self, mpm_config):
         """Test report action with communities list."""
         reports = mpm_config.get_report_actions()
-        
+
         # Find a report with communities
         community_report = next(
-            (r for r in reports if r["action_code"] == "retail_liability_ticket_report_per_community"),
-            None
+            (r for r in reports if r["action_code"] == "retail_liability_ticket_report_per_community"), None
         )
-        
+
         assert community_report is not None
         assert "Baha_Mar_Casino" in community_report["communities"]
         assert "Atlantis_Paradise_Island_Atlantis_Casino" in community_report["communities"]
@@ -282,13 +276,10 @@ class TestReportActions:
     def test_report_with_parents(self, mpm_config):
         """Test report action with parent dependencies."""
         reports = mpm_config.get_report_actions()
-        
+
         # Find a report with parents
-        report_with_parents = next(
-            (r for r in reports if r["action_code"] == "retail_liability_ticket_report"),
-            None
-        )
-        
+        report_with_parents = next((r for r in reports if r["action_code"] == "retail_liability_ticket_report"), None)
+
         assert report_with_parents is not None
         assert "retail_liability_bets" in report_with_parents["parents"]
 
@@ -301,14 +292,14 @@ class TestActionCounts:
         all_actions = mpm_config.actions
         sensors = mpm_config.get_sensor_actions()
         reports = mpm_config.get_report_actions()
-        
+
         assert len(all_actions) == len(sensors) + len(reports)
 
     def test_sensors_vs_reports_count(self, mpm_config):
         """Test we have both sensors and reports."""
         sensors = mpm_config.get_sensor_actions()
         reports = mpm_config.get_report_actions()
-        
+
         assert len(sensors) > 0, "Should have at least one sensor"
         assert len(reports) > 0, "Should have at least one report"
         assert len(reports) > len(sensors), "Typically more reports than sensors"

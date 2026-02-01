@@ -1,16 +1,17 @@
 """Unit tests for MPM Snowpark integration."""
 
-import pytest
 from pathlib import Path
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock
 
-from snowflake_local_testing.mpm_parser import MPMConfig
-from snowflake_local_testing.mpm_snowpark import (
-    MPMSnowparkSaver,
-    DEPLOYMENT_STRUCT,
+import pytest
+
+from tests.snowflake_local_testing.mpm_parser import MPMConfig
+from tests.snowflake_local_testing.mpm_snowpark import (
     COMMUNITY_STRUCT,
-    SENSOR_ACTION_STRUCT,
+    DEPLOYMENT_STRUCT,
     REPORT_ACTION_STRUCT,
+    SENSOR_ACTION_STRUCT,
+    MPMSnowparkSaver,
 )
 
 
@@ -30,12 +31,12 @@ def mpm_config(valid_yaml_path):
 def mock_session():
     """Create a mock Snowpark session."""
     session = MagicMock()
-    
+
     # Mock SQL execution
     sql_result = MagicMock()
     sql_result.collect.return_value = []
     session.sql.return_value = sql_result
-    
+
     # Mock dataframe creation
     mock_df = MagicMock()
     mock_write = MagicMock()
@@ -44,13 +45,13 @@ def mock_session():
     mock_write.mode.return_value = mock_mode
     mock_df.write = mock_write
     session.create_dataframe.return_value = mock_df
-    
+
     # Mock table reads
     mock_table_df = MagicMock()
     mock_table_df.filter.return_value = mock_table_df
     mock_table_df.count.return_value = 1
     session.table.return_value = mock_table_df
-    
+
     return session
 
 
@@ -66,23 +67,23 @@ class TestMPMSnowparkSaverInit:
     def test_initialization(self, mock_session):
         """Test saver initializes correctly."""
         saver = MPMSnowparkSaver(mock_session, database="TEST_DB", schema="TEST_SCHEMA")
-        
+
         assert saver.session == mock_session
         assert saver.database == "TEST_DB"
         assert saver.schema == "TEST_SCHEMA"
 
     def test_schema_creation_on_init(self, mock_session):
         """Test that database and schema are created on init."""
-        saver = MPMSnowparkSaver(mock_session, database="TEST_DB", schema="TEST_SCHEMA")
-        
+        _ = MPMSnowparkSaver(mock_session, database="TEST_DB", schema="TEST_SCHEMA")
+
         # Verify SQL was called to create database and schema
         calls = mock_session.sql.call_args_list
         assert len(calls) >= 2
-        
+
         # Check database creation call
         db_call = any("CREATE DATABASE IF NOT EXISTS TEST_DB" in str(c) for c in calls)
         assert db_call, "Database creation SQL not called"
-        
+
         # Check schema creation call
         schema_call = any("CREATE SCHEMA IF NOT EXISTS TEST_DB.TEST_SCHEMA" in str(c) for c in calls)
         assert schema_call, "Schema creation SQL not called"
@@ -95,17 +96,17 @@ class TestSaveDeployment:
         """Test saving deployment data."""
         deployment = mpm_config.get_deployment_info()
         saver.save_deployment(deployment)
-        
+
         # Verify create_dataframe was called with deployment data
         mock_session.create_dataframe.assert_called()
         call_args = mock_session.create_dataframe.call_args
-        
+
         # Check data
         data_arg = call_args[0][0]
         assert len(data_arg) == 1
         assert data_arg[0]["deployment_version"] == "BS_005"
         assert data_arg[0]["domain_code"] == "BS"
-        
+
         # Check schema
         schema_arg = call_args[1]["schema"]
         assert schema_arg == DEPLOYMENT_STRUCT
@@ -113,12 +114,12 @@ class TestSaveDeployment:
     def test_save_deployment_with_mode(self, saver, mpm_config, mock_session):
         """Test saving deployment with different write modes."""
         deployment = mpm_config.get_deployment_info()
-        
+
         # Test append mode
         saver.save_deployment(deployment, mode="append")
         mock_df = mock_session.create_dataframe.return_value
         mock_df.write.mode.assert_called_with("append")
-        
+
         # Test overwrite mode
         saver.save_deployment(deployment, mode="overwrite")
         mock_df.write.mode.assert_called_with("overwrite")
@@ -131,17 +132,17 @@ class TestSaveCommunities:
         """Test saving communities data."""
         communities = mpm_config.get_communities_list()
         saver.save_communities(communities)
-        
+
         # Verify create_dataframe was called
         mock_session.create_dataframe.assert_called()
         call_args = mock_session.create_dataframe.call_args
-        
+
         # Check data
         data_arg = call_args[0][0]
         assert len(data_arg) == 2
         assert data_arg[0]["community_id"] == 8571101
         assert data_arg[0]["community_name"] == "Baha_Mar_Casino"
-        
+
         # Check schema
         schema_arg = call_args[1]["schema"]
         assert schema_arg == COMMUNITY_STRUCT
@@ -149,7 +150,7 @@ class TestSaveCommunities:
     def test_save_empty_communities(self, saver, mock_session):
         """Test saving empty communities list does nothing."""
         saver.save_communities([])
-        
+
         # Should not create dataframe for empty list
         mock_session.create_dataframe.assert_not_called()
 
@@ -161,16 +162,16 @@ class TestSaveSensorActions:
         """Test saving sensor actions data."""
         sensors = mpm_config.get_sensor_actions()
         saver.save_sensor_actions(sensors)
-        
+
         # Verify create_dataframe was called
         mock_session.create_dataframe.assert_called()
         call_args = mock_session.create_dataframe.call_args
-        
+
         # Check data
         data_arg = call_args[0][0]
         assert len(data_arg) > 0
         assert all(s["action_type"] == "SENSOR" for s in data_arg)
-        
+
         # Check schema
         schema_arg = call_args[1]["schema"]
         assert schema_arg == SENSOR_ACTION_STRUCT
@@ -178,7 +179,7 @@ class TestSaveSensorActions:
     def test_save_empty_sensors(self, saver, mock_session):
         """Test saving empty sensor actions list does nothing."""
         saver.save_sensor_actions([])
-        
+
         # Should not create dataframe for empty list
         mock_session.create_dataframe.assert_not_called()
 
@@ -190,16 +191,16 @@ class TestSaveReportActions:
         """Test saving report actions data."""
         reports = mpm_config.get_report_actions()
         saver.save_report_actions(reports)
-        
+
         # Verify create_dataframe was called
         mock_session.create_dataframe.assert_called()
         call_args = mock_session.create_dataframe.call_args
-        
+
         # Check data
         data_arg = call_args[0][0]
         assert len(data_arg) > 0
         assert all(r["action_type"] == "REPORT" for r in data_arg)
-        
+
         # Check schema
         schema_arg = call_args[1]["schema"]
         assert schema_arg == REPORT_ACTION_STRUCT
@@ -207,7 +208,7 @@ class TestSaveReportActions:
     def test_save_empty_reports(self, saver, mock_session):
         """Test saving empty report actions list does nothing."""
         saver.save_report_actions([])
-        
+
         # Should not create dataframe for empty list
         mock_session.create_dataframe.assert_not_called()
 
@@ -221,15 +222,15 @@ class TestSaveAll:
         communities = mpm_config.get_communities_list()
         sensors = mpm_config.get_sensor_actions()
         reports = mpm_config.get_report_actions()
-        
+
         result = saver.save_all(deployment, communities, sensors, reports)
-        
+
         # Verify counts
         assert result["deployments"] == 1
         assert result["communities"] == len(communities)
         assert result["sensor_actions"] == len(sensors)
         assert result["report_actions"] == len(reports)
-        
+
         # Verify create_dataframe was called 4 times (one for each entity type)
         assert mock_session.create_dataframe.call_count == 4
 
@@ -239,9 +240,9 @@ class TestSaveAll:
         communities = mpm_config.get_communities_list()
         sensors = mpm_config.get_sensor_actions()
         reports = mpm_config.get_report_actions()
-        
+
         saver.save_all(deployment, communities, sensors, reports, mode="overwrite")
-        
+
         # Verify mode was set correctly for all saves
         mock_df = mock_session.create_dataframe.return_value
         calls = mock_df.write.mode.call_args_list
@@ -254,7 +255,7 @@ class TestReadOperations:
     def test_read_deployment(self, saver, mock_session):
         """Test reading deployment configuration."""
         df = saver.read_deployment("BS_005")
-        
+
         assert df is not None
         mock_session.table.assert_called_with("TEST_DB.TEST_SCHEMA.DEPLOYMENTS")
 
@@ -262,28 +263,28 @@ class TestReadOperations:
         """Test reading non-existent deployment returns None."""
         mock_table_df = mock_session.table.return_value
         mock_table_df.count.return_value = 0
-        
+
         df = saver.read_deployment("NONEXISTENT")
         assert df is None
 
     def test_read_communities(self, saver, mock_session):
         """Test reading communities."""
         df = saver.read_communities("BS_005")
-        
+
         assert df is not None
         mock_session.table.assert_called_with("TEST_DB.TEST_SCHEMA.COMMUNITIES")
 
     def test_read_sensor_actions(self, saver, mock_session):
         """Test reading sensor actions."""
         df = saver.read_sensor_actions("BS_005")
-        
+
         assert df is not None
         mock_session.table.assert_called_with("TEST_DB.TEST_SCHEMA.SENSOR_ACTIONS")
 
     def test_read_report_actions(self, saver, mock_session):
         """Test reading report actions."""
         df = saver.read_report_actions("BS_005")
-        
+
         assert df is not None
         mock_session.table.assert_called_with("TEST_DB.TEST_SCHEMA.REPORT_ACTIONS")
 
@@ -294,7 +295,7 @@ class TestStructTypeDefinitions:
     def test_deployment_struct_fields(self):
         """Test DEPLOYMENT_STRUCT has correct fields."""
         field_names = [field.name for field in DEPLOYMENT_STRUCT.fields]
-        
+
         expected_fields = [
             "DEPLOYMENT_VERSION",
             "DOMAIN_CODE",
@@ -303,26 +304,26 @@ class TestStructTypeDefinitions:
             "EXTERNAL_STAGE",
             "DOMAIN_TIMEZONE",
         ]
-        
+
         assert field_names == expected_fields
 
     def test_community_struct_fields(self):
         """Test COMMUNITY_STRUCT has correct fields."""
         field_names = [field.name for field in COMMUNITY_STRUCT.fields]
-        
+
         expected_fields = [
             "DEPLOYMENT_VERSION",
             "DOMAIN_CODE",
             "COMMUNITY_ID",
             "COMMUNITY_NAME",
         ]
-        
+
         assert field_names == expected_fields
 
     def test_sensor_action_struct_fields(self):
         """Test SENSOR_ACTION_STRUCT has correct fields."""
         field_names = [field.name for field in SENSOR_ACTION_STRUCT.fields]
-        
+
         assert "ACTION_TYPE" in field_names
         assert "ACTION_CODE" in field_names
         assert "DATASET" in field_names
@@ -335,12 +336,14 @@ class TestStructTypeDefinitions:
     def test_report_action_struct_fields(self):
         """Test REPORT_ACTION_STRUCT has correct fields."""
         field_names = [field.name for field in REPORT_ACTION_STRUCT.fields]
-        
+
         assert "ACTION_TYPE" in field_names
         assert "ACTION_CODE" in field_names
         assert "REPORT_NAME" in field_names
         assert "COMMUNITIES" in field_names  # VARIANT field
-        assert "CONSUMER_TAGS" in field_names  # VARIANT field (replaces consumer_tag_aml, consumer_tag_finance, consumer_tag_regulatory)
+        assert (
+            "CONSUMER_TAGS" in field_names
+        )  # VARIANT field (replaces consumer_tag_aml, consumer_tag_finance, consumer_tag_regulatory)
         assert "SCHEDULE" in field_names  # VARIANT field
         assert "START_DATE" in field_names  # TimestampType field
         assert "PARENTS" in field_names  # VARIANT field
@@ -356,23 +359,23 @@ class TestFullWorkflow:
         """Test loading YAML, extracting entities, and saving to Snowflake."""
         # Load configuration
         config = MPMConfig(valid_yaml_path)
-        
+
         # Extract entities
         deployment = config.get_deployment_info()
         communities = config.get_communities_list()
         sensors = config.get_sensor_actions()
         reports = config.get_report_actions()
-        
+
         # Verify extractions worked
         assert deployment["deployment_version"] == "BS_005"
         assert len(communities) == 2
         assert len(sensors) > 0
         assert len(reports) > 0
-        
+
         # Create saver and save all
         saver = MPMSnowparkSaver(mock_session)
         result = saver.save_all(deployment, communities, sensors, reports)
-        
+
         # Verify save results
         assert result["deployments"] == 1
         assert result["communities"] == 2

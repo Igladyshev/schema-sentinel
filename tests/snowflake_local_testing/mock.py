@@ -36,8 +36,7 @@ class MockSnowflakeCursor:
         if self.return_data and len(self.return_data) > 0:
             first_row = self.return_data[0]
             if isinstance(first_row, dict):
-                self.description = [(col, None, None, None, None, None, None)
-                                   for col in first_row]
+                self.description = [(col, None, None, None, None, None, None) for col in first_row]
         return self
 
     def fetchall(self) -> list:

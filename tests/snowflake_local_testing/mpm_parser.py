@@ -1,12 +1,12 @@
 """MPM YAML configuration parser and validator."""
 
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 import re
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import yaml
-from jsonschema import validate, ValidationError
+from jsonschema import ValidationError, validate
 
 from .schema import MPM_SCHEMA
 
@@ -32,7 +32,7 @@ class MPMConfig:
         if not self.yaml_path.exists():
             raise FileNotFoundError(f"YAML file not found: {yaml_path}")
 
-        with open(self.yaml_path, 'r') as f:
+        with open(self.yaml_path) as f:
             self.data = yaml.safe_load(f)
 
         # Normalize dates to ensure all start_date values are datetime objects
@@ -51,14 +51,14 @@ class MPMConfig:
         """
         if isinstance(obj, dict):
             for key, value in obj.items():
-                if key == 'start_date' and isinstance(value, str):
+                if key == "start_date" and isinstance(value, str):
                     # Parse string date and ensure it has seconds
-                    if re.match(r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$', value):
+                    if re.match(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$", value):
                         # Missing seconds, add :00
                         value = f"{value}:00"
                     # Convert to datetime object
                     try:
-                        obj[key] = datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+                        obj[key] = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
                     except ValueError:
                         # If parsing fails, leave as-is
                         pass
@@ -151,20 +151,22 @@ class MPMConfig:
         sensors = []
         for action in self.actions:
             if action["action_type"] == "SENSOR":
-                sensors.append({
-                    "deployment_version": self.deployment_version,
-                    "domain_code": self.domain_code,
-                    "action_type": action["action_type"],
-                    "action_code": action["action_code"],
-                    "abbreviation": action["abbreviation"],
-                    "dataset": action.get("dataset"),
-                    "source_system": action.get("source_system"),
-                    "date_range_function": action.get("date_range_function"),
-                    "schedule": action["schedule"],
-                    "parents": action.get("parents", []),
-                    "query_reference": action["query_reference"],
-                    "start_date": action.get("start_date"),
-                })
+                sensors.append(
+                    {
+                        "deployment_version": self.deployment_version,
+                        "domain_code": self.domain_code,
+                        "action_type": action["action_type"],
+                        "action_code": action["action_code"],
+                        "abbreviation": action["abbreviation"],
+                        "dataset": action.get("dataset"),
+                        "source_system": action.get("source_system"),
+                        "date_range_function": action.get("date_range_function"),
+                        "schedule": action["schedule"],
+                        "parents": action.get("parents", []),
+                        "query_reference": action["query_reference"],
+                        "start_date": action.get("start_date"),
+                    }
+                )
         return sensors
 
     def get_report_actions(self) -> List[Dict[str, Any]]:
@@ -177,24 +179,26 @@ class MPMConfig:
         reports = []
         for action in self.actions:
             if action["action_type"] == "REPORT":
-                reports.append({
-                    "deployment_version": self.deployment_version,
-                    "domain_code": self.domain_code,
-                    "action_type": action["action_type"],
-                    "action_code": action["action_code"],
-                    "abbreviation": action["abbreviation"],
-                    "report_name": action.get("report_name"),
-                    "report_file_pattern": action.get("report_file_name_pattern"),
-                    "communities": action.get("communities", []),
-                    "consumer_tags": action.get("consumer_tags"),
-                    "date_range_function": action.get("date_range_function"),
-                    "schedule": action["schedule"],
-                    "parents": action.get("parents", []),
-                    "query_reference": action["query_reference"],
-                    "header_information": action.get("header_information"),
-                    "pii_information": action.get("pii_information"),
-                    "start_date": action.get("start_date"),
-                })
+                reports.append(
+                    {
+                        "deployment_version": self.deployment_version,
+                        "domain_code": self.domain_code,
+                        "action_type": action["action_type"],
+                        "action_code": action["action_code"],
+                        "abbreviation": action["abbreviation"],
+                        "report_name": action.get("report_name"),
+                        "report_file_pattern": action.get("report_file_name_pattern"),
+                        "communities": action.get("communities", []),
+                        "consumer_tags": action.get("consumer_tags"),
+                        "date_range_function": action.get("date_range_function"),
+                        "schedule": action["schedule"],
+                        "parents": action.get("parents", []),
+                        "query_reference": action["query_reference"],
+                        "header_information": action.get("header_information"),
+                        "pii_information": action.get("pii_information"),
+                        "start_date": action.get("start_date"),
+                    }
+                )
         return reports
 
     @staticmethod
@@ -213,7 +217,7 @@ class MPMConfig:
             if not path.exists():
                 return False, f"File not found: {yaml_path}"
 
-            with open(path, 'r') as f:
+            with open(path) as f:
                 data = yaml.safe_load(f)
 
             validate(instance=data, schema=MPM_SCHEMA)

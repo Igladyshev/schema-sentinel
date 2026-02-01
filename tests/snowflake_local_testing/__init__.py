@@ -3,16 +3,16 @@
 from .connection import SnowflakeConnectionManager
 from .mock import (
     MockSnowflakeConnection,
-    MockSnowflakeCursor,
     MockSnowflakeConnectionManager,
+    MockSnowflakeCursor,
 )
 from .mpm_parser import MPMConfig
 from .mpm_snowpark import (
-    MPMSnowparkSaver,
-    DEPLOYMENT_STRUCT,
     COMMUNITY_STRUCT,
-    SENSOR_ACTION_STRUCT,
+    DEPLOYMENT_STRUCT,
     REPORT_ACTION_STRUCT,
+    SENSOR_ACTION_STRUCT,
+    MPMSnowparkSaver,
 )
 from .schema import MPM_SCHEMA
 
