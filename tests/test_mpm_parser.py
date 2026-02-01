@@ -24,7 +24,7 @@ class TestMPMConfigProperties:
 
     def test_deployment_version(self, mpm_config):
         """Test deployment_version property."""
-        assert mpm_config.deployment_version == "BS_005"
+        assert mpm_config.deployment_version == "0.0.5"
 
     def test_domain_code(self, mpm_config):
         """Test domain_code property."""
@@ -97,7 +97,7 @@ class TestDeploymentInfo:
         """Test deployment info has correct values."""
         deployment = mpm_config.get_deployment_info()
 
-        assert deployment["deployment_version"] == "BS_005"
+        assert deployment["deployment_version"] == "0.0.5"
         assert deployment["domain_code"] == "BS"
         # Access warehouse fields from nested object
         assert deployment["warehouse"]["auto_suspend"] == 120
@@ -131,7 +131,7 @@ class TestCommunitiesList:
         communities = mpm_config.get_communities_list()
 
         # First community
-        assert communities[0]["deployment_version"] == "BS_005"
+        assert communities[0]["deployment_version"] == "0.0.5"
         assert communities[0]["domain_code"] == "BS"
         assert communities[0]["community_id"] == 8571101
         assert communities[0]["community_name"] == "Baha_Mar_Casino"
@@ -187,7 +187,7 @@ class TestSensorActions:
         assert retail_liability_sensor["abbreviation"] == "RLBS"
         assert retail_liability_sensor["dataset"] == "retail_liability_bets"
         assert retail_liability_sensor["source_system"] == "BE"
-        assert retail_liability_sensor["deployment_version"] == "BS_005"
+        assert retail_liability_sensor["deployment_version"] == "0.0.5"
         assert retail_liability_sensor["domain_code"] == "BS"
 
     def test_sensor_actions_only_sensors(self, mpm_config):
@@ -250,7 +250,7 @@ class TestReportActions:
         assert liability_report["consumer_tags"]["Finance"] is True
         assert liability_report["consumer_tags"]["AML"] is False
         assert liability_report["consumer_tags"]["Regulatory"] is False
-        assert liability_report["deployment_version"] == "BS_005"
+        assert liability_report["deployment_version"] == "0.0.5"
         assert liability_report["domain_code"] == "BS"
 
     def test_report_actions_only_reports(self, mpm_config):

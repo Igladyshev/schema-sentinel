@@ -118,7 +118,7 @@ class MPMSnowparkSaver:
         return f"{self.database}.{self.schema}.{table_name}"
 
     def save_deployment(
-        self, deployment_data: dict[str, Any], table_name: str = "deployment", mode: str = "merge"
+        self, deployment_data: dict[str, Any], table_name: str = "DEPLOYMENTS", mode: str = "merge"
     ) -> DataFrame:
         """
         Save deployment configuration to Snowflake using merge.
@@ -184,7 +184,7 @@ class MPMSnowparkSaver:
     def save_communities(
         self,
         communities_data: list[dict[str, Any]],
-        table_name: str = "retail_property",
+        table_name: str = "COMMUNITIES",
         mode: str = "merge",
     ) -> DataFrame:
         """
@@ -199,7 +199,7 @@ class MPMSnowparkSaver:
             Snowpark DataFrame containing the communities data
         """
         if not communities_data:
-            return self.session.create_dataframe([], schema=COMMUNITY_STRUCT)
+            return None
 
         df = self.session.create_dataframe(communities_data, schema=COMMUNITY_STRUCT)
         full_table_name = self._get_full_table_name(table_name)
@@ -251,14 +251,14 @@ class MPMSnowparkSaver:
     def save_sensor_actions(
         self,
         sensor_data: list[dict[str, Any]],
-        table_name: str = "sensor",
+        table_name: str = "SENSOR_ACTIONS",
         mode: str = "merge",
     ) -> DataFrame:
         """
         Save sensor actions to Snowflake using merge.
 
         Args:
-            sensor_data: Sensor actions from MPMConfig.get_sensor_actions()
+            sensor_data: Sensor actions list from MPMConfig.get_sensor_actions()
             table_name: Target table name
             mode: Write mode ('merge', 'append', 'overwrite', 'errorifexists')
 
@@ -266,7 +266,7 @@ class MPMSnowparkSaver:
             Snowpark DataFrame containing the sensor actions data
         """
         if not sensor_data:
-            return self.session.create_dataframe([], schema=SENSOR_ACTION_STRUCT)
+            return None
 
         df = self.session.create_dataframe(sensor_data, schema=SENSOR_ACTION_STRUCT)
         full_table_name = self._get_full_table_name(table_name)
@@ -334,14 +334,14 @@ class MPMSnowparkSaver:
     def save_report_actions(
         self,
         report_data: list[dict[str, Any]],
-        table_name: str = "report",
+        table_name: str = "REPORT_ACTIONS",
         mode: str = "merge",
     ) -> DataFrame:
         """
         Save report actions to Snowflake using merge.
 
         Args:
-            report_data: Report actions from MPMConfig.get_report_actions()
+            report_data: Report actions list from MPMConfig.get_report_actions()
             table_name: Target table name
             mode: Write mode ('merge', 'append', 'overwrite', 'errorifexists')
 
@@ -349,7 +349,7 @@ class MPMSnowparkSaver:
             Snowpark DataFrame containing the report actions data
         """
         if not report_data:
-            return self.session.create_dataframe([], schema=REPORT_ACTION_STRUCT)
+            return None
 
         df = self.session.create_dataframe(report_data, schema=REPORT_ACTION_STRUCT)
         full_table_name = self._get_full_table_name(table_name)
@@ -465,7 +465,7 @@ class MPMSnowparkSaver:
         Returns:
             DataFrame with deployment data or None if not found
         """
-        table_name = self._get_full_table_name("deployment")
+        table_name = self._get_full_table_name("DEPLOYMENTS")
         try:
             df = self.session.table(table_name).filter(f"deployment_version = '{deployment_version}'")
             return df if df.count() > 0 else None
@@ -482,7 +482,7 @@ class MPMSnowparkSaver:
         Returns:
             DataFrame with communities or None if not found
         """
-        table_name = self._get_full_table_name("retail_property")
+        table_name = self._get_full_table_name("COMMUNITIES")
         try:
             df = self.session.table(table_name).filter(f"deployment_version = '{deployment_version}'")
             return df if df.count() > 0 else None
@@ -499,7 +499,7 @@ class MPMSnowparkSaver:
         Returns:
             DataFrame with sensor actions or None if not found
         """
-        table_name = self._get_full_table_name("sensor")
+        table_name = self._get_full_table_name("SENSOR_ACTIONS")
         try:
             df = self.session.table(table_name).filter(f"deployment_version = '{deployment_version}'")
             return df if df.count() > 0 else None
@@ -516,7 +516,7 @@ class MPMSnowparkSaver:
         Returns:
             DataFrame with report actions or None if not found
         """
-        table_name = self._get_full_table_name("report")
+        table_name = self._get_full_table_name("REPORT_ACTIONS")
         try:
             df = self.session.table(table_name).filter(f"deployment_version = '{deployment_version}'")
             return df if df.count() > 0 else None

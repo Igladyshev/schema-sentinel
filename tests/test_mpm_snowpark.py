@@ -104,7 +104,7 @@ class TestSaveDeployment:
         # Check data
         data_arg = call_args[0][0]
         assert len(data_arg) == 1
-        assert data_arg[0]["deployment_version"] == "BS_005"
+        assert data_arg[0]["deployment_version"] == "0.0.5"
         assert data_arg[0]["domain_code"] == "BS"
 
         # Check schema
@@ -367,7 +367,7 @@ class TestFullWorkflow:
         reports = config.get_report_actions()
 
         # Verify extractions worked
-        assert deployment["deployment_version"] == "BS_005"
+        assert deployment["deployment_version"] == "0.0.5"
         assert len(communities) == 2
         assert len(sensors) > 0
         assert len(reports) > 0
