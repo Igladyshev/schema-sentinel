@@ -5,7 +5,7 @@ warehouse:
   max_cluster_count: 4
   scaling_policy: STANDARD
   warehouse_size: MEDIUM
-  warehouse_type: SNOWPARK-OPRIMIZED
+  warehouse_type: SNOWPARK-OPTIMIZED
 internal_stage: GENERIC_REPORTING.BS_005.REPORTING
 external_stage: GENERIC_REPORTING.REPORTING.PRODUCTION
 domain_timezone: US / Eastern
