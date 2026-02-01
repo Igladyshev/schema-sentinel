@@ -108,6 +108,7 @@ class MPMSnowparkSaver:
                 # Local testing mode detected, skip DDL
                 return
         except ImportError:
+            # Mock testing connection class not available; proceed with normal DDL creation.
             pass
 
         self.session.sql(f"CREATE DATABASE IF NOT EXISTS {self.database}").collect()
