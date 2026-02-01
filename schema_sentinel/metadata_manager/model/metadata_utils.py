@@ -6,9 +6,10 @@ from .database import Database
 
 
 def _quote_identifier(identifier: str) -> str:
-    """Safely quote a SQL identifier by removing existing quotes and wrapping in double quotes."""
-    # Remove any existing quotes and wrap in double quotes
-    return f'"{identifier.replace('"', "")}"'
+    """Safely quote a SQL identifier by escaping internal quotes and wrapping in double quotes."""
+    # Escape double quotes by doubling them (SQL standard), then wrap in double quotes
+    escaped = identifier.replace('"', '""')
+    return f'"{escaped}"'
 
 
 def get_table_constraints_old(database: str, engine: SfAlchemyEngine) -> pd.DataFrame:
