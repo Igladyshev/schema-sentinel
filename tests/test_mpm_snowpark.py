@@ -80,12 +80,12 @@ class TestMPMSnowparkSaverInit:
         calls = mock_session.sql.call_args_list
         assert len(calls) >= 2
 
-        # Check database creation call
-        db_call = any("CREATE DATABASE IF NOT EXISTS TEST_DB" in str(c) for c in calls)
+        # Check database creation call (now with quoted identifiers)
+        db_call = any('CREATE DATABASE IF NOT EXISTS "TEST_DB"' in str(c) for c in calls)
         assert db_call, "Database creation SQL not called"
 
-        # Check schema creation call
-        schema_call = any("CREATE SCHEMA IF NOT EXISTS TEST_DB.TEST_SCHEMA" in str(c) for c in calls)
+        # Check schema creation call (now with quoted identifiers)
+        schema_call = any('CREATE SCHEMA IF NOT EXISTS "TEST_DB"."TEST_SCHEMA"' in str(c) for c in calls)
         assert schema_call, "Schema creation SQL not called"
 
 

@@ -110,8 +110,11 @@ class MPMSnowparkSaver:
         except ImportError:
             pass
 
-        self.session.sql(f"CREATE DATABASE IF NOT EXISTS {self.database}").collect()
-        self.session.sql(f"CREATE SCHEMA IF NOT EXISTS {self.database}.{self.schema}").collect()
+        # Properly quote identifiers to prevent SQL injection
+        safe_database = self.database.replace('"', "")
+        safe_schema = self.schema.replace('"', "")
+        self.session.sql(f'CREATE DATABASE IF NOT EXISTS "{safe_database}"').collect()
+        self.session.sql(f'CREATE SCHEMA IF NOT EXISTS "{safe_database}"."{safe_schema}"').collect()
 
     def _get_full_table_name(self, table_name: str) -> str:
         """Get fully qualified table name."""
@@ -467,7 +470,7 @@ class MPMSnowparkSaver:
         """
         table_name = self._get_full_table_name("DEPLOYMENTS")
         try:
-            df = self.session.table(table_name).filter(f"deployment_version = '{deployment_version}'")
+            df = self.session.table(table_name).filter(col("deployment_version") == deployment_version)
             return df if df.count() > 0 else None
         except Exception:
             return None
@@ -484,7 +487,7 @@ class MPMSnowparkSaver:
         """
         table_name = self._get_full_table_name("COMMUNITIES")
         try:
-            df = self.session.table(table_name).filter(f"deployment_version = '{deployment_version}'")
+            df = self.session.table(table_name).filter(col("deployment_version") == deployment_version)
             return df if df.count() > 0 else None
         except Exception:
             return None
@@ -501,7 +504,7 @@ class MPMSnowparkSaver:
         """
         table_name = self._get_full_table_name("SENSOR_ACTIONS")
         try:
-            df = self.session.table(table_name).filter(f"deployment_version = '{deployment_version}'")
+            df = self.session.table(table_name).filter(col("deployment_version") == deployment_version)
             return df if df.count() > 0 else None
         except Exception:
             return None
@@ -518,7 +521,7 @@ class MPMSnowparkSaver:
         """
         table_name = self._get_full_table_name("REPORT_ACTIONS")
         try:
-            df = self.session.table(table_name).filter(f"deployment_version = '{deployment_version}'")
+            df = self.session.table(table_name).filter(col("deployment_version") == deployment_version)
             return df if df.count() > 0 else None
         except Exception:
             return None

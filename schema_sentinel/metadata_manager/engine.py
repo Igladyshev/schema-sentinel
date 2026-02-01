@@ -175,7 +175,9 @@ class SfAlchemyEngine(DBEngineStrategy):
         log.debug(f"statement=[{statement}]")
         conn = self.get_conn()
         if schema is not None:
-            conn.execute(f"USE SCHEMA {schema};")
+            # Properly quote schema identifier
+            safe_schema = schema.replace('"', "")
+            conn.execute(f'USE SCHEMA "{safe_schema}";')
 
         if columns is None:
             conn.execute("BEGIN")
@@ -259,7 +261,9 @@ class SfConnectorEngine(DBEngineStrategy):
         conn = self.get_engine()
 
         if schema is not None:
-            conn.cursor().execute(f"USE SCHEMA {schema};")
+            # Properly quote schema identifier
+            safe_schema = schema.replace('"', "")
+            conn.cursor().execute(f'USE SCHEMA "{safe_schema}";')
 
         if columns is None:
             conn.cursor().execute(statement, parameters)

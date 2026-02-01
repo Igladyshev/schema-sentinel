@@ -5,6 +5,12 @@ from ..engine import DBEngineStrategy, SfAlchemyEngine
 from .database import Database
 
 
+def _quote_identifier(identifier: str) -> str:
+    """Safely quote a SQL identifier by removing existing quotes and wrapping in double quotes."""
+    # Remove any existing quotes and wrap in double quotes
+    return f'"{identifier.replace('"', "")}"'
+
+
 def get_table_constraints_old(database: str, engine: SfAlchemyEngine) -> pd.DataFrame:
     statement = f"""select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_CATALOG = '{database.replace('"', "")}'"""
     success, result = engine.execute(statement=statement, columns=["name"])
@@ -23,13 +29,13 @@ def to_lower_case(string_array: list) -> list:
 
 
 def get_imported_keys(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
-    statement = f"show imported keys in database {database_name}"
+    statement = f"show imported keys in database {_quote_identifier(database_name)}"
     success, result = engine.execute(statement=statement, columns=["name"])
     return result
 
 
 def get_stages(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
-    statement = f"show stages in database {database_name}"
+    statement = f"show stages in database {_quote_identifier(database_name)}"
     success, result = engine.execute(statement=statement, columns=["name"])
     return result
 
@@ -52,7 +58,7 @@ order by constraint_schema, constraint_name;"""
 
 
 def get_views(database_name: str, engine: DBEngineStrategy) -> pd.DataFrame:
-    statement = f"show views in database {database_name}"
+    statement = f"show views in database {_quote_identifier(database_name)}"
     success, result = engine.execute(statement=statement, columns=["name"])
     result = result[result["schema_name"] != "INFORMATION_SCHEMA"].copy()
     return result
@@ -188,7 +194,9 @@ def get_functions_sql(database):
 
 
 def get_tasks(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
-    success, tasks = engine.execute(statement=f"""show tasks in database {database_name};""", columns=["name"])
+    success, tasks = engine.execute(
+        statement=f"""show tasks in database {_quote_identifier(database_name)};""", columns=["name"]
+    )
     return tasks
 
 
@@ -213,7 +221,9 @@ def get_pipes(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
 
 
 def get_streams(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
-    success, streams = engine.execute(statement=f"show streams in database {database_name};", columns=["name"])
+    success, streams = engine.execute(
+        statement=f"show streams in database {_quote_identifier(database_name)};", columns=["name"]
+    )
     return streams
 
 
@@ -295,17 +305,17 @@ group by "fk_database_name",
 
 def get_constraints(database_name: str, engine: SfAlchemyEngine) -> pd.DataFrame:
     conn = engine.get_conn()
-    statement = f"show imported keys in database {database_name};"
+    statement = f"show imported keys in database {_quote_identifier(database_name)};"
     conn.execute(text(statement))
     statement = """create or replace temporary table imported_keys as
 select * from table(result_scan(last_query_id()));"""
     conn.execute(text(statement))
-    statement = f"show primary keys in database {database_name};"
+    statement = f"show primary keys in database {_quote_identifier(database_name)};"
     conn.execute(text(statement))
     statement = """create or replace temporary table primary_keys as
 select * from table(result_scan(last_query_id()));"""
     conn.execute(text(statement))
-    statement = f"show unique keys in database {database_name};"
+    statement = f"show unique keys in database {_quote_identifier(database_name)};"
     conn.execute(text(statement))
     statement = """create or replace temporary table unique_keys as
 select * from table(result_scan(last_query_id()));"""
