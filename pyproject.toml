@@ -83,7 +83,6 @@ dev = [
     "ruff>=0.14.14",
     "mypy>=1.0.0",
     "pdoc>=14.0.0",
-    "python-dotenv>=1.0.0",
 ]
 jupyter = [
     "jupyter>=1.0.0",
