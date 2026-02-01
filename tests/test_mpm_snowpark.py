@@ -257,7 +257,7 @@ class TestReadOperations:
         df = saver.read_deployment("BS_005")
 
         assert df is not None
-        mock_session.table.assert_called_with("TEST_DB.TEST_SCHEMA.DEPLOYMENTS")
+        mock_session.table.assert_called_with('"TEST_DB"."TEST_SCHEMA"."DEPLOYMENTS"')
 
     def test_read_deployment_not_found(self, saver, mock_session):
         """Test reading non-existent deployment returns None."""
@@ -272,21 +272,21 @@ class TestReadOperations:
         df = saver.read_communities("BS_005")
 
         assert df is not None
-        mock_session.table.assert_called_with("TEST_DB.TEST_SCHEMA.COMMUNITIES")
+        mock_session.table.assert_called_with('"TEST_DB"."TEST_SCHEMA"."COMMUNITIES"')
 
     def test_read_sensor_actions(self, saver, mock_session):
         """Test reading sensor actions."""
         df = saver.read_sensor_actions("BS_005")
 
         assert df is not None
-        mock_session.table.assert_called_with("TEST_DB.TEST_SCHEMA.SENSOR_ACTIONS")
+        mock_session.table.assert_called_with('"TEST_DB"."TEST_SCHEMA"."SENSOR_ACTIONS"')
 
     def test_read_report_actions(self, saver, mock_session):
         """Test reading report actions."""
         df = saver.read_report_actions("BS_005")
 
         assert df is not None
-        mock_session.table.assert_called_with("TEST_DB.TEST_SCHEMA.REPORT_ACTIONS")
+        mock_session.table.assert_called_with('"TEST_DB"."TEST_SCHEMA"."REPORT_ACTIONS"')
 
 
 class TestStructTypeDefinitions:
