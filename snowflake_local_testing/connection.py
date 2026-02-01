@@ -1,0 +1,244 @@
+"""Snowflake connection management utilities."""
+
+import os
+from contextlib import contextmanager
+from pathlib import Path
+
+import snowflake.connector
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from dotenv import load_dotenv
+from snowflake.connector import SnowflakeConnection
+
+
+class SnowflakeConnectionManager:
+    """Manages Snowflake database connections with environment variable configuration."""
+
+    def __init__(
+        self,
+        account: str | None = None,
+        user: str | None = None,
+        password: str | None = None,
+        warehouse: str | None = None,
+        database: str | None = None,
+        schema: str | None = None,
+        role: str | None = None,
+        private_key_path: str | None = None,
+        private_key_passphrase: str | None = None,
+        authenticator: str | None = None,
+    ):
+        """
+        Initialize Snowflake connection manager.
+
+        Supports multiple authentication methods:
+        - Password authentication (user + password)
+        - Key pair authentication (user + private_key_path)
+        - External browser authentication (authenticator='externalbrowser')
+        - OAuth authentication (authenticator='oauth')
+
+        Args:
+            account: Snowflake account identifier
+            user: Snowflake username
+            password: Snowflake password (for password auth)
+            warehouse: Snowflake warehouse name
+            database: Snowflake database name
+            schema: Snowflake schema name
+            role: Snowflake role name
+            private_key_path: Path to private key file (for key pair auth)
+            private_key_passphrase: Passphrase for encrypted private key
+            authenticator: Authentication method (e.g., 'externalbrowser', 'oauth')
+        """
+        load_dotenv()
+
+        self.account = account or os.getenv("SNOWFLAKE_ACCOUNT")
+        self.user = user or os.getenv("SNOWFLAKE_USER")
+        self.warehouse = warehouse or os.getenv("SNOWFLAKE_WAREHOUSE")
+        self.database = database or os.getenv("SNOWFLAKE_DATABASE")
+        self.schema = schema or os.getenv("SNOWFLAKE_SCHEMA")
+        self.role = role or os.getenv("SNOWFLAKE_ROLE")
+        self.authenticator = authenticator or os.getenv("SNOWFLAKE_AUTHENTICATOR")
+
+        # Store sensitive credentials temporarily - will be cleared after first use
+        self._password = password or os.getenv("SNOWFLAKE_PASSWORD")
+        self._private_key_path = private_key_path or os.getenv("SNOWFLAKE_PRIVATE_KEY_PATH")
+        self._private_key_passphrase = private_key_passphrase or os.getenv("SNOWFLAKE_PRIVATE_KEY_PASSPHRASE")
+
+        self._connection: SnowflakeConnection | None = None
+        self._private_key: bytes | None = None
+
+    def __repr__(self) -> str:
+        """Safe string representation that doesn't expose credentials."""
+        return (
+            f"SnowflakeConnectionManager("
+            f"account={self.account!r}, "
+            f"user={self.user!r}, "
+            f"warehouse={self.warehouse!r}, "
+            f"database={self.database!r}, "
+            f"schema={self.schema!r})"
+        )
+
+    def _load_private_key(self) -> bytes:
+        """
+        Load and parse private key from file.
+
+        Returns:
+            Parsed private key in DER format
+
+        Raises:
+            FileNotFoundError: If private key file doesn't exist
+            ValueError: If private key cannot be parsed
+        """
+        if not self._private_key_path:
+            raise ValueError("Private key path not provided")
+
+        key_path = Path(self._private_key_path).expanduser()
+        if not key_path.exists():
+            raise FileNotFoundError(f"Private key file not found: {key_path}")
+
+        with open(key_path, "rb") as key_file:
+            private_key_data = key_file.read()
+
+        # Parse the private key with optional passphrase
+        passphrase = None
+        if self._private_key_passphrase:
+            passphrase = self._private_key_passphrase.encode()
+
+        try:
+            private_key = serialization.load_pem_private_key(
+                private_key_data, password=passphrase, backend=default_backend()
+            )
+        except Exception as e:
+            raise ValueError(f"Failed to load private key: {e}") from e
+
+        # Serialize to DER format for Snowflake
+        pkb = private_key.private_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+
+        return pkb
+
+    def connect(self) -> SnowflakeConnection:
+        """
+        Establish connection to Snowflake using configured authentication method.
+
+        Authentication priority:
+        1. Key pair authentication (if private_key_path provided)
+        2. External authenticator (if authenticator provided)
+        3. Password authentication (if password provided)
+
+        Returns:
+            SnowflakeConnection: Active Snowflake connection
+
+        Raises:
+            ValueError: If required credentials are missing or invalid
+        """
+        if not self.account or not self.user:
+            raise ValueError("Missing required Snowflake credentials. Please provide at least account and user.")
+
+        # Prepare connection parameters
+        connection_params: dict[str, str | bytes] = {
+            "account": self.account,
+            "user": self.user,
+        }
+
+        # Add optional parameters if provided
+        if self.warehouse:
+            connection_params["warehouse"] = self.warehouse
+        if self.database:
+            connection_params["database"] = self.database
+        if self.schema:
+            connection_params["schema"] = self.schema
+        if self.role:
+            connection_params["role"] = self.role
+
+        # Determine authentication method (priority order)
+        if self._private_key_path:
+            # Key pair authentication
+            if not self._private_key:
+                self._private_key = self._load_private_key()
+                # Clear passphrase after use
+                self._private_key_passphrase = None
+            connection_params["private_key"] = self._private_key
+            # Clear private key path after use
+            self._private_key_path = None
+        elif self.authenticator:
+            # External authenticator (e.g., externalbrowser, oauth)
+            connection_params["authenticator"] = self.authenticator
+        elif self._password:
+            # Password authentication
+            connection_params["password"] = self._password
+            # Clear password after use
+            self._password = None
+        else:
+            raise ValueError(
+                "No valid authentication method provided. Please provide password, private_key_path, or authenticator."
+            )
+
+        self._connection = snowflake.connector.connect(**connection_params)
+        # Clear connection params dict to ensure password/key are not retained
+        connection_params.clear()
+        return self._connection
+
+    def disconnect(self) -> None:
+        """Close the Snowflake connection and clear sensitive data."""
+        if self._connection:
+            self._connection.close()
+            self._connection = None
+        # Clear any remaining sensitive data
+        self._password = None
+        self._private_key_passphrase = None
+        self._private_key = None
+        self._private_key_path = None
+
+    @contextmanager
+    def get_connection(self):
+        """
+        Context manager for Snowflake connections.
+
+        Yields:
+            SnowflakeConnection: Active connection that will be closed automatically
+
+        Example:
+            >>> manager = SnowflakeConnectionManager()
+            >>> with manager.get_connection() as conn:
+            ...     cursor = conn.cursor()
+            ...     cursor.execute("SELECT CURRENT_VERSION()")
+        """
+        connection = self.connect()
+        try:
+            yield connection
+        finally:
+            self.disconnect()
+
+    def execute_query(self, query: str, params: dict | None = None) -> list[dict]:
+        """
+        Execute a SQL query and return results as list of dictionaries.
+
+        Args:
+            query: SQL query to execute
+            params: Optional query parameters
+
+        Returns:
+            List of dictionaries containing query results
+        """
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            try:
+                if params:
+                    cursor.execute(query, params)
+                else:
+                    cursor.execute(query)
+
+                # Fetch column names
+                columns = [desc[0] for desc in cursor.description]
+
+                # Fetch all rows and convert to dictionaries
+                results = []
+                for row in cursor.fetchall():
+                    results.append(dict(zip(columns, row, strict=True)))
+
+                return results
+            finally:
+                cursor.close()

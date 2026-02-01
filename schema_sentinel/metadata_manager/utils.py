@@ -44,14 +44,16 @@ def camel_case_split(s):
     idx = list(map(str.isupper, s))
     # mark change of case
     indices = [0]
-    for i, (x, y) in enumerate(zip(idx, idx[1:])):
+    # Sliding window pattern: pair each element with next (strict=False is correct as idx[1:] is shorter)
+    for i, (x, y) in enumerate(zip(idx, idx[1:], strict=False)):
         if x and not y:  # "Ul"
             indices.append(i)
         elif not x and y:  # "lU"
             indices.append(i + 1)
     indices.append(len(s))
     # for "lUl", index of "U" will pop twice, have to filer it
-    return " ".join([s[x:y] for x, y in zip(indices, indices[1:]) if x < y])
+    # Sliding window pattern: pair consecutive indices (strict=False is correct as indices[1:] is shorter)
+    return " ".join([s[x:y] for x, y in zip(indices, indices[1:], strict=False) if x < y])
 
 
 GET_SCHEMA_DISCREPANCY_SQL = """
