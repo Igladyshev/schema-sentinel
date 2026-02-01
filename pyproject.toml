@@ -7,7 +7,7 @@ name = "schema-sentinel"
 version = "2.1.0"
 description = "Compare database metadata across environments - built for Snowflake data engineers"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<3.14"
 license = {text = "Apache-2.0"}
 authors = [
     {name = "Igor Gladyshev", email = "92756539+Igladyshev@users.noreply.github.com"},
@@ -49,6 +49,8 @@ dependencies = [
     "click>=8.1.3",
     "pandas>=2.0.1",
     "snowflake-connector-python>=3.0.3",
+    "snowflake-snowpark-python[pandas]>=1.11.0",
+    "pydantic>=2.0.0",
     "cryptography>=39.0.2",
     "snowflake-sqlalchemy>=1.4.7",
     "jinja2>=3.1.2",
@@ -64,6 +66,8 @@ dependencies = [
     "SQLAlchemy>=1.4.49,<2.0",
     "typer>=0.9.0",
     "sqlalchemy-json>=0.7.0",
+    "python-dotenv>=1.2.1",
+    "jsonschema>=4.0.0"
 ]
 
 [project.urls]
@@ -78,7 +82,7 @@ dev = [
     "pre-commit>=3.3.3",
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
-    "ruff>=0.1.0",
+    "ruff>=0.14.14",
     "mypy>=1.0.0",
     "pdoc>=14.0.0",
 ]
