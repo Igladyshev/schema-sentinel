@@ -112,8 +112,9 @@ class MPMSnowparkSaver:
             pass
 
         # Properly quote identifiers to prevent SQL injection
-        safe_database = self.database.replace('"', "")
-        safe_schema = self.schema.replace('"', "")
+        # Escape double quotes by doubling them (SQL standard)
+        safe_database = self.database.replace('"', '""')
+        safe_schema = self.schema.replace('"', '""')
         self.session.sql(f'CREATE DATABASE IF NOT EXISTS "{safe_database}"').collect()
         self.session.sql(f'CREATE SCHEMA IF NOT EXISTS "{safe_database}"."{safe_schema}"').collect()
 
