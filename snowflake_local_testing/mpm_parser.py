@@ -3,7 +3,7 @@
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import yaml
 from jsonschema import ValidationError, validate
@@ -79,7 +79,7 @@ class MPMConfig:
         return self.data["domain_code"]
 
     @property
-    def warehouse_config(self) -> Dict[str, Any]:
+    def warehouse_config(self) -> dict[str, Any]:
         """Get warehouse configuration."""
         return self.data["warehouse"]
 
@@ -99,16 +99,16 @@ class MPMConfig:
         return self.data["domain_timezone"]
 
     @property
-    def communities(self) -> List[Dict[str, Any]]:
+    def communities(self) -> list[dict[str, Any]]:
         """Get list of communities."""
         return self.data["communities"]
 
     @property
-    def actions(self) -> List[Dict[str, Any]]:
+    def actions(self) -> list[dict[str, Any]]:
         """Get list of all actions."""
         return self.data["actions"]
 
-    def get_deployment_info(self) -> Dict[str, Any]:
+    def get_deployment_info(self) -> dict[str, Any]:
         """
         Extract deployment information as a single record.
 
@@ -124,7 +124,7 @@ class MPMConfig:
             "domain_timezone": self.domain_timezone,
         }
 
-    def get_communities_list(self) -> List[Dict[str, Any]]:
+    def get_communities_list(self) -> list[dict[str, Any]]:
         """
         Extract communities as a list.
 
@@ -141,7 +141,7 @@ class MPMConfig:
             for community in self.communities
         ]
 
-    def get_sensor_actions(self) -> List[Dict[str, Any]]:
+    def get_sensor_actions(self) -> list[dict[str, Any]]:
         """
         Extract SENSOR type actions.
 
@@ -169,7 +169,7 @@ class MPMConfig:
                 )
         return sensors
 
-    def get_report_actions(self) -> List[Dict[str, Any]]:
+    def get_report_actions(self) -> list[dict[str, Any]]:
         """
         Extract REPORT type actions.
 
@@ -202,7 +202,7 @@ class MPMConfig:
         return reports
 
     @staticmethod
-    def validate_yaml_file(yaml_path: str | Path) -> tuple[bool, Optional[str]]:
+    def validate_yaml_file(yaml_path: str | Path) -> tuple[bool, str | None]:
         """
         Validate a YAML file against the MPM schema without loading full config.
 

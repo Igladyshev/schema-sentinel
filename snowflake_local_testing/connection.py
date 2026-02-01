@@ -3,7 +3,6 @@
 import os
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Optional
 
 import snowflake.connector
 from cryptography.hazmat.backends import default_backend
@@ -17,16 +16,16 @@ class SnowflakeConnectionManager:
 
     def __init__(
         self,
-        account: Optional[str] = None,
-        user: Optional[str] = None,
-        password: Optional[str] = None,
-        warehouse: Optional[str] = None,
-        database: Optional[str] = None,
-        schema: Optional[str] = None,
-        role: Optional[str] = None,
-        private_key_path: Optional[str] = None,
-        private_key_passphrase: Optional[str] = None,
-        authenticator: Optional[str] = None,
+        account: str | None = None,
+        user: str | None = None,
+        password: str | None = None,
+        warehouse: str | None = None,
+        database: str | None = None,
+        schema: str | None = None,
+        role: str | None = None,
+        private_key_path: str | None = None,
+        private_key_passphrase: str | None = None,
+        authenticator: str | None = None,
     ):
         """
         Initialize Snowflake connection manager.
@@ -62,8 +61,8 @@ class SnowflakeConnectionManager:
         self.private_key_passphrase = private_key_passphrase or os.getenv("SNOWFLAKE_PRIVATE_KEY_PASSPHRASE")
         self.authenticator = authenticator or os.getenv("SNOWFLAKE_AUTHENTICATOR")
 
-        self._connection: Optional[SnowflakeConnection] = None
-        self._private_key: Optional[bytes] = None
+        self._connection: SnowflakeConnection | None = None
+        self._private_key: bytes | None = None
 
     def _load_private_key(self) -> bytes:
         """
@@ -96,7 +95,7 @@ class SnowflakeConnectionManager:
                 private_key_data, password=passphrase, backend=default_backend()
             )
         except Exception as e:
-            raise ValueError(f"Failed to load private key: {e}")
+            raise ValueError(f"Failed to load private key: {e}") from e
 
         # Serialize to DER format for Snowflake
         pkb = private_key.private_bytes(
@@ -187,7 +186,7 @@ class SnowflakeConnectionManager:
         finally:
             self.disconnect()
 
-    def execute_query(self, query: str, params: Optional[dict] = None) -> list[dict]:
+    def execute_query(self, query: str, params: dict | None = None) -> list[dict]:
         """
         Execute a SQL query and return results as list of dictionaries.
 
@@ -212,7 +211,7 @@ class SnowflakeConnectionManager:
                 # Fetch all rows and convert to dictionaries
                 results = []
                 for row in cursor.fetchall():
-                    results.append(dict(zip(columns, row)))
+                    results.append(dict(zip(columns, row, strict=True)))
 
                 return results
             finally:

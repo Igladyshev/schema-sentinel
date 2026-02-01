@@ -1,7 +1,6 @@
 """Mock Snowflake connection for local testing without actual Snowflake instance."""
 
 from contextlib import contextmanager
-from typing import Optional
 
 
 class MockSnowflakeCursor:
@@ -19,7 +18,7 @@ class MockSnowflakeCursor:
         self._executed_queries = []
         self._closed = False
 
-    def execute(self, query: str, params: Optional[dict] = None) -> "MockSnowflakeCursor":
+    def execute(self, query: str, params: dict | None = None) -> "MockSnowflakeCursor":
         """
         Mock execute method.
 
@@ -51,7 +50,7 @@ class MockSnowflakeCursor:
             return [tuple(row.values()) for row in self.return_data]
         return self.return_data
 
-    def fetchone(self) -> Optional[tuple]:
+    def fetchone(self) -> tuple | None:
         """
         Return first row of mock data.
 
@@ -74,7 +73,7 @@ class MockSnowflakeCursor:
 class MockSnowflakeConnection:
     """Mock Snowflake connection for testing."""
 
-    def __init__(self, mock_data: Optional[dict] = None):
+    def __init__(self, mock_data: dict | None = None):
         """
         Initialize mock connection.
 
@@ -105,7 +104,7 @@ class MockSnowflakeConnection:
 class MockSnowflakeConnectionManager:
     """Mock version of SnowflakeConnectionManager for testing."""
 
-    def __init__(self, mock_results: Optional[list[dict]] = None):
+    def __init__(self, mock_results: list[dict] | None = None):
         """
         Initialize mock connection manager.
 
@@ -143,7 +142,7 @@ class MockSnowflakeConnectionManager:
         finally:
             self.disconnect()
 
-    def execute_query(self, query: str, params: Optional[dict] = None) -> list[dict]:
+    def execute_query(self, query: str, params: dict | None = None) -> list[dict]:
         """
         Mock query execution.
 
