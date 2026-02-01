@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from tests.snowflake_local_testing.mpm_parser import MPMConfig
-from tests.snowflake_local_testing.mpm_snowpark import (
+from snowflake_local_testing.mpm_parser import MPMConfig
+from snowflake_local_testing.mpm_snowpark import (
     COMMUNITY_STRUCT,
     DEPLOYMENT_STRUCT,
     REPORT_ACTION_STRUCT,

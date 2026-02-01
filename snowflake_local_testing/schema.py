@@ -92,7 +92,6 @@ MPM_SCHEMA = {
         },
         "domain_timezone": {"type": "string", "description": "Domain timezone (e.g., US / Eastern)"},
         "warehouse": {"$ref": "#/$defs/warehouse"},
-        "warehouse": {"$ref": "#/$defs/warehouse"},
         "communities": {"type": "array", "minItems": 0, "items": {"$ref": "#/$defs/community"}},
         "actions": {
             "type": "array",

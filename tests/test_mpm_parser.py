@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.snowflake_local_testing.mpm_parser import MPMConfig
+from snowflake_local_testing.mpm_parser import MPMConfig
 
 
 @pytest.fixture
