@@ -97,6 +97,30 @@ class MPMSnowparkSaver:
         self.schema = schema
         self._ensure_schema_exists()
 
+    def _quote_identifier(self, identifier: str) -> str:
+        """
+        Safely quote a Snowflake identifier by escaping double quotes.
+
+        Per Snowflake documentation, double quotes in identifiers must be escaped
+        by doubling them (e.g., " becomes ""). Quoted identifiers in Snowflake
+        can contain any characters (including spaces, special characters, reserved
+        keywords, etc.), so no additional validation or filtering is needed.
+
+        This implementation follows Snowflake's documented best practices and
+        prevents SQL injection by ensuring identifiers cannot break out of the
+        quoted context.
+
+        Args:
+            identifier: The identifier to quote
+
+        Returns:
+            Properly quoted identifier safe for use in SQL statements
+
+        References:
+            https://docs.snowflake.com/en/sql-reference/identifiers-syntax
+        """
+        return f'"{identifier.replace('"', '""')}"'
+
     def _ensure_schema_exists(self) -> None:
         """Ensure target database and schema exist."""
         # Skip for local testing mode - DDL not supported
@@ -112,15 +136,22 @@ class MPMSnowparkSaver:
             pass
 
         # Properly quote identifiers to prevent SQL injection
-        # Escape double quotes by doubling them (SQL standard)
-        safe_database = self.database.replace('"', '""')
-        safe_schema = self.schema.replace('"', '""')
-        self.session.sql(f'CREATE DATABASE IF NOT EXISTS "{safe_database}"').collect()
-        self.session.sql(f'CREATE SCHEMA IF NOT EXISTS "{safe_database}"."{safe_schema}"').collect()
+        quoted_database = self._quote_identifier(self.database)
+        quoted_schema = self._quote_identifier(self.schema)
+        self.session.sql(f'CREATE DATABASE IF NOT EXISTS {quoted_database}').collect()
+        self.session.sql(f'CREATE SCHEMA IF NOT EXISTS {quoted_database}.{quoted_schema}').collect()
 
     def _get_full_table_name(self, table_name: str) -> str:
-        """Get fully qualified table name."""
-        return f"{self.database}.{self.schema}.{table_name}"
+        """
+        Get fully qualified table name with properly quoted identifiers.
+
+        Args:
+            table_name: The table name to qualify
+
+        Returns:
+            Fully qualified table name with quoted identifiers
+        """
+        return f"{self._quote_identifier(self.database)}.{self._quote_identifier(self.schema)}.{self._quote_identifier(table_name)}"
 
     def save_deployment(
         self, deployment_data: dict[str, Any], table_name: str = "DEPLOYMENTS", mode: str = "merge"
