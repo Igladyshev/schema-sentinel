@@ -105,6 +105,13 @@ comparison.generate_report("differences.md")
 
 ## 📖 Documentation
 
+- **[📚 Project Wiki](wiki/)** - Comprehensive documentation hub
+  - [Getting Started](wiki/Getting-Started.md) - Installation and quick start
+  - [Architecture](wiki/Architecture.md) - System design and architecture
+  - [Development Guide](wiki/Development.md) - Development environment and guidelines
+  - [Contributing Guide](wiki/Contributing.md) - How to contribute
+  - [Security Guide](wiki/Security.md) - Security best practices
+  - [Future Development Plan](wiki/Future-Development-Plan.md) - Roadmap and upcoming features
 - [Installation & Setup Guide](README.md#-quick-start)
 - [Development Guide](DEVELOPMENT.md) - Detailed development instructions
 - [Contributing Guide](CONTRIBUTING.md) - How to contribute
@@ -277,9 +284,11 @@ This project is being actively developed and prepared for production use. We're 
 ### Roadmap
 
 - **v2.1.0** - Current release with uv support, modern tooling
-- **v2.2.0** - Enhanced reporting, PostgreSQL support
-- **v2.3.0** - CLI interface, REST API
-- **v3.0.0** - Web UI, multi-database support
+- **v2.2.0** - DuckDB integration, enhanced data comparator, PostgreSQL & MySQL support
+- **v2.3.0** - REST API, CLI interface, Oracle & SQL Server support
+- **v3.0.0** - Web UI, multi-user support, RBAC, CI/CD integration
+
+📋 See the detailed [Future Development Plan](wiki/Future-Development-Plan.md) for comprehensive roadmap and planned features
 
 ## 💬 Support & Community
 
