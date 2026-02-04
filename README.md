@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Igladyshev/schema-sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/Igladyshev/schema-sentinel/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.13%2B-blue)](https://www.python.org/downloads/)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
 A powerful tool for comparing database metadata across different environments. This project extracts database schema information, stores it in SQLite for versioning, and generates detailed comparison reports highlighting differences between database environments.
