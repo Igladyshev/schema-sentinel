@@ -27,23 +27,15 @@
         "strict_required_status_checks_policy": true,
         "required_status_checks": [
           {
-            "context": "Test Python 3.9",
-            "integration_id": null
-          },
-          {
-            "context": "Test Python 3.10",
-            "integration_id": null
-          },
-          {
-            "context": "Test Python 3.11",
-            "integration_id": null
-          },
-          {
-            "context": "Test Python 3.12",
+            "context": "Test Python 3.13",
             "integration_id": null
           },
           {
             "context": "Lint and Format Check",
+            "integration_id": null
+          },
+          {
+            "context": "Type Checking",
             "integration_id": null
           }
         ]

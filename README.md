@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Igladyshev/schema-sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/Igladyshev/schema-sentinel/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.13%2B-blue)](https://www.python.org/downloads/)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
 A powerful tool for comparing database metadata across different environments. This project extracts database schema information, stores it in SQLite for versioning, and generates detailed comparison reports highlighting differences between database environments.
@@ -31,7 +31,7 @@ Perfect for **data engineers**, **DBAs**, and **analytics teams** working with *
 
 ## 📋 Requirements
 
-- Python 3.9 or higher
+- Python 3.13 or higher
 - [uv](https://github.com/astral-sh/uv) - Modern Python package manager
 - Snowflake account with appropriate permissions
 
@@ -105,6 +105,13 @@ comparison.generate_report("differences.md")
 
 ## 📖 Documentation
 
+- **[📚 Project Wiki](wiki/)** - Comprehensive documentation hub
+  - [Getting Started](wiki/Getting-Started.md) - Installation and quick start
+  - [Architecture](wiki/Architecture.md) - System design and architecture
+  - [Development Guide](wiki/Development.md) - Development environment and guidelines
+  - [Contributing Guide](wiki/Contributing.md) - How to contribute
+  - [Security Guide](wiki/Security.md) - Security best practices
+  - [Future Development Plan](wiki/Future-Development-Plan.md) - Roadmap and upcoming features
 - [Installation & Setup Guide](README.md#-quick-start)
 - [Development Guide](DEVELOPMENT.md) - Detailed development instructions
 - [Contributing Guide](CONTRIBUTING.md) - How to contribute
@@ -277,9 +284,11 @@ This project is being actively developed and prepared for production use. We're 
 ### Roadmap
 
 - **v2.1.0** - Current release with uv support, modern tooling
-- **v2.2.0** - Enhanced reporting, PostgreSQL support
-- **v2.3.0** - CLI interface, REST API
-- **v3.0.0** - Web UI, multi-database support
+- **v2.2.0** - DuckDB integration, enhanced data comparator, PostgreSQL & MySQL support
+- **v2.3.0** - REST API, CLI interface, Oracle & SQL Server support
+- **v3.0.0** - Web UI, multi-user support, RBAC, CI/CD integration
+
+📋 See the detailed [Future Development Plan](wiki/Future-Development-Plan.md) for comprehensive roadmap and planned features
 
 ## 💬 Support & Community
 
