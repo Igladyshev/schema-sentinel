@@ -6,7 +6,7 @@ This guide will help you get Schema Sentinel up and running on your system.
 
 Before you begin, ensure you have the following:
 
-- **Python 3.9 or higher** installed on your system
+- **Python 3.13 or higher** installed on your system
 - **[uv](https://github.com/astral-sh/uv)** - Modern Python package manager
 - **Snowflake account** with appropriate permissions
 - **Git** for version control
