@@ -31,7 +31,7 @@ Perfect for **data engineers**, **DBAs**, and **analytics teams** working with *
 
 ## 📋 Requirements
 
-- Python 3.9 or higher
+- Python 3.13 or higher
 - [uv](https://github.com/astral-sh/uv) - Modern Python package manager
 - Snowflake account with appropriate permissions
 
