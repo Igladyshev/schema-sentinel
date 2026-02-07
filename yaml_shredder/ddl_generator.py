@@ -208,12 +208,14 @@ class DDLGenerator:
         """
         import re
         
-        # Validate identifier contains only safe characters (alphanumeric, underscore, space, hyphen, dot)
+        # Validate identifier contains only safe ASCII characters
+        # Allow: letters, digits, underscore, space, hyphen
+        # Dots are excluded to prevent injection via qualified names
         # This prevents SQL injection via control characters, newlines, null bytes, etc.
-        if not re.match(r'^[\w\s\-\.]+$', identifier):
+        if not re.match(r'^[a-zA-Z0-9_\s\-]+$', identifier):
             raise ValueError(
                 f"Identifier '{identifier}' contains unsafe characters. "
-                f"Only alphanumeric, underscore, space, hyphen, and dot are allowed."
+                f"Only ASCII alphanumeric, underscore, space, and hyphen are allowed."
             )
         
         if self.dialect == "mysql":
