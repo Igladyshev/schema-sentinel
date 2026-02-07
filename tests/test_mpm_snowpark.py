@@ -19,8 +19,7 @@ MPM_DATA_DIR = Path(__file__).parent.parent / "resources" / "master-mpm"
 MPM_DATA_AVAILABLE = MPM_DATA_DIR.exists()
 
 pytestmark = pytest.mark.skipif(
-    not MPM_DATA_AVAILABLE,
-    reason="MPM data not available (proprietary files not in public repo)"
+    not MPM_DATA_AVAILABLE, reason="MPM data not available (proprietary files not in public repo)"
 )
 
 
