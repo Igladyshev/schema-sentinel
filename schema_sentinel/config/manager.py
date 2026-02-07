@@ -165,6 +165,10 @@ class ConfigManager:
             with open(config_file) as f:
                 config_data = yaml.safe_load(f)
 
+            # Handle empty config file (safe_load returns None)
+            if config_data is None:
+                config_data = {}
+
             # Update configurations from file
             if "paths" in config_data:
                 for key, value in config_data["paths"].items():

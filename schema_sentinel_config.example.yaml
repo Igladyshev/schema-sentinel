@@ -35,11 +35,12 @@ database:
   data_retention_days: 7
 
   # Snowflake account mappings by environment
-  # Can use environment variables: ${VARNAME:default_value}
+  # Note: Environment variable interpolation is not currently supported
+  # Set these values directly or use environment variables in your shell
   account_map:
-    dev: "${SNOWFLAKE_DEV_ACCOUNT:YOUR_DEV_ACCOUNT}"
-    staging: "${SNOWFLAKE_STAGING_ACCOUNT:YOUR_STAGING_ACCOUNT}"
-    prod: "${SNOWFLAKE_PROD_ACCOUNT:YOUR_PROD_ACCOUNT}"
+    dev: "YOUR_DEV_ACCOUNT"
+    staging: "YOUR_STAGING_ACCOUNT"
+    prod: "YOUR_PROD_ACCOUNT"
 
   # Environment name mappings
   env_map:

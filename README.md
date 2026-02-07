@@ -17,7 +17,6 @@ Perfect for **data engineers**, **analytics teams**, and **DBAs** working with c
 - **🗄️ Multi-Database DDL Generation** - Generate SQL DDL for Snowflake, PostgreSQL, MySQL, and SQLite
 - **⚡ Data Loading** - Load transformed data directly into SQLite databases with automatic indexing
 - **🔍 Structure Analysis** - Analyze and identify nested structures, arrays, and potential table candidates
-- **📈 Data Comparison** - Compare data across different sources with detailed diff reports and flexible grouping
 - **💻 CLI & Python API** - Command-line interface and Python API for seamless integration
 
 ### Schema Comparison (Bonus)
@@ -36,7 +35,6 @@ Perfect for **data engineers**, **analytics teams**, and **DBAs** working with c
 - **Schema Discovery** - Automatically infer schemas from example data
 - **Multi-Source Integration** - Combine data from different YAML/JSON sources
 - **Data Versioning** - Track changes in configuration files over time
-- **Data Quality Validation** - Compare data across different sources and environments
 
 ### Schema Comparison Use Cases
 - **Environment Synchronization** - Ensure dev, staging, and production schemas are aligned

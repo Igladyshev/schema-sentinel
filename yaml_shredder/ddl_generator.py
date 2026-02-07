@@ -192,18 +192,22 @@ class DDLGenerator:
 
     def _quote_identifier(self, identifier: str) -> str:
         """
-        Quote identifier based on dialect.
+        Quote identifier based on dialect and escape embedded quotes.
 
         Args:
             identifier: Identifier to quote
 
         Returns:
-            Quoted identifier
+            Quoted identifier with escaped quotes
         """
         if self.dialect == "mysql":
-            return f"`{identifier}`"
+            # MySQL: escape backticks by doubling them
+            escaped = identifier.replace("`", "``")
+            return f"`{escaped}`"
         else:  # snowflake, postgres, sqlite use double quotes
-            return f'"{identifier}"'
+            # ANSI SQL: escape double quotes by doubling them
+            escaped = identifier.replace('"', '""')
+            return f'"{escaped}"'
 
     def save_ddl(self, output_file: str | Path) -> None:
         """
