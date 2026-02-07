@@ -16,13 +16,13 @@ from yaml_shredder.table_generator import TableGenerator
 
 def load_yaml_or_json(file_path: Path) -> dict:
     """Load YAML or JSON file and validate it's a dictionary.
-    
+
     Args:
         file_path: Path to YAML or JSON file
-        
+
     Returns:
         Dictionary loaded from file
-        
+
     Raises:
         ValueError: If the file is empty or root element is not a dictionary
     """
@@ -41,7 +41,7 @@ def load_yaml_or_json(file_path: Path) -> dict:
             except yaml.YAMLError:
                 f.seek(0)
                 data = json.load(f)
-    
+
     # Validate that we have a dictionary
     if data is None:
         raise ValueError(f"File {file_path} contains no data or only contains comments/whitespace")
@@ -50,7 +50,7 @@ def load_yaml_or_json(file_path: Path) -> dict:
             f"File {file_path} must contain a dictionary at the root level, "
             f"but got {type(data).__name__}. Lists and scalars are not supported."
         )
-    
+
     return data
 
 
