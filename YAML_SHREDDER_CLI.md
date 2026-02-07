@@ -101,34 +101,34 @@ uv run python yaml_shredder_cli.py all input.yaml \
 
 ## Examples
 
-### Example 1: MPM Configuration
+### Example 1: Complete Workflow - YAML to Database
 ```bash
-# Load MPM YAML into database
+# Load YAML configuration into database
 uv run python yaml_shredder_cli.py all \
-  resources/master-mpm/BS/BS_005-mpm.yaml \
+  data/config.yaml \
   -db resources/meta-db/schema-sentinel.db \
-  -r MPM_CONFIG \
-  -ddl resources/meta-db/mpm-ddl.sql
+  -r APP_CONFIG \
+  -ddl resources/meta-db/schema.sql
 ```
 
 ### Example 2: Generate Tables Only
 ```bash
-# Convert YAML to CSV tables
+# Convert YAML/JSON to CSV tables
 uv run python yaml_shredder_cli.py tables \
-  resources/master-mpm/BS/BS_005-mpm.yaml \
-  -o resources/generated-tables/ \
+  data/config.yaml \
+  -o output/tables/ \
   -f csv \
-  -r BS_MPM
+  -r CONFIG_DATA
 ```
 
 ### Example 3: Generate Snowflake DDL
 ```bash
-# Create DDL for Snowflake
+# Create DDL for Snowflake from YAML
 uv run python yaml_shredder_cli.py ddl \
-  resources/master-mpm/BS/BS_005-mpm.yaml \
-  -o resources/snowflake-schema.sql \
+  data/config.yaml \
+  -o output/snowflake-schema.sql \
   -d snowflake \
-  -r MPM_CONFIG
+  -r CONFIG_DATA
 ```
 
 ### Example 4: Analyze Before Processing
