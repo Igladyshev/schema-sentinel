@@ -96,7 +96,7 @@ class TableGenerator:
             )
 
         # Process nested arrays within this array
-        for i, item in enumerate(array):
+        for i, item in enumerate(array):  # noqa: B007
             item_keys = {**parent_keys}
             # Add identifying keys from this level
             for key in ["id", "name", "code"]:

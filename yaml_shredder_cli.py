@@ -120,7 +120,7 @@ def cmd_ddl(args):
 
     # Generate DDL
     ddl_gen = DDLGenerator(dialect=args.dialect)
-    ddl_statements = ddl_gen.generate_ddl(tables, table_gen.relationships)
+    ddl_gen.generate_ddl(tables, table_gen.relationships)
 
     if args.output:
         ddl_gen.save_ddl(args.output)
@@ -183,7 +183,7 @@ def cmd_all(args):
         generator.add_json_file(args.input)
     else:
         generator.add_yaml_file(args.input)
-    schema = generator.generate_schema()
+    generator.generate_schema()
     stats = generator.get_stats()
     print(f"\n✓ Schema: {stats['schema_properties']} properties, {stats['required_fields']} required")
 

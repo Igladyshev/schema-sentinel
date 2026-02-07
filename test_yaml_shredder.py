@@ -34,7 +34,7 @@ def main():
 
     generator = SchemaGenerator()
     generator.add_yaml_file(yaml_file)
-    schema = generator.generate_schema()
+    generator.generate_schema()
 
     output_schema = Path("resources/bs-mpm-schema.json")
     generator.save_schema(output_schema)
@@ -73,7 +73,7 @@ def main():
     print(f"{'=' * 60}\n")
 
     ddl_gen = DDLGenerator(dialect="snowflake")
-    ddl = ddl_gen.generate_ddl(tables, table_gen.relationships)
+    ddl_gen.generate_ddl(tables, table_gen.relationships)
 
     ddl_gen.print_ddl()
 
