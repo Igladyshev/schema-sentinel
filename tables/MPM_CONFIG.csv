@@ -1,0 +1,2 @@
+deployment_version,domain_code,internal_stage,external_stage,domain_timezone,generic_reporting_version
+0.0.5,AZ,"GENERIC_REPORTING.""AZ_005"".REPORTING",GENERIC_REPORTING.REPORTING.PRODUCTION,US/Eastern,3.0.0
