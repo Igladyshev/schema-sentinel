@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "schema-sentinel"
-version = "2.1.0"
-description = "Compare database metadata across environments - built for Snowflake data engineers"
+version = "3.0.0"
+description = "Data processing toolkit: YAML/JSON to relational tables, schema comparison, and metadata management"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
 license = {text = "Apache-2.0"}
