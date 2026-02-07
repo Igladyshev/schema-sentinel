@@ -16,10 +16,9 @@ migration_plan_AZ_to_WY.csv
 # Credentials and secrets - NEVER COMMIT
 .env
 .env.*
-!.env.example
+!resources/examples/.env.example
 *.properties
 !resources/db.properties
-!.env.example
 resources/SDP/db-*.properties
 resources/*/db-*.properties
 *.pem
@@ -31,9 +30,9 @@ load-env.sh
 
 # Configuration files (keep .example files)
 schema_sentinel_config.yaml
-!schema_sentinel_config.example.yaml
+!resources/examples/schema_sentinel_config.example.yaml
 # Only keep the example
-!load-env.sh.example
+!resources/examples/load-env.sh.example
 
 # AWS and cloud credentials
 **/aws-credentials*
