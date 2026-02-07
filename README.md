@@ -192,12 +192,13 @@ pre-commit run --all-files
 
 ## 🏗️ Architecture
 
-## 🏗️ Architecture
-
 ```
 schema-sentinel/
 ├── schema_sentinel/              # Main package
 │   ├── __init__.py             # Package initialization
+│   ├── config/                  # Configuration management
+│   │   ├── __init__.py
+│   │   └── manager.py          # ConfigManager class
 │   ├── markdown_utils/          # Markdown report generation
 │   │   └── markdown.py
 │   └── metadata_manager/        # Core metadata management
@@ -218,13 +219,27 @@ schema-sentinel/
 │       │   └── ...             # Other object models
 │       └── lookup/             # Reference data
 │           └── sql_data_type.py
+├── yaml_shredder/               # YAML/JSON processing toolkit
+│   ├── __init__.py
+│   ├── schema_generator.py     # Auto JSON Schema generation
+│   ├── structure_analyzer.py   # Nested structure analysis
+│   ├── table_generator.py      # Relational table conversion
+│   ├── ddl_generator.py        # SQL DDL generation
+│   └── data_loader.py          # SQLite data loading
 ├── resources/                   # Configuration and templates
 │   ├── db.properties           # Database config template
 │   ├── datacompy/templates/    # Report templates
+│   ├── meta-db/                # SQLite metadata storage
 │   └── migrations-ddl/         # DDL migration procedures
 ├── tests/                       # Test suite
-├── notebooks/                   # Jupyter notebooks for exploration
-└── docs/                        # Documentation
+│   ├── test_config.py          # Configuration tests
+│   ├── test_imports.py         # Import tests
+│   └── ...                     # Other test files
+├── docs/                        # API documentation (pdoc)
+├── wiki/                        # Project wiki and guides
+└── notebooks/                   # Jupyter notebooks
+    ├── MPM Comparison and Migration.ipynb
+    └── ...
 ```
 
 ### Supported Database Objects
