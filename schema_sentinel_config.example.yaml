@@ -1,0 +1,91 @@
+# Schema Sentinel Configuration
+# Copy this file to schema_sentinel_config.yaml and customize as needed
+
+# Path configuration
+paths:
+  # Override project name (default: "schema-sentinel")
+  # project_name: "schema-sentinel"
+
+  # Override project home directory (default: auto-detected)
+  # project_home: "/path/to/schema-sentinel"
+
+  # Override temp directory (default: system temp dir)
+  # temp_dir: "/tmp"
+
+  # Override resources directory (default: {project_home}/resources)
+  # resources_dir: "/path/to/resources"
+
+  # Override meta database directory (default: {resources_dir}/meta-db)
+  # meta_db_dir: "/path/to/meta-db"
+
+# Logging configuration
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+
+  # Log file path (default: {temp_dir}/schema-sentinel.log)
+  # file: "/var/log/schema-sentinel.log"
+
+  # Log message format
+  format: "%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s"
+
+# Database configuration
+database:
+  # Data retention period in days
+  data_retention_days: 7
+
+  # Snowflake account mappings by environment
+  # Can use environment variables: ${VARNAME:default_value}
+  account_map:
+    dev: "${SNOWFLAKE_DEV_ACCOUNT:YOUR_DEV_ACCOUNT}"
+    staging: "${SNOWFLAKE_STAGING_ACCOUNT:YOUR_STAGING_ACCOUNT}"
+    prod: "${SNOWFLAKE_PROD_ACCOUNT:YOUR_PROD_ACCOUNT}"
+
+  # Environment name mappings
+  env_map:
+    dev: "DEV"
+    staging: "STAGING"
+    prod: "PROD"
+
+# Metadata extraction configuration
+metadata:
+  # Attributes to exclude from metadata comparison
+  attributes_to_exclude:
+    - database_id
+    - table_id
+    - environment
+    - version
+    - created
+    - last_altered
+    - schema_id
+    - id
+    - column_id
+    - last_suspended
+    - table_constraint_id
+    - column_constraint_id
+    - referential_constraint_id
+    - view_id
+    - pipe_id
+    - task_id
+    - stream_id
+    - function_id
+    - procedure_id
+    - last_ddl
+    - stale_after
+    - bytes
+    - row_count
+
+  # Custom view filters for business logic
+  # Example structure for row-level security or filtering
+  custom_view_filters:
+    # Example: Filter by account
+    # FILTER_BY_ACCOUNT:
+    #   TABLE_LIST:
+    #     - "MY_TABLE_1"
+    #     - "MY_TABLE_2"
+
+    # Example: Exclude specific tables
+    # EXCLUDE:
+    #   TABLE_LIST:
+    #     - "TEMP_TABLE"
+    #     - "BACKUP_TABLE"

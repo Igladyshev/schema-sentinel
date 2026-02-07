@@ -28,6 +28,10 @@ resources/*/db-*.properties
 secrets/
 credentials/
 load-env.sh
+
+# Configuration files (keep .example files)
+schema_sentinel_config.yaml
+!schema_sentinel_config.example.yaml
 # Only keep the example
 !load-env.sh.example
 
