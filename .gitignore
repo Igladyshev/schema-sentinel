@@ -44,6 +44,10 @@ schema_sentinel_config.yaml
 resources/SDP/
 **/proprietary/
 
+# Output directories that should not be committed
+tables/
+output/
+
 # Database files
 *.db
 *.sqlite
