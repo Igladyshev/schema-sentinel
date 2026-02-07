@@ -193,13 +193,29 @@ class DDLGenerator:
     def _quote_identifier(self, identifier: str) -> str:
         """
         Quote identifier based on dialect and escape embedded quotes.
+        
+        Validates that the identifier contains only safe characters to prevent
+        SQL injection through control characters or newlines.
 
         Args:
             identifier: Identifier to quote
 
         Returns:
             Quoted identifier with escaped quotes
+            
+        Raises:
+            ValueError: If identifier contains unsafe characters
         """
+        import re
+        
+        # Validate identifier contains only safe characters (alphanumeric, underscore, space, hyphen, dot)
+        # This prevents SQL injection via control characters, newlines, null bytes, etc.
+        if not re.match(r'^[\w\s\-\.]+$', identifier):
+            raise ValueError(
+                f"Identifier '{identifier}' contains unsafe characters. "
+                f"Only alphanumeric, underscore, space, hyphen, and dot are allowed."
+            )
+        
         if self.dialect == "mysql":
             # MySQL: escape backticks by doubling them
             escaped = identifier.replace("`", "``")

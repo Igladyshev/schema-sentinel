@@ -9,9 +9,9 @@ from yaml_shredder.table_generator import TableGenerator
 __version__ = "0.1.0"
 
 __all__ = [
-    "TableGenerator",
-    "DDLGenerator",
     "SQLiteLoader",
+    "DDLGenerator",
     "SchemaGenerator",
     "StructureAnalyzer",
+    "TableGenerator",
 ]
