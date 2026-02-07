@@ -55,7 +55,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh  # Linux/macOS
 ./setup.sh
 
 # Configure your environment
-cp .env.example .env
+cp resources/examples/.env.example .env
 # Edit .env with your Snowflake credentials
 ```
 
@@ -63,7 +63,7 @@ See [Getting Started](Getting-Started.md) for detailed installation and configur
 
 ## 📊 Project Status
 
-**Current Version**: v2.1.0  
+**Current Version**: v2.1.0
 **Status**: Active Development 🚧
 
 This project is being actively developed and prepared for production use. See the [Future Development Plan](Future-Development-Plan.md) for upcoming features and roadmap.
