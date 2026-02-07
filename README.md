@@ -227,6 +227,10 @@ schema-sentinel/
 │   ├── ddl_generator.py        # SQL DDL generation
 │   └── data_loader.py          # SQLite data loading
 ├── resources/                   # Configuration and templates
+│   ├── examples/               # Example files and configurations
+│   │   ├── .env.example        # Environment variables template
+│   │   ├── example_sqlite_workflow.py  # SQLite workflow example
+│   │   └── ...                 # Other example files
 │   ├── db.properties           # Database config template
 │   ├── datacompy/templates/    # Report templates
 │   ├── meta-db/                # SQLite metadata storage

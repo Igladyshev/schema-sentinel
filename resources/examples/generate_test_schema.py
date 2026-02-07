@@ -8,7 +8,7 @@ import yaml
 from genson import SchemaBuilder
 
 # Find YAML files
-mpm_dir = Path("resources/master-mpm")
+mpm_dir = Path(".")
 yaml_files = sorted(mpm_dir.rglob("*.yaml"))
 
 print(f"Found {len(yaml_files)} YAML files:")
@@ -29,7 +29,7 @@ for yaml_file in yaml_files:
 schema = builder.to_schema()
 
 # Save
-output = Path("resources/generated-mpm-schema.json")
+output = Path("./example-schema.json")
 with open(output, "w") as f:
     json.dump(schema, f, indent=2)
 

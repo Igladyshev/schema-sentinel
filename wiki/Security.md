@@ -125,7 +125,7 @@ SNOWFLAKE_SCHEMAS=PUBLIC,ANALYTICS
 Users should copy this to `.env` and fill in their actual values:
 
 ```bash
-cp .env.example .env
+cp resources/examples/.env.example .env
 # Edit .env with your credentials
 ```
 
@@ -296,7 +296,7 @@ repos:
     hooks:
       - id: bandit
         args: ['-c', 'pyproject.toml']
-  
+
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.4.0
     hooks:
