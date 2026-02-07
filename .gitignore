@@ -51,10 +51,12 @@ resources/master-mpm/
 tables/
 output/
 
-# Database files
+# Database files and metadata storage
 *.db
 *.sqlite
 *.sqlite3
+!resources/meta-db/.gitkeep
+resources/meta-db/*
 !resources/meta-db/.gitkeep
 census.sqlite
 

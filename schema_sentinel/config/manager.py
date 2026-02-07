@@ -32,6 +32,14 @@ class PathConfig:
         if self.meta_db_dir is None:
             self.meta_db_dir = self.resources_dir / "meta-db"
 
+        # Ensure the meta-db directory exists (best effort)
+        try:
+            self.meta_db_dir.mkdir(parents=True, exist_ok=True)
+        except (OSError, PermissionError):
+            # Directory creation failed (e.g., read-only filesystem, insufficient permissions)
+            # This is okay - the directory will be created when needed by SQLite operations
+            pass
+
 
 @dataclass
 class LogConfig:

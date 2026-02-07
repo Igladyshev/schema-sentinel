@@ -17,6 +17,8 @@ class SQLiteLoader:
             db_path: Path to SQLite database file (will be created if doesn't exist)
         """
         self.db_path = Path(db_path)
+        # Ensure parent directory exists
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.connection = None
         self.loaded_tables = []
 
