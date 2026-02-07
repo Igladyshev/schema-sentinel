@@ -97,7 +97,7 @@ jupyter = [
 schema-sentinel = "schema_sentinel.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["schema_sentinel"]
+packages = ["schema_sentinel", "yaml_shredder"]
 
 [tool.ruff]
 line-length = 120

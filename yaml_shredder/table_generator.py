@@ -24,7 +24,17 @@ class TableGenerator:
 
         Returns:
             Dictionary of table_name -> DataFrame
+            
+        Raises:
+            TypeError: If data is not a dictionary
         """
+        # Validate input type
+        if not isinstance(data, dict):
+            raise TypeError(
+                f"generate_tables expects a dictionary at the root level, "
+                f"but got {type(data).__name__}. Lists and scalars are not supported."
+            )
+        
         # Extract root-level scalar fields into root table
         root_data = {k: v for k, v in data.items() if not isinstance(v, (list, dict))}
         if root_data:

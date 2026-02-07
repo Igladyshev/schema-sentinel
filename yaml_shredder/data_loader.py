@@ -104,6 +104,7 @@ class SQLiteLoader:
             try:
                 cursor.execute(f'CREATE INDEX IF NOT EXISTS "{index_name}" ON "{table_name}" ("{fk_col}")')
             except sqlite3.OperationalError:
+                # Index may already exist or table structure doesn't allow it; safe to ignore
                 pass
 
         self.connection.commit()

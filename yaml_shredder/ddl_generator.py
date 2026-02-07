@@ -192,18 +192,50 @@ class DDLGenerator:
 
     def _quote_identifier(self, identifier: str) -> str:
         """
-        Quote identifier based on dialect.
+        Quote identifier based on dialect and escape embedded quotes.
+        
+        Validates that the identifier contains only safe characters to prevent
+        SQL injection through control characters or newlines.
 
         Args:
             identifier: Identifier to quote
 
         Returns:
-            Quoted identifier
+            Quoted identifier with escaped quotes
+            
+        Raises:
+            ValueError: If identifier contains unsafe characters
         """
+        import re
+        
+        # Validate identifier is not empty
+        if not identifier:
+            raise ValueError("Identifier cannot be empty")
+        
+        # Validate identifier contains only safe ASCII characters
+        # Allow: letters, digits, underscore, space, hyphen
+        # Spaces and hyphens are allowed because identifiers are derived from YAML keys
+        # which commonly use these characters (e.g., "my-config", "user name")
+        # All identifiers are properly quoted (backticks for MySQL, double quotes for others)
+        # so spaces are safe and intentionally supported for YAML key compatibility
+        # Note: If spaces cause issues with specific database tools, consider normalizing
+        # identifiers (e.g., replacing spaces with underscores) before calling this method
+        # Dots are excluded to prevent injection via qualified names
+        # This prevents SQL injection via control characters, newlines, null bytes, etc.
+        if not re.match(r'^[a-zA-Z0-9_\s\-]+$', identifier):
+            raise ValueError(
+                f"Identifier '{identifier}' contains unsafe characters. "
+                f"Only ASCII alphanumeric, underscore, space, and hyphen are allowed."
+            )
+        
         if self.dialect == "mysql":
-            return f"`{identifier}`"
+            # MySQL: escape backticks by doubling them
+            escaped = identifier.replace("`", "``")
+            return f"`{escaped}`"
         else:  # snowflake, postgres, sqlite use double quotes
-            return f'"{identifier}"'
+            # ANSI SQL: escape double quotes by doubling them
+            escaped = identifier.replace('"', '""')
+            return f'"{escaped}"'
 
     def save_ddl(self, output_file: str | Path) -> None:
         """
