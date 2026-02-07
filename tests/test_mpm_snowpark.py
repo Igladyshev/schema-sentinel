@@ -14,6 +14,15 @@ from snowflake_local_testing.mpm_snowpark import (
     MPMSnowparkSaver,
 )
 
+# Check if MPM data is available (not in public repo)
+MPM_DATA_DIR = Path(__file__).parent.parent / "resources" / "master-mpm"
+MPM_DATA_AVAILABLE = MPM_DATA_DIR.exists()
+
+pytestmark = pytest.mark.skipif(
+    not MPM_DATA_AVAILABLE,
+    reason="MPM data not available (proprietary files not in public repo)"
+)
+
 
 @pytest.fixture
 def valid_yaml_path():

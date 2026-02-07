@@ -44,6 +44,9 @@ schema_sentinel_config.yaml
 resources/SDP/
 **/proprietary/
 
+# Proprietary data - MPM configurations
+resources/master-mpm/
+
 # Output directories that should not be committed
 tables/
 output/
