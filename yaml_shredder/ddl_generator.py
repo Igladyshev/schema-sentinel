@@ -221,7 +221,7 @@ class DDLGenerator:
         # identifiers (e.g., replacing spaces with underscores) before calling this method
         # Dots are excluded to prevent injection via qualified names
         # This prevents SQL injection via control characters, newlines, null bytes, etc.
-        if not re.match(r'^[a-zA-Z0-9_\s\-]+$', identifier):
+        if not re.match(r"^[a-zA-Z0-9_\s\-]+$", identifier):
             raise ValueError(
                 f"Identifier '{identifier}' contains unsafe characters. "
                 f"Only ASCII alphanumeric, underscore, space, and hyphen are allowed."
