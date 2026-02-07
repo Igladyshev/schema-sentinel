@@ -216,7 +216,10 @@ class DDLGenerator:
         # Allow: letters, digits, underscore, space, hyphen
         # Spaces and hyphens are allowed because identifiers are derived from YAML keys
         # which commonly use these characters (e.g., "my-config", "user name")
-        # These will be properly quoted by the dialect-specific quoting
+        # All identifiers are properly quoted (backticks for MySQL, double quotes for others)
+        # so spaces are safe and intentionally supported for YAML key compatibility
+        # Note: If spaces cause issues with specific database tools, consider normalizing
+        # identifiers (e.g., replacing spaces with underscores) before calling this method
         # Dots are excluded to prevent injection via qualified names
         # This prevents SQL injection via control characters, newlines, null bytes, etc.
         if not re.match(r'^[a-zA-Z0-9_\s\-]+$', identifier):

@@ -44,7 +44,7 @@ def load_yaml_or_json(file_path: Path) -> dict:
     
     # Validate that we have a dictionary
     if data is None:
-        raise ValueError(f"File {file_path} is empty")
+        raise ValueError(f"File {file_path} contains no data or only contains comments/whitespace")
     if not isinstance(data, dict):
         raise ValueError(
             f"File {file_path} must contain a dictionary at the root level, "
