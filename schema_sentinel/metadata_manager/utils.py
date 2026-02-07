@@ -3,6 +3,11 @@ import random
 import string
 from configparser import ConfigParser
 
+from schema_sentinel.config import get_config as get_config_manager
+
+# Get configuration manager instance
+_config = get_config_manager()
+
 
 def get_html(file_name):
     with open(file_name) as file:
@@ -83,51 +88,48 @@ WHERE
     AND "db_object_name"=:db_object_name
 """
 
-ACCOUNT_MAP = {
-    "dev": "YOUR_DEV_ACCOUNT",
-    "staging": "YOUR_STAGING_ACCOUNT",
-    "prod": "YOUR_PROD_ACCOUNT",
-}
+# Use config manager for account and environment mappings
+ACCOUNT_MAP = _config.database.account_map
+ENV_MAP = _config.database.env_map
+CUSTOM_VIEW_FILTERS = _config.metadata.custom_view_filters
 
-ENV_MAP = {"dev": "DEV", "staging": "STAGING", "prod": "PROD"}
-
-# Example: Custom view filters for specific business logic
-# This is a template - customize based on your data model
-CUSTOM_VIEW_FILTERS = {
-    # Example: Filter views that need specific row-level security
-    "FILTER_BY_ACCOUNT": {
-        "TABLE_LIST": [
-            # Add your table names here
-            # "ORDERS",
-            # "TRANSACTIONS",
-        ],
-        "FILTER": """AS {alias} WHERE EXISTS(
-            SELECT *
-            FROM SCHEMA.ACCOUNT AS A
-            WHERE {alias}.ACCOUNT_ID = A.ACCOUNT_ID)""",
-    },
-    # Example: Exclude test data
-    "FILTER_OUT_TEST": {
-        "TABLE_LIST": [
-            # "ACCOUNT",
-        ],
-        "FILTER": "WHERE NOT IS_TEST",
-    },
-    # Example: Tables/views that don't need filtering
-    "NO_FILTER": {
-        "VIEWS": [
-            # "REFERENCE_DATA",
-            # "LOOKUP_TABLES",
-        ]
-    },
-    # Example: Tables to exclude from comparison
-    "EXCLUDE": {
-        "TABLE_LIST": [
-            # "TEMP_TABLE",
-            # "STAGING_TABLE",
-        ]
-    },
-}
+# Legacy default values for backward compatibility if config is empty
+if not CUSTOM_VIEW_FILTERS:
+    CUSTOM_VIEW_FILTERS = {
+        # Example: Filter views that need specific row-level security
+        "FILTER_BY_ACCOUNT": {
+            "TABLE_LIST": [
+                # Add your table names here
+                # "ORDERS",
+                # "TRANSACTIONS",
+            ],
+            "FILTER": """AS {alias} WHERE EXISTS(
+                SELECT *
+                FROM SCHEMA.ACCOUNT AS A
+                WHERE {alias}.ACCOUNT_ID = A.ACCOUNT_ID)""",
+        },
+        # Example: Exclude test data
+        "FILTER_OUT_TEST": {
+            "TABLE_LIST": [
+                # "ACCOUNT",
+            ],
+            "FILTER": "WHERE NOT IS_TEST",
+        },
+        # Example: Tables/views that don't need filtering
+        "NO_FILTER": {
+            "VIEWS": [
+                # "REFERENCE_DATA",
+                # "LOOKUP_TABLES",
+            ]
+        },
+        # Example: Tables to exclude from comparison
+        "EXCLUDE": {
+            "TABLE_LIST": [
+                # "TEMP_TABLE",
+                # "STAGING_TABLE",
+            ]
+        },
+    }
 
 
 def exclude_table(table_name: str) -> bool:

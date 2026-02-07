@@ -1,39 +1,53 @@
-# SQL Comparison
+# Schema Sentinel
 
 [![CI](https://github.com/Igladyshev/schema-sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/Igladyshev/schema-sentinel/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python Version](https://img.shields.io/badge/python-3.13%2B-blue)](https://www.python.org/downloads/)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
-A powerful tool for comparing database metadata across different environments. This project extracts database schema information, stores it in SQLite for versioning, and generates detailed comparison reports highlighting differences between database environments.
+A comprehensive data processing and schema management toolkit for data engineers and analysts. Schema Sentinel provides powerful tools for transforming nested YAML/JSON data into relational structures, generating dynamic schemas, comparing data, and tracking database schema changes.
 
-Perfect for **data engineers**, **DBAs**, and **analytics teams** working with **Snowflake** and needing to track schema changes across development, staging, and production environments.
+Perfect for **data engineers**, **analytics teams**, and **DBAs** working with complex configuration files, API responses, nested data structures, or needing to track schema changes across environments.
 
 ## 🎯 Key Features
 
-- **📊 Comprehensive Metadata Extraction** - Extract complete schema information including tables, columns, views, procedures, functions, constraints, and more
-- **💾 Version Control for Schema** - Store metadata snapshots in SQLite for historical tracking
-- **🔍 Intelligent Comparison** - Compare metadata between different environments with detailed diff reports
-- **📝 Multiple Report Formats** - Generate reports in Markdown, HTML, and JSON formats
-- **🏢 Snowflake Native** - Built specifically for Snowflake with deep integration
-- **🔌 Extensible** - Architecture supports additional database platforms
-- **🚀 Fast & Efficient** - Optimized queries and parallel processing
+### YAML Shredder - Transform Nested Data
+- **🔄 Automatic Schema Generation** - Dynamically infer JSON Schema from YAML/JSON files with auto-detection of types and patterns
+- **📊 Relational Table Conversion** - Convert deeply nested YAML/JSON into normalized relational tables with automatic relationship mapping
+- **🗄️ Multi-Database DDL Generation** - Generate SQL DDL for Snowflake, PostgreSQL, MySQL, and SQLite
+- **⚡ Data Loading** - Load transformed data directly into SQLite databases with automatic indexing
+- **🔍 Structure Analysis** - Analyze and identify nested structures, arrays, and potential table candidates
+- **💻 CLI & Python API** - Command-line interface and Python API for seamless integration
+
+### Schema Comparison (Bonus)
+- **📋 Metadata Extraction** - Extract complete schema information from Snowflake databases
+- **💾 Version Control** - Store metadata snapshots in SQLite for historical tracking
+- **🔎 Environment Comparison** - Compare schemas between dev, staging, and production
+- **📝 Multiple Report Formats** - Generate comparison reports in Markdown, HTML, and JSON
 - **🔒 Secure** - Best practices for credential management and data security
 
 ## 🎓 Use Cases
 
+### YAML Shredder Use Cases
+- **Configuration Management** - Transform YAML configs into queryable database tables
+- **API Response Processing** - Convert nested JSON API responses into relational format
+- **Data Pipeline Transformation** - Normalize complex nested data for analytics
+- **Schema Discovery** - Automatically infer schemas from example data
+- **Multi-Source Integration** - Combine data from different YAML/JSON sources
+- **Data Versioning** - Track changes in configuration files over time
+
+### Schema Comparison Use Cases
 - **Environment Synchronization** - Ensure dev, staging, and production schemas are aligned
-- **Change Tracking** - Monitor schema evolution over time
+- **Change Tracking** - Monitor database schema evolution over time
 - **Deployment Validation** - Verify schema changes after deployments
-- **Compliance & Auditing** - Maintain schema change history for compliance requirements
-- **Migration Planning** - Identify differences before major migrations
-- **Documentation** - Auto-generate schema documentation
+- **Compliance & Auditing** - Maintain schema change history for compliance
+- **Migration Planning** - Identify schema differences before migrations
 
 ## 📋 Requirements
 
 - Python 3.13 or higher
 - [uv](https://github.com/astral-sh/uv) - Modern Python package manager
-- Snowflake account with appropriate permissions
+- Snowflake account (optional, only for schema comparison features)
 
 ## 🚀 Quick Start
 
@@ -58,53 +72,61 @@ source .venv/bin/activate  # Linux/macOS or .venv\Scripts\activate on Windows
 uv pip install -e ".[dev,jupyter]"
 ```
 
-### Configuration
+### Quick Start - YAML Shredder
 
-1. Copy the example environment file:
-   ```bash
-   cp .env.example .env
-   ```
+#### Command Line Interface
+```bash
+# Complete workflow: YAML → Tables → DDL → SQLite
+uv run python yaml_shredder_cli.py all config.yaml -db output.db -r CONFIG
 
-2. Edit `.env` with your Snowflake credentials:
-   ```bash
-   SNOWFLAKE_ACCOUNT=your_account
-   SNOWFLAKE_USER=your_username
-   SNOWFLAKE_PASSWORD=your_password
-   SNOWFLAKE_WAREHOUSE=your_warehouse
-   SNOWFLAKE_DATABASE=your_database
-   SNOWFLAKE_ROLE=your_role
+# Analyze structure only
+uv run python yaml_shredder_cli.py analyze config.yaml
 
-   # Optional: Specify schemas to include (comma-separated)
-   # If not set, all schemas in the database will be included
-   SNOWFLAKE_SCHEMAS=PUBLIC,ANALYTICS,STAGING,MARTS
-   ```
+# Generate relational tables
+uv run python yaml_shredder_cli.py tables config.yaml -o output/ -f csv
 
-### Basic Usage
+# Generate SQL DDL
+uv run python yaml_shredder_cli.py ddl config.yaml -o schema.sql -d snowflake
+```
 
+#### Python API
 ```python
-from schema_sentinel.metadata_manager import extract_metadata, compare_metadata
+from yaml_shredder import TableGenerator, DDLGenerator, SQLiteLoader
 
-# Extract metadata from source environment
-source_metadata = extract_metadata(
-    account="prod_account",
-    database="ANALYTICS_DB",
-    schema="PUBLIC"
-)
+# Load and convert YAML to tables
+table_gen = TableGenerator()
+tables = table_gen.generate_tables(data, root_table_name="CONFIG")
 
-# Extract metadata from target environment
-target_metadata = extract_metadata(
-    account="dev_account",
-    database="ANALYTICS_DB",
-    schema="PUBLIC"
-)
+# Generate SQL DDL
+ddl_gen = DDLGenerator(dialect="sqlite")
+ddl = ddl_gen.generate_ddl(tables, table_gen.relationships)
 
-# Compare and generate report
-comparison = compare_metadata(source_metadata, target_metadata)
-comparison.generate_report("differences.md")
+# Load into SQLite
+loader = SQLiteLoader("output.db")
+loader.load_tables(tables)
+```
+
+### Configuration (For Schema Comparison)
+
+For Snowflake schema comparison features, create `.env` with credentials:
+```bash
+SNOWFLAKE_ACCOUNT=your_account
+SNOWFLAKE_USER=your_username
+SNOWFLAKE_PASSWORD=your_password
+SNOWFLAKE_WAREHOUSE=your_warehouse
+SNOWFLAKE_DATABASE=your_database
+SNOWFLAKE_ROLE=your_role
+SNOWFLAKE_SCHEMAS=PUBLIC,ANALYTICS  # Optional
 ```
 
 ## 📖 Documentation
 
+### YAML Shredder
+- **[YAML Shredder CLI Guide](YAML_SHREDDER_CLI.md)** - Complete CLI reference and examples
+- **[Notebooks Guide](NOTEBOOKS.md)** - Jupyter notebooks for data comparison and analysis
+- Generic Table Comparison - See `MPM Comparison and Migration.ipynb` for examples
+
+### General Documentation
 - **[📚 Project Wiki](wiki/)** - Comprehensive documentation hub
   - [Getting Started](wiki/Getting-Started.md) - Installation and quick start
   - [Architecture](wiki/Architecture.md) - System design and architecture
@@ -112,7 +134,6 @@ comparison.generate_report("differences.md")
   - [Contributing Guide](wiki/Contributing.md) - How to contribute
   - [Security Guide](wiki/Security.md) - Security best practices
   - [Future Development Plan](wiki/Future-Development-Plan.md) - Roadmap and upcoming features
-- [Installation & Setup Guide](README.md#-quick-start)
 - [Development Guide](DEVELOPMENT.md) - Detailed development instructions
 - [Contributing Guide](CONTRIBUTING.md) - How to contribute
 - [Security Policy](SECURITY.md) - Security guidelines and reporting

@@ -1,51 +1,25 @@
 from __future__ import annotations
 
 import logging as log
-import os
 from abc import abstractmethod
 
 import pandas as pd
 from sqlalchemy.ext.declarative import declarative_base
 
-ATTRIBUTES_TO_EXCLUDE = [
-    "database_id",
-    "table_id",
-    "environment",
-    "version",
-    "created",
-    "last_altered",
-    "schema_id",
-    "id",
-    "column_id",
-    "last_suspended",
-    "table_constraint_id",
-    "column_constraint_id",
-    "referential_constraint_id",
-    "view_id",
-    "pipe_id",
-    "task_id",
-    "stream_id",
-    "function_id",
-    "procedure_id",
-    "last_ddl",
-    "stale_after",
-    "bytes",
-    "row_count",
-]
-PROJECT_NAME = "schema-sentinel"
-TEMP_DIR = os.getenv("TEMP") if os.name == "nt" else "/tmp"
-LOG_FILE = os.path.join(TEMP_DIR, "schema-sentinel.log")
-LOG_LEVEL = os.getenv("LOG_LEVEL") if os.getenv("LOG_LEVEL") is not None else "INFO"
+from schema_sentinel.config import get_config
 
-PROJECT_HOME = os.path.dirname(os.path.join(os.path.abspath("./"), PROJECT_NAME))
-RESOURCES_PATH = os.path.join(PROJECT_HOME, "resources")
-META_DB_PATH = os.path.join(RESOURCES_PATH, "meta-db")
+# Get configuration manager instance
+_config = get_config()
 
-log.basicConfig(
-    level=LOG_LEVEL,
-    format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
-    handlers=[log.FileHandler(LOG_FILE), log.StreamHandler()],
-)
+# Use config manager for attributes to exclude
+ATTRIBUTES_TO_EXCLUDE = _config.metadata.attributes_to_exclude
+
+# Backward compatibility - deprecated path variables
+PROJECT_HOME = str(_config.paths.project_home)
+RESOURCES_PATH = str(_config.paths.resources_dir)
+META_DB_PATH = str(_config.paths.meta_db_dir)
+
+Base = declarative_base()
 
 
 def compare_obj(left, right) -> {}:

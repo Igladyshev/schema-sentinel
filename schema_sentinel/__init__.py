@@ -2,30 +2,38 @@ import base64
 import getpass
 import logging as log
 import os
+import warnings
 
 from alembic.ddl import DefaultImpl
 from sqlalchemy import and_
 from sqlalchemy.dialects import registry
 from sqlalchemy.orm import sessionmaker
 
+from schema_sentinel.config import get_config as get_config_manager
 from schema_sentinel.metadata_manager.engine import SfAlchemyEngine, SqLiteAqlAlchemyEngine, get_config_dict
 from schema_sentinel.metadata_manager.enums import ConnectMode, Environment
 from schema_sentinel.metadata_manager.model.database import Database
 from schema_sentinel.metadata_manager.utils import get_config
 
-PROJECT_NAME = "schema-sentinel"
-TEMP_DIR = os.getenv("TEMP") if os.name == "nt" else "/tmp"
-LOG_FILE = os.path.join(TEMP_DIR, "schema-sentinel.log")
-LOG_LEVEL = os.getenv("LOG_LEVEL") if os.getenv("LOG_LEVEL") is not None else "INFO"
+# Initialize configuration manager
+_config = get_config_manager()
 
-PROJECT_HOME = os.path.dirname(os.path.join(os.path.abspath("./"), PROJECT_NAME))
-RESOURCES_PATH = os.path.join(PROJECT_HOME, "resources")
-META_DB_PATH = os.path.join(RESOURCES_PATH, "meta-db")
+# Backward compatibility - deprecated
+# These module-level variables are maintained for backward compatibility
+# but will be removed in a future version.
+PROJECT_NAME = _config.paths.project_name
+TEMP_DIR = str(_config.paths.temp_dir)
+LOG_FILE = str(_config.logging.file)
+LOG_LEVEL = _config.logging.level
+PROJECT_HOME = str(_config.paths.project_home)
+RESOURCES_PATH = str(_config.paths.resources_dir)
+META_DB_PATH = str(_config.paths.meta_db_dir)
 
+# Configure logging using config manager settings
 log.basicConfig(
-    level=LOG_LEVEL,
-    format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
-    handlers=[log.FileHandler(LOG_FILE), log.StreamHandler()],
+    level=_config.logging.level,
+    format=_config.logging.format,
+    handlers=[log.FileHandler(str(_config.logging.file)), log.StreamHandler()],
 )
 
 

@@ -1,6 +1,11 @@
 from dataclasses import dataclass
 from enum import Enum
 
+from schema_sentinel.config import get_config
+
+# Get configuration manager instance
+_config = get_config()
+
 
 class ChangeSetUpdateAction(Enum):
     IGNORE = 0
@@ -73,7 +78,8 @@ class DiffCategoryItem:
     message: Message
 
 
-DATA_RETENTION_TIME_IN_DAYS = 7
+# Use config manager for data retention setting
+DATA_RETENTION_TIME_IN_DAYS = _config.database.data_retention_days
 
 
 class DbObjectType(Enum):

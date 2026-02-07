@@ -7,7 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-02-07
+
 ### Added
+- **YAML Shredder**: Complete toolkit for transforming nested YAML/JSON into relational tables
+  - Automatic JSON Schema generation from YAML/JSON examples
+  - Relational table conversion with automatic relationship mapping
+  - Multi-database DDL generation (Snowflake, PostgreSQL, MySQL, SQLite)
+  - SQLite data loader with automatic indexing
+  - Structure analysis and pattern detection
+  - CLI interface with 6 commands (analyze, schema, tables, ddl, load, all)
+  - Python API for programmatic access
+- **Configuration Management System**: Centralized configuration with ConfigManager class
+  - PathConfig for project paths and directories
+  - LogConfig for logging settings
+  - DatabaseConfig for database connections and retention
+  - MetadataConfig for metadata extraction settings
+  - YAML configuration file support (`schema_sentinel_config.yaml`)
+  - Environment variable integration
+  - Singleton pattern for global access
+  - Comprehensive test suite (16 tests)
+- **Generic Table Comparison Framework**: Universal data comparison tool
+  - Auto-discovery of tables and structures
+  - Flexible grouping and comparison logic
+  - Works with any table structure
+  - Batch comparison reports
 - Modern Python packaging with `pyproject.toml`
 - Development environment setup with `uv` package manager
 - Comprehensive documentation (README, DEVELOPMENT, CONTRIBUTING)
@@ -21,12 +45,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Production readiness checklist
 
 ### Changed
+- **Project Positioning**: Repositioned as comprehensive data processing toolkit
+  - YAML Shredder as primary feature
+  - Schema comparison as bonus feature
+- **README.md**: Complete rewrite emphasizing YAML Shredder capabilities
+  - Generic use cases (configuration management, API processing, data pipelines)
+  - Updated key features and documentation structure
+  - Snowflake now optional (only for schema comparison)
+- **Documentation**: Generalized all examples to be non-MPM-specific
+  - YAML_SHREDDER_CLI.md with generic configuration examples
+  - Updated all documentation to show diverse use cases
+- **Configuration**: Consolidated scattered global variables
+  - Removed duplicate definitions from `metadata_manager/model/__init__.py`
+  - Centralized ACCOUNT_MAP, ENV_MAP, CUSTOM_VIEW_FILTERS in config
+  - Backward compatible with existing code
 - Updated dependencies to latest compatible versions
 - Improved `.gitignore` for modern Python development
 - Reorganized project structure
 
 ### Fixed
 - Merged unrelated git histories between dev and master branches
+- DateTime handling in YAML schema generation
+- Syntax errors in DDL generator
+- SQLite type mappings for proper data type inference
 
 ## [2.0.5] - 2023-09-26
 
@@ -37,5 +78,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic comparison functionality
 - Metadata models for database objects
 
-[Unreleased]: https://github.com/Igladyshev/schema-sentinel/compare/v2.0.5...HEAD
+[Unreleased]: https://github.com/Igladyshev/schema-sentinel/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/Igladyshev/schema-sentinel/compare/v2.0.5...v3.0.0
 [2.0.5]: https://github.com/Igladyshev/schema-sentinel/releases/tag/v2.0.5

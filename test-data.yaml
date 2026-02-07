@@ -1,0 +1,20 @@
+deployment:
+  code: TEST_001
+  name: Test Deployment
+  region: Test Region
+
+communities:
+  - id: 1
+    name: Community A
+    population: 1000
+  - id: 2
+    name: Community B
+    population: 2000
+
+sensors:
+  - type: temperature
+    threshold: 75.5
+    enabled: true
+  - type: humidity
+    threshold: 60.0
+    enabled: true

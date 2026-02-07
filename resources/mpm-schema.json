@@ -1,0 +1,220 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "deployment_version": {
+      "type": "string"
+    },
+    "domain_code": {
+      "type": "string"
+    },
+    "warehouse": {
+      "type": "object",
+      "properties": {
+        "auto_suspend": {
+          "type": "integer"
+        },
+        "max_cluster_count": {
+          "type": "integer"
+        },
+        "scaling_policy": {
+          "type": "string"
+        },
+        "warehouse_size": {
+          "type": "string"
+        },
+        "warehouse_type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "auto_suspend",
+        "max_cluster_count",
+        "scaling_policy",
+        "warehouse_size",
+        "warehouse_type"
+      ]
+    },
+    "internal_stage": {
+      "type": "string"
+    },
+    "external_stage": {
+      "type": "string"
+    },
+    "domain_timezone": {
+      "type": "string"
+    },
+    "communities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action_type": {
+            "type": "string"
+          },
+          "action_code": {
+            "type": "string"
+          },
+          "abbreviation": {
+            "type": "string"
+          },
+          "communities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "consumer_tags": {
+            "type": "object",
+            "properties": {
+              "AML": {
+                "type": "boolean"
+              },
+              "Finance": {
+                "type": "boolean"
+              },
+              "Regulatory": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "AML",
+              "Finance",
+              "Regulatory"
+            ]
+          },
+          "date_range_function": {
+            "type": "string"
+          },
+          "header_information": {
+            "type": "object",
+            "properties": {
+              "header_support": {
+                "type": "string"
+              },
+              "no_header_column": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "header_support",
+              "no_header_column"
+            ]
+          },
+          "parents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pii_information": {
+            "type": "object",
+            "properties": {
+              "csv_column_encryption": {
+                "type": "string"
+              },
+              "decrypt_method": {
+                "type": "string"
+              },
+              "encryption_support": {
+                "type": "string"
+              }
+            }
+          },
+          "query_reference": {
+            "type": "object",
+            "properties": {
+              "database_name": {
+                "type": "string"
+              },
+              "query": {
+                "type": "string"
+              },
+              "query_version": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "database_name",
+              "query"
+            ]
+          },
+          "report_file_name_pattern": {
+            "type": "string"
+          },
+          "report_name": {
+            "type": "string"
+          },
+          "schedule": {
+            "type": "object",
+            "properties": {
+              "crontab": {
+                "type": "string"
+              },
+              "timezone": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "crontab",
+              "timezone"
+            ]
+          },
+          "start_date": {
+            "type": "string"
+          },
+          "dataset": {
+            "type": "string"
+          },
+          "source_system": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "abbreviation",
+          "action_code",
+          "action_type",
+          "date_range_function",
+          "parents",
+          "query_reference",
+          "schedule"
+        ]
+      }
+    },
+    "generic_reporting_version": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "actions",
+    "communities",
+    "deployment_version",
+    "domain_code",
+    "domain_timezone",
+    "external_stage",
+    "generic_reporting_version",
+    "internal_stage",
+    "warehouse"
+  ]
+}
