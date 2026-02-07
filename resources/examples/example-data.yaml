@@ -1,0 +1,88 @@
+# Example deployment configuration data for testing
+# This represents a typical deployment structure with nested relationships
+
+deployment_version: "0.0.5"
+domain_code: "CO"
+
+warehouse:
+  auto_suspend: 60
+  max_cluster_count: 2
+  scaling_policy: "STANDARD"
+  warehouse_size: "MEDIUM"
+  warehouse_type: "STANDARD"
+
+internal_stage: "@INTERNAL_STAGE"
+external_stage: "@EXTERNAL_STAGE"
+domain_timezone: "America/Denver"
+
+communities:
+  - id: 10
+    name: "Denver Metro"
+  - id: 11
+    name: "Colorado Springs"
+  - id: 12
+    name: "Boulder Valley"
+  - id: 13
+    name: "Fort Collins"
+
+actions:
+  - action_type: "sensor"
+    action_code: "TEMP_MONITOR"
+    abbreviation: "TMP"
+    communities:
+      - "Denver Metro"
+      - "Boulder Valley"
+    consumer_tags:
+      AML: false
+      Finance: true
+      Regulatory: true
+    date_range_function: "CURRENT_DATE"
+    header_information:
+      header_support: "FULL"
+      no_header_column: false
+    parents:
+      - "BASE_SENSOR"
+    pii_information:
+      csv_column_encryption: "NONE"
+      decrypt_method: "N/A"
+      encryption_support: "OPTIONAL"
+    query_reference:
+      database_name: "ANALYTICS_DB"
+      query: "SELECT * FROM TEMPERATURE_DATA"
+      query_version: "1.0"
+    report_file_name_pattern: "temp_report_{date}.csv"
+    report_name: "Temperature Monitoring Report"
+    schedule:
+      crontab: "0 0 * * *"
+      timezone: "America/Denver"
+    start_date: "2024-01-01"
+    dataset: "SENSORS"
+    source_system: "IOT_PLATFORM"
+  - action_type: "report"
+    action_code: "DAILY_SUMMARY"
+    abbreviation: "DLY"
+    communities:
+      - "Denver Metro"
+    consumer_tags:
+      AML: false
+      Finance: true
+      Regulatory: false
+    date_range_function: "DATEADD(day, -1, CURRENT_DATE)"
+    header_information:
+      header_support: "BASIC"
+      no_header_column: false
+    parents:
+      - "BASE_REPORT"
+    query_reference:
+      database_name: "ANALYTICS_DB"
+      query: "SELECT * FROM DAILY_METRICS"
+    report_file_name_pattern: "daily_{date}.pdf"
+    report_name: "Daily Summary Report"
+    schedule:
+      crontab: "0 8 * * *"
+      timezone: "America/Denver"
+    start_date: "2024-01-01"
+    dataset: "REPORTS"
+    source_system: "REPORTING_ENGINE"
+
+generic_reporting_version: "2.1.0"
