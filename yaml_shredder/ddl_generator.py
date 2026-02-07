@@ -208,8 +208,15 @@ class DDLGenerator:
         """
         import re
         
+        # Validate identifier is not empty
+        if not identifier:
+            raise ValueError("Identifier cannot be empty")
+        
         # Validate identifier contains only safe ASCII characters
         # Allow: letters, digits, underscore, space, hyphen
+        # Spaces and hyphens are allowed because identifiers are derived from YAML keys
+        # which commonly use these characters (e.g., "my-config", "user name")
+        # These will be properly quoted by the dialect-specific quoting
         # Dots are excluded to prevent injection via qualified names
         # This prevents SQL injection via control characters, newlines, null bytes, etc.
         if not re.match(r'^[a-zA-Z0-9_\s\-]+$', identifier):
