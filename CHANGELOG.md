@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.3] - 2026-02-08
+
+### Added
+- **Depth Parameter for YAML Flattening**: Control dictionary flattening depth in YAML Shredder
+  - `max_depth` parameter: None (full flattening), 0 (no flattening), 1+ (progressive levels)
+  - Arrays always processed into tables regardless of depth
+  - CLI option: `--max-depth` added to yaml analyze, tables, ddl, load, shred commands
+  - Comprehensive test suite with 7 test cases covering all depth scenarios
+
+### Changed
+- **Table Generation Architecture**: Restructured how root-level YAML data is processed
+  - Root scalars → descriptor table (named after source file)
+  - Root dictionaries → separate tables (one table per dict)
+  - Root arrays → separate tables (unchanged behavior)
+  - Deduplication applied to all generated tables
+- **StructureAnalyzer**: Added depth awareness for dictionary nesting analysis
+
+### Security
+- **Data Sanitization**: Complete removal of proprietary data from codebase
+  - All proprietary deployment codes replaced with generic equivalents
+  - All proprietary business names replaced with generic region names
+  - Added `notebooks/` directory to .gitignore
+  - Added SANITIZATION_SUMMARY.md for maintenance guidelines
+  - Updated all example scripts with sanitized references
+
 ## [3.0.2] - 2026-02-08
 
 ### Added
