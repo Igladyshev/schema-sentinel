@@ -336,7 +336,7 @@ def compare_yaml(yaml1: Path, yaml2: Path, output: Path | None, db_dir: Path, ke
             click.echo(f"  - {db2_name}")
     except Exception as e:
         click.echo(f"✗ Error: {e}", err=True)
-        raise click.Abort()
+        raise click.Abort() from e
 
 
 # =============================================================================
