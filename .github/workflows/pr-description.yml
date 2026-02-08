@@ -1,0 +1,200 @@
+name: Auto-Generate PR Description
+
+on:
+  pull_request:
+    types: [opened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  generate-description:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for proper commit analysis
+
+      - name: Generate PR Description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Get PR details
+            const pr = context.payload.pull_request;
+            const baseRef = pr.base.ref;
+            const headRef = pr.head.ref;
+
+            // Skip if PR already has a custom description (more than just template)
+            const currentBody = pr.body || '';
+            const hasCustomDescription = currentBody.length > 200 &&
+                                        !currentBody.includes('<!-- Brief description');
+
+            if (hasCustomDescription) {
+              console.log('PR already has a custom description, skipping auto-generation');
+              return;
+            }
+
+            // Get commits in this PR
+            const { data: commits } = await github.rest.pulls.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+            });
+
+            // Parse commits by type
+            const features = [];
+            const fixes = [];
+            const refactors = [];
+            const tests = [];
+            const docs = [];
+            const chores = [];
+            const other = [];
+
+            commits.forEach(commit => {
+              const msg = commit.commit.message;
+              const firstLine = msg.split('\n')[0];
+
+              if (firstLine.startsWith('feat:') || firstLine.startsWith('feat(')) {
+                features.push(firstLine.replace(/^feat(\([^)]+\))?:\s*/, ''));
+              } else if (firstLine.startsWith('fix:') || firstLine.startsWith('fix(')) {
+                fixes.push(firstLine.replace(/^fix(\([^)]+\))?:\s*/, ''));
+              } else if (firstLine.startsWith('refactor:') || firstLine.startsWith('refactor(')) {
+                refactors.push(firstLine.replace(/^refactor(\([^)]+\))?:\s*/, ''));
+              } else if (firstLine.startsWith('test:') || firstLine.startsWith('test(')) {
+                tests.push(firstLine.replace(/^test(\([^)]+\))?:\s*/, ''));
+              } else if (firstLine.startsWith('docs:') || firstLine.startsWith('docs(')) {
+                docs.push(firstLine.replace(/^docs(\([^)]+\))?:\s*/, ''));
+              } else if (firstLine.startsWith('chore:') || firstLine.startsWith('chore(')) {
+                chores.push(firstLine.replace(/^chore(\([^)]+\))?:\s*/, ''));
+              } else {
+                other.push(firstLine);
+              }
+            });
+
+            // Build description
+            let description = '## What does this PR do?\n\n';
+
+            // Generate summary based on commits
+            if (features.length > 0) {
+              description += '**New Features:**\n';
+              features.forEach(f => description += `- ${f}\n`);
+              description += '\n';
+            }
+
+            if (fixes.length > 0) {
+              description += '**Bug Fixes:**\n';
+              fixes.forEach(f => description += `- ${f}\n`);
+              description += '\n';
+            }
+
+            if (refactors.length > 0) {
+              description += '**Refactoring:**\n';
+              refactors.forEach(f => description += `- ${f}\n`);
+              description += '\n';
+            }
+
+            if (tests.length > 0) {
+              description += '**Tests:**\n';
+              tests.forEach(f => description += `- ${f}\n`);
+              description += '\n';
+            }
+
+            if (docs.length > 0) {
+              description += '**Documentation:**\n';
+              docs.forEach(f => description += `- ${f}\n`);
+              description += '\n';
+            }
+
+            if (other.length > 0 && features.length === 0 && fixes.length === 0) {
+              description += '**Changes:**\n';
+              other.forEach(f => description += `- ${f}\n`);
+              description += '\n';
+            }
+
+            // Get files changed
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+            });
+
+            const additions = files.reduce((sum, f) => sum + f.additions, 0);
+            const deletions = files.reduce((sum, f) => sum + f.deletions, 0);
+
+            description += `## Why?\n\n`;
+            description += `This PR includes ${commits.length} commit(s) with ${additions} additions and ${deletions} deletions across ${files.length} file(s).\n\n`;
+            description += `<!-- Add context about why these changes are needed -->\n\n`;
+
+            // Breaking changes detection
+            const hasBreakingChanges = commits.some(c =>
+              c.commit.message.includes('BREAKING CHANGE') ||
+              c.commit.message.includes('!:')
+            );
+
+            description += `## How to test?\n\n`;
+
+            // Suggest test commands based on changes
+            const testSuggestions = [];
+            const fileChanges = files.map(f => f.filename);
+
+            if (fileChanges.some(f => f.includes('cli.py'))) {
+              testSuggestions.push('Test CLI commands:');
+              testSuggestions.push('```bash');
+              testSuggestions.push('uv run schema-sentinel --help');
+              testSuggestions.push('uv run schema-sentinel yaml --help');
+              testSuggestions.push('```');
+            }
+
+            if (fileChanges.some(f => f.startsWith('tests/'))) {
+              testSuggestions.push('Run test suite:');
+              testSuggestions.push('```bash');
+              testSuggestions.push('uv run pytest tests/ -v');
+              testSuggestions.push('```');
+            }
+
+            if (testSuggestions.length > 0) {
+              description += testSuggestions.join('\n') + '\n\n';
+            } else {
+              description += '<!-- Add steps to verify the changes work -->\n\n';
+            }
+
+            description += `## Notes\n\n`;
+
+            if (hasBreakingChanges) {
+              description += `⚠️ **BREAKING CHANGES** - This PR contains breaking changes!\n\n`;
+            }
+
+            // Detect if docs need updating
+            const hasCodeChanges = files.some(f =>
+              f.filename.endsWith('.py') &&
+              !f.filename.startsWith('tests/')
+            );
+            const hasDocChanges = files.some(f => f.filename.endsWith('.md'));
+
+            if (hasCodeChanges && !hasDocChanges) {
+              description += `📝 Consider updating documentation for these changes\n\n`;
+            }
+
+            description += `**Commits:** ${commits.length}\n`;
+            description += `**Files changed:** ${files.length}\n`;
+            description += `**Branch:** \`${headRef}\` → \`${baseRef}\`\n\n`;
+            description += `---\n\n`;
+            description += `<details>\n<summary>📋 Detailed Commit List</summary>\n\n`;
+            commits.forEach(commit => {
+              const shortSha = commit.sha.substring(0, 7);
+              const msg = commit.commit.message.split('\n')[0];
+              description += `- \`${shortSha}\` ${msg}\n`;
+            });
+            description += `\n</details>\n`;
+
+            // Update PR description
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              body: description
+            });
+
+            console.log('✓ PR description auto-generated successfully');

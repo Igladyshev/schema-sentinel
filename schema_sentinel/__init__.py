@@ -14,6 +14,7 @@ from schema_sentinel.metadata_manager.engine import SfAlchemyEngine, SqLiteAqlAl
 from schema_sentinel.metadata_manager.enums import ConnectMode, Environment
 from schema_sentinel.metadata_manager.model.database import Database
 from schema_sentinel.metadata_manager.utils import get_config
+from schema_sentinel.yaml_comparator import YAMLComparator
 
 # Initialize configuration manager
 _config = get_config_manager()
