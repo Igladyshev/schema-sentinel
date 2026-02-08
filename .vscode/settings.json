@@ -33,6 +33,9 @@
   ],
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
+  "files.associations": {
+    "**/conda-forge-recipe/meta.yaml": "jinja"
+  },
   "notebook.formatOnSave.enabled": true,
   "notebook.codeActionsOnSave": {
     "source.fixAll": "explicit",
