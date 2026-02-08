@@ -37,36 +37,17 @@ def main():
 
 
 # =============================================================================
-# Schema Comparison Commands
+# YAML Command Group - YAML/JSON Processing
 # =============================================================================
 
 
-@main.command()
-@click.argument("database")
-@click.option("--env", "-e", default="dev", help="Environment (dev, staging, prod)")
-def extract(database: str, env: str):
-    """Extract metadata from a Snowflake database."""
-    click.echo(f"Extracting metadata from {database} in {env} environment...")
-    # Add implementation
+@main.group()
+def yaml():
+    """YAML/JSON processing commands - analyze, transform, load, and compare."""
+    pass
 
 
-@main.command()
-@click.argument("source")
-@click.argument("target")
-@click.option("--output", "-o", default="comparison_report", help="Output file name")
-@click.option("--format", "-f", "fmt", default="md", type=click.Choice(["md", "html", "json"]), help="Output format")
-def compare(source: str, target: str, output: str, fmt: str):
-    """Compare two schema snapshots."""
-    click.echo(f"Comparing {source} with {target}...")
-    # Add implementation
-
-
-# =============================================================================
-# YAML Shredder Commands
-# =============================================================================
-
-
-@main.command()
+@yaml.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file for analysis JSON")
 def analyze(input_file: Path, output: Path | None):
@@ -86,7 +67,7 @@ def analyze(input_file: Path, output: Path | None):
         click.echo(f"\n✓ Analysis saved to: {output}")
 
 
-@main.command()
+@yaml.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file for schema JSON")
 def schema(input_file: Path, output: Path | None):
@@ -115,7 +96,56 @@ def schema(input_file: Path, output: Path | None):
         click.echo(f"\n{json.dumps(schema_dict, indent=2)}")
 
 
-@main.command()
+@yaml.command()
+@click.argument("input_file", type=click.Path(exists=True, path_type=Path))
+@click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file for analysis JSON")
+def analyze(input_file: Path, output: Path | None):
+    """Analyze YAML/JSON structure and identify nested elements."""
+    from yaml_shredder.structure_analyzer import StructureAnalyzer
+
+    click.echo(f"Analyzing: {input_file}")
+    data = load_yaml_or_json(input_file)
+
+    analyzer = StructureAnalyzer()
+    analysis = analyzer.analyze(data)
+    analyzer.print_summary(analysis)
+
+    if output:
+        with open(output, "w") as f:
+            json.dump(analysis, f, indent=2)
+        click.echo(f"\n✓ Analysis saved to: {output}")
+
+
+@yaml.command()
+@click.argument("input_file", type=click.Path(exists=True, path_type=Path))
+@click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file for schema JSON")
+def schema(input_file: Path, output: Path | None):
+    """Generate JSON schema from YAML/JSON file."""
+    from yaml_shredder.schema_generator import SchemaGenerator
+
+    click.echo(f"Generating schema from: {input_file}")
+
+    generator = SchemaGenerator()
+    if input_file.suffix.lower() == ".json":
+        generator.add_json_file(input_file)
+    else:
+        generator.add_yaml_file(input_file)
+
+    schema_dict = generator.generate_schema()
+    stats = generator.get_stats()
+
+    click.echo("\n✓ Schema generated:")
+    click.echo(f"  Properties: {stats['schema_properties']}")
+    click.echo(f"  Required fields: {stats['required_fields']}")
+
+    if output:
+        generator.save_schema(output)
+        click.echo(f"\n✓ Schema saved to: {output}")
+    else:
+        click.echo(f"\n{json.dumps(schema_dict, indent=2)}")
+
+
+@yaml.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--output", "-o", type=click.Path(path_type=Path), help="Output directory for tables")
 @click.option(
@@ -143,7 +173,7 @@ def tables(input_file: Path, output: Path | None, fmt: str, root_name: str):
             click.echo(df.head(3).to_string(index=False))
 
 
-@main.command()
+@yaml.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file for DDL")
 @click.option(
@@ -175,7 +205,7 @@ def ddl(input_file: Path, output: Path | None, dialect: str, root_name: str):
         ddl_gen.print_ddl()
 
 
-@main.command()
+@yaml.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--database", "-db", required=True, type=click.Path(path_type=Path), help="SQLite database file")
 @click.option("--root-name", "-r", default="ROOT", help="Name for the root table")
@@ -212,7 +242,7 @@ def load(input_file: Path, database: Path, root_name: str, if_exists: str, creat
     loader.disconnect()
 
 
-@main.command(name="shred")
+@yaml.command(name="shred")
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--database", "-db", required=True, type=click.Path(path_type=Path), help="SQLite database file")
 @click.option("--root-name", "-r", default="ROOT", help="Name for the root table")
@@ -284,7 +314,7 @@ def shred_all(input_file: Path, database: Path, root_name: str, ddl_output: Path
     click.echo(f"Database: {database}")
 
 
-@main.command()
+@yaml.command(name="compare")
 @click.argument("yaml1", type=click.Path(exists=True, path_type=Path))
 @click.argument("yaml2", type=click.Path(exists=True, path_type=Path))
 @click.option("--output", "-o", type=click.Path(path_type=Path), help="Output path for comparison report (markdown)")
@@ -343,6 +373,37 @@ def compare_yaml(yaml1: Path, yaml2: Path, output: Path | None, db_dir: Path, ke
     except Exception as e:
         click.echo(f"✗ Error: {e}", err=True)
         raise click.Abort()
+
+
+# =============================================================================
+# Schema Command Group - Snowflake Schema Management
+# =============================================================================
+
+
+@main.group()
+def schema():
+    """Snowflake schema extraction and comparison commands."""
+    pass
+
+
+@schema.command()
+@click.argument("database")
+@click.option("--env", "-e", default="dev", help="Environment (dev, staging, prod)")
+def extract(database: str, env: str):
+    """Extract metadata from a Snowflake database."""
+    click.echo(f"Extracting metadata from {database} in {env} environment...")
+    # Add implementation
+
+
+@schema.command()
+@click.argument("source")
+@click.argument("target")
+@click.option("--output", "-o", default="comparison_report", help="Output file name")
+@click.option("--format", "-f", "fmt", default="md", type=click.Choice(["md", "html", "json"]), help="Output format")
+def compare(source: str, target: str, output: str, fmt: str):
+    """Compare two Snowflake schema snapshots."""
+    click.echo(f"Comparing {source} with {target}...")
+    # Add implementation
 
 
 if __name__ == "__main__":

@@ -74,21 +74,43 @@ source .venv/bin/activate  # Linux/macOS or .venv\Scripts\activate on Windows
 uv pip install -e ".[dev,jupyter]"
 ```
 
-### Quick Start - YAML Shredder
+### Quick Start - YAML Processing
 
 #### Command Line Interface
-```bash
-# Complete workflow: YAML → Tables → DDL → SQLite
-uv run python yaml_shredder_cli.py all config.yaml -db output.db -r CONFIG
 
-# Analyze structure only
-uv run python yaml_shredder_cli.py analyze config.yaml
+Schema Sentinel provides organized command groups for different tasks:
+
+**YAML Processing Commands** (`schema-sentinel yaml`)
+```bash
+# Analyze YAML structure
+uv run schema-sentinel yaml analyze config.yaml
+
+# Generate JSON schema
+uv run schema-sentinel yaml schema config.yaml -o schema.json
 
 # Generate relational tables
-uv run python yaml_shredder_cli.py tables config.yaml -o output/ -f csv
+uv run schema-sentinel yaml tables config.yaml -o output/ -f csv
 
 # Generate SQL DDL
-uv run python yaml_shredder_cli.py ddl config.yaml -o schema.sql -d snowflake
+uv run schema-sentinel yaml ddl config.yaml -o schema.sql -d snowflake
+
+# Load data into SQLite
+uv run schema-sentinel yaml load config.yaml -db output.db -r CONFIG
+
+# Complete workflow: analyze → tables → DDL → load
+uv run schema-sentinel yaml shred config.yaml -db output.db -r CONFIG
+
+# Compare two YAML files
+uv run schema-sentinel yaml compare file1.yaml file2.yaml -o comparison.md
+```
+
+**Schema Management Commands** (`schema-sentinel schema`)
+```bash
+# Extract Snowflake schema metadata
+uv run schema-sentinel schema extract MY_DATABASE --env prod
+
+# Compare two schema snapshots
+uv run schema-sentinel schema compare snapshot1 snapshot2 -o report.md
 ```
 
 #### Python API
@@ -109,17 +131,6 @@ loader.load_tables(tables)
 ```
 
 #### YAML Comparison
-```bash
-# Compare two YAML files and generate report
-uv run schema-sentinel compare-yaml config1.yaml config2.yaml -o comparison.md
-
-# Keep databases for inspection
-uv run schema-sentinel compare-yaml config1.yaml config2.yaml --keep-dbs
-
-# Custom root table name
-uv run schema-sentinel compare-yaml deploy1.yaml deploy2.yaml --root-name deployment
-```
-
 Python API:
 ```python
 from pathlib import Path
