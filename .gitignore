@@ -138,6 +138,9 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+# Notebooks may contain proprietary data or analysis
+notebooks/
+!notebooks/.gitkeep
 
 # IPython
 profile_default/

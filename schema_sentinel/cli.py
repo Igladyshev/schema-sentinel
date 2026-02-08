@@ -50,14 +50,20 @@ def yaml():
 @yaml.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file for analysis JSON")
-def analyze(input_file: Path, output: Path | None):
+@click.option(
+    "--max-depth",
+    type=int,
+    default=None,
+    help="Max depth for flattening (affects which structures become tables)",
+)
+def analyze(input_file: Path, output: Path | None, max_depth: int | None):
     """Analyze YAML/JSON structure and identify nested elements."""
     from yaml_shredder.structure_analyzer import StructureAnalyzer
 
     click.echo(f"Analyzing: {input_file}")
     data = load_yaml_or_json(input_file)
 
-    analyzer = StructureAnalyzer()
+    analyzer = StructureAnalyzer(max_depth=max_depth)
     analysis = analyzer.analyze(data)
     analyzer.print_summary(analysis)
 
@@ -112,15 +118,22 @@ def generate_schema(input_file: Path, output: Path | None):
     "--format", "-f", "fmt", default="csv", type=click.Choice(["csv", "json", "parquet"]), help="Output format"
 )
 @click.option("--root-name", "-r", default="ROOT", help="Name for the root table")
-def tables(input_file: Path, output: Path | None, fmt: str, root_name: str):
+@click.option(
+    "--depth",
+    "-d",
+    type=int,
+    default=None,
+    help="Max depth for flattening (0=none, 1=keep variants, 2+=flatten variants, None=flatten all)",
+)
+def tables(input_file: Path, output: Path | None, fmt: str, root_name: str, depth: int | None):
     """Generate relational tables from nested YAML/JSON."""
     from yaml_shredder.table_generator import TableGenerator
 
     click.echo(f"Generating tables from: {input_file}")
     data = load_yaml_or_json(input_file)
 
-    table_gen = TableGenerator()
-    tables_dict = table_gen.generate_tables(data, root_table_name=root_name)
+    table_gen = TableGenerator(max_depth=depth)
+    tables_dict = table_gen.generate_tables(data, root_table_name=root_name, source_file=input_file)
     table_gen.print_summary()
 
     if output:
@@ -148,7 +161,13 @@ def tables(input_file: Path, output: Path | None, fmt: str, root_name: str):
     help="SQL dialect",
 )
 @click.option("--root-name", "-r", default="ROOT", help="Name for the root table")
-def ddl(input_file: Path, output: Path | None, dialect: str, root_name: str):
+@click.option(
+    "--max-depth",
+    type=int,
+    default=None,
+    help="Max depth for flattening (0=none, 1=keep variants, 2+=flatten variants, None=flatten all)",
+)
+def ddl(input_file: Path, output: Path | None, dialect: str, root_name: str, max_depth: int | None):
     """Generate SQL DDL from YAML/JSON structure."""
     from yaml_shredder.ddl_generator import DDLGenerator
     from yaml_shredder.table_generator import TableGenerator
@@ -156,8 +175,8 @@ def ddl(input_file: Path, output: Path | None, dialect: str, root_name: str):
     click.echo(f"Generating {dialect} DDL from: {input_file}")
     data = load_yaml_or_json(input_file)
 
-    table_gen = TableGenerator()
-    tables_dict = table_gen.generate_tables(data, root_table_name=root_name)
+    table_gen = TableGenerator(max_depth=max_depth)
+    tables_dict = table_gen.generate_tables(data, root_table_name=root_name, source_file=input_file)
 
     ddl_gen = DDLGenerator(dialect=dialect)
     ddl_gen.generate_ddl(tables_dict, table_gen.relationships)
@@ -178,7 +197,21 @@ def ddl(input_file: Path, output: Path | None, dialect: str, root_name: str):
 )
 @click.option("--create-ddl", is_flag=True, help="Create tables before loading")
 @click.option("--no-indexes", is_flag=True, help="Skip index creation")
-def load(input_file: Path, database: Path, root_name: str, if_exists: str, create_ddl: bool, no_indexes: bool):
+@click.option(
+    "--max-depth",
+    type=int,
+    default=None,
+    help="Max depth for flattening (0=none, 1=keep variants, 2+=flatten variants, None=flatten all)",
+)
+def load(
+    input_file: Path,
+    database: Path,
+    root_name: str,
+    if_exists: str,
+    create_ddl: bool,
+    no_indexes: bool,
+    max_depth: int | None,
+):
     """Load YAML/JSON data into SQLite database."""
     from yaml_shredder.data_loader import SQLiteLoader
     from yaml_shredder.ddl_generator import DDLGenerator
@@ -187,8 +220,8 @@ def load(input_file: Path, database: Path, root_name: str, if_exists: str, creat
     click.echo(f"Loading data from: {input_file}")
     data = load_yaml_or_json(input_file)
 
-    table_gen = TableGenerator()
-    tables_dict = table_gen.generate_tables(data, root_table_name=root_name)
+    table_gen = TableGenerator(max_depth=max_depth)
+    tables_dict = table_gen.generate_tables(data, root_table_name=root_name, source_file=input_file)
     table_gen.print_summary()
 
     click.echo(f"\nLoading to database: {database}")
@@ -218,7 +251,15 @@ def load(input_file: Path, database: Path, root_name: str, if_exists: str, creat
     type=click.Choice(["snowflake", "postgresql", "mysql", "sqlite"]),
     help="DDL dialect for --ddl-output",
 )
-def shred_all(input_file: Path, database: Path, root_name: str, ddl_output: Path | None, dialect: str):
+@click.option(
+    "--max-depth",
+    type=int,
+    default=None,
+    help="Max depth for flattening (0=none, 1=keep variants, 2+=flatten variants, None=flatten all)",
+)
+def shred_all(
+    input_file: Path, database: Path, root_name: str, ddl_output: Path | None, dialect: str, max_depth: int | None
+):
     """Complete workflow: analyze → tables → DDL → load to SQLite."""
     from yaml_shredder.data_loader import SQLiteLoader
     from yaml_shredder.ddl_generator import DDLGenerator
@@ -236,7 +277,7 @@ def shred_all(input_file: Path, database: Path, root_name: str, ddl_output: Path
     click.echo(f"\n{'=' * 70}")
     click.echo("STEP 1: STRUCTURE ANALYSIS")
     click.echo(f"{'=' * 70}")
-    analyzer = StructureAnalyzer()
+    analyzer = StructureAnalyzer(max_depth=max_depth)
     analysis = analyzer.analyze(data)
     analyzer.print_summary(analysis)
 
@@ -244,8 +285,8 @@ def shred_all(input_file: Path, database: Path, root_name: str, ddl_output: Path
     click.echo(f"\n{'=' * 70}")
     click.echo("STEP 2: TABLE GENERATION")
     click.echo(f"{'=' * 70}")
-    table_gen = TableGenerator()
-    tables_dict = table_gen.generate_tables(data, root_table_name=root_name)
+    table_gen = TableGenerator(max_depth=max_depth)
+    tables_dict = table_gen.generate_tables(data, root_table_name=root_name, source_file=input_file)
     table_gen.print_summary()
 
     # Step 3: Generate DDL

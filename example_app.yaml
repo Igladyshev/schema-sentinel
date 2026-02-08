@@ -1,0 +1,24 @@
+name: MyApplication
+version: 1.0.0
+deployment:
+  environment: production
+  region: us-east-1
+  configuration:
+    timeout_seconds: 300
+    max_retries: 5
+    endpoints:
+      - name: api
+        url: https://api.example.com
+      - name: backup
+        url: https://backup.example.com
+query_reference:
+  primary_query: SELECT * FROM users
+  filters:
+    active: true
+    verified: true
+metadata:
+  created_by: admin
+  created_at: 2024-01-01
+  tags:
+    - production
+    - critical

@@ -26,7 +26,7 @@ pytestmark = pytest.mark.skipif(
 @pytest.fixture
 def valid_yaml_path():
     """Path to valid YAML test file."""
-    return Path(__file__).parent.parent / "resources" / "master-mpm" / "BS" / "BS_005-mpm.yaml"
+    return Path(__file__).parent.parent / "resources" / "master-mpm" / "XY" / "XY_123-mpm.yaml"
 
 
 @pytest.fixture
@@ -149,7 +149,7 @@ class TestSaveCommunities:
         data_arg = call_args[0][0]
         assert len(data_arg) == 2
         assert data_arg[0]["community_id"] == 8571101
-        assert data_arg[0]["community_name"] == "Baha_Mar_Casino"
+        assert data_arg[0]["community_name"] == "Region_Alpha"
 
         # Check schema
         schema_arg = call_args[1]["schema"]
@@ -262,7 +262,7 @@ class TestReadOperations:
 
     def test_read_deployment(self, saver, mock_session):
         """Test reading deployment configuration."""
-        df = saver.read_deployment("BS_005")
+        df = saver.read_deployment("XY_123")
 
         assert df is not None
         mock_session.table.assert_called_with('"TEST_DB"."TEST_SCHEMA"."DEPLOYMENTS"')
@@ -277,21 +277,21 @@ class TestReadOperations:
 
     def test_read_communities(self, saver, mock_session):
         """Test reading communities."""
-        df = saver.read_communities("BS_005")
+        df = saver.read_communities("XY_123")
 
         assert df is not None
         mock_session.table.assert_called_with('"TEST_DB"."TEST_SCHEMA"."COMMUNITIES"')
 
     def test_read_sensor_actions(self, saver, mock_session):
         """Test reading sensor actions."""
-        df = saver.read_sensor_actions("BS_005")
+        df = saver.read_sensor_actions("XY_123")
 
         assert df is not None
         mock_session.table.assert_called_with('"TEST_DB"."TEST_SCHEMA"."SENSOR_ACTIONS"')
 
     def test_read_report_actions(self, saver, mock_session):
         """Test reading report actions."""
-        df = saver.read_report_actions("BS_005")
+        df = saver.read_report_actions("XY_123")
 
         assert df is not None
         mock_session.table.assert_called_with('"TEST_DB"."TEST_SCHEMA"."REPORT_ACTIONS"')

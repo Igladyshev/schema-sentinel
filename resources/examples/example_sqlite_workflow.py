@@ -12,7 +12,7 @@ from yaml_shredder.ddl_generator import DDLGenerator
 deployments_df = pd.DataFrame(
     {
         "id": [1, 2, 3],
-        "deployment_code": ["AZ_001", "BS_005", "CO_010"],
+        "deployment_code": ["XY_123", "AB_456", "CD_789"],
         "name": ["Arizona Deployment 1", "Big Sky Deployment 5", "Colorado Deployment 10"],
         "region": ["Southwest", "Northwest", "Mountain"],
         "active": [True, True, False],

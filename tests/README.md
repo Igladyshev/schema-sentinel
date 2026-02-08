@@ -24,14 +24,14 @@ These tests will be **skipped** if the `resources/master-mpm/` directory is not 
 If you have access to the MPM data files, place them in:
 ```
 resources/master-mpm/
-├── AZ/
-│   └── AZ_005-mpm.yaml
-├── BS/
-│   └── BS_005-mpm.yaml
-├── CO/
-│   └── CO_005-mpm.yaml
-└── WY/
-    └── WY_005-mpm.yaml
+├── XY/
+│   └── XY_123-mpm.yaml
+├── AB/
+│   └── AB_456-mpm.yaml
+├── CD/
+│   └── CD_789-mpm.yaml
+└── EF/
+    └── EF_012-mpm.yaml
 ```
 
 The tests will automatically detect and use these files if available.

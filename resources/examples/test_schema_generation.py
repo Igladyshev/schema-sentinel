@@ -9,6 +9,7 @@ from yaml_shredder.schema_generator import generate_schema_from_directory
 def main():
     """Generate schema from MPM YAML files."""
     # Set paths
+    # Note: master-mpm directory contains proprietary data and is gitignored
     project_root = Path(__file__).parent
     mpm_directory = project_root / "resources" / "master-mpm"
     output_file = project_root / "resources" / "generated-mpm-schema.json"
