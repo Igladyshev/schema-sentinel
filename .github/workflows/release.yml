@@ -46,6 +46,15 @@ jobs:
         name: python-package-distributions
         path: dist/
 
+    - name: Verify PyPI token exists
+      run: |
+        if [ -z "${{ secrets.PYPI_API_TOKEN }}" ]; then
+          echo "ERROR: PYPI_API_TOKEN secret is not set!"
+          echo "Please add it at: https://github.com/${{ github.repository }}/settings/secrets/actions"
+          exit 1
+        fi
+        echo "✓ PyPI token is configured"
+
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
