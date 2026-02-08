@@ -134,6 +134,7 @@ SNOWFLAKE_SCHEMAS=PUBLIC,ANALYTICS  # Optional
   - [Contributing Guide](wiki/Contributing.md) - How to contribute
   - [Security Guide](wiki/Security.md) - Security best practices
   - [Future Development Plan](wiki/Future-Development-Plan.md) - Roadmap and upcoming features
+- [Installation & Setup Guide](README.md#-quick-start)
 - [Development Guide](DEVELOPMENT.md) - Detailed development instructions
 - [Contributing Guide](CONTRIBUTING.md) - How to contribute
 - [Security Policy](SECURITY.md) - Security guidelines and reporting

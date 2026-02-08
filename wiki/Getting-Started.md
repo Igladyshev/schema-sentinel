@@ -68,7 +68,7 @@ source .venv/bin/activate
 Copy the example environment file:
 
 ```bash
-cp resources/examples/.env.example .env
+cp .env.example .env
 ```
 
 ### 2. Configure Snowflake Credentials
