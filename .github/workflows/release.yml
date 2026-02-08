@@ -38,6 +38,11 @@ jobs:
     name: Publish to PyPI
     needs: build
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/schema-sentinel
+    permissions:
+      id-token: write
 
     steps:
     - name: Download distribution packages
@@ -46,20 +51,8 @@ jobs:
         name: python-package-distributions
         path: dist/
 
-    - name: Verify PyPI token exists
-      run: |
-        if [ -z "${{ secrets.PYPI_API_TOKEN }}" ]; then
-          echo "ERROR: PYPI_API_TOKEN secret is not set!"
-          echo "Please add it at: https://github.com/${{ github.repository }}/settings/secrets/actions"
-          exit 1
-        fi
-        echo "✓ PyPI token is configured"
-
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
 
   github-release:
     name: Create GitHub Release
