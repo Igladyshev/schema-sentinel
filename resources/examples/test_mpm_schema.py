@@ -18,7 +18,7 @@ pytestmark = pytest.mark.skipif(
 @pytest.fixture
 def valid_yaml_path():
     """Path to valid YAML test file."""
-    return Path(__file__).parent.parent / "resources" / "master-mpm" / "BS" / "BS_005-mpm.yaml"
+    return Path(__file__).parent.parent / "resources" / "master-mpm" / "XY" / "XY_123-mpm.yaml"
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ class TestMPMSchemaValidation:
     """Test cases for MPM schema validation."""
 
     def test_valid_yaml_file(self, valid_yaml_path):
-        """Test that the actual BS_005-mpm.yaml file is valid."""
+        """Test that the actual XY_123-mpm.yaml file is valid."""
         is_valid, error = MPMConfig.validate_yaml_file(valid_yaml_path)
         assert is_valid is True, f"Valid YAML should pass validation. Error: {error}"
         assert error is None
@@ -53,14 +53,14 @@ class TestMPMSchemaValidation:
     def test_missing_required_field_deployment_version(self, temp_yaml_file):
         """Test validation fails when deployment_version is missing."""
         yaml_content = """
-domain_code: BS
+domain_code: XY
 warehouse:
   auto_suspend: 120
   max_cluster_count: 4
   scaling_policy: STANDARD
   warehouse_size: MEDIUM
   warehouse_type: SNOWPARK-OPTIMIZED
-internal_stage: GENERIC_REPORTING.BS_005.REPORTING
+internal_stage: GENERIC_REPORTING.XY_123.REPORTING
 external_stage: GENERIC_REPORTING.REPORTING.PRODUCTION
 domain_timezone: US / Eastern
 communities:
@@ -89,14 +89,14 @@ actions:
         """Test validation fails with invalid deployment_version pattern."""
         yaml_content = """
 deployment_version: INVALID
-domain_code: BS
+domain_code: XY
 warehouse:
   auto_suspend: 120
   max_cluster_count: 4
   scaling_policy: STANDARD
   warehouse_size: MEDIUM
   warehouse_type: SNOWPARK-OPTIMIZED
-internal_stage: GENERIC_REPORTING.BS_005.REPORTING
+internal_stage: GENERIC_REPORTING.XY_123.REPORTING
 external_stage: GENERIC_REPORTING.REPORTING.PRODUCTION
 domain_timezone: US / Eastern
 communities:
@@ -127,14 +127,14 @@ actions:
         """Test validation fails with invalid action_type."""
         yaml_content = """
 deployment_version: 0.0.5
-domain_code: BS
+domain_code: XY
 warehouse:
   auto_suspend: 120
   max_cluster_count: 4
   scaling_policy: STANDARD
   warehouse_size: MEDIUM
   warehouse_type: SNOWPARK-OPTIMIZED
-internal_stage: GENERIC_REPORTING.BS_005.REPORTING
+internal_stage: GENERIC_REPORTING.XY_123.REPORTING
 external_stage: GENERIC_REPORTING.REPORTING.PRODUCTION
 domain_timezone: US / Eastern
 communities:
@@ -163,15 +163,15 @@ actions:
     def test_invalid_crontab_pattern(self, temp_yaml_file):
         """Test validation fails with invalid crontab pattern."""
         yaml_content = """
-deployment_version: BS_005
-domain_code: BS
+deployment_version: XY_123
+domain_code: XY
 warehouse:
   auto_suspend: 120
   max_cluster_count: 4
   scaling_policy: STANDARD
   warehouse_size: MEDIUM
   warehouse_type: SNOWPARK-OPTIMIZED
-internal_stage: GENERIC_REPORTING.BS_005.REPORTING
+internal_stage: GENERIC_REPORTING.XY_123.REPORTING
 external_stage: GENERIC_REPORTING.REPORTING.PRODUCTION
 domain_timezone: US / Eastern
 communities:
@@ -200,14 +200,14 @@ actions:
         """Test validation fails with negative auto_suspend value."""
         yaml_content = """
 deployment_version: 0.0.5
-domain_code: BS
+domain_code: XY
 warehouse:
   auto_suspend: -1
   max_cluster_count: 4
   scaling_policy: STANDARD
   warehouse_size: MEDIUM
   warehouse_type: SNOWPARK-OPTIMIZED
-internal_stage: GENERIC_REPORTING.BS_005.REPORTING
+internal_stage: GENERIC_REPORTING.XY_123.REPORTING
 external_stage: GENERIC_REPORTING.REPORTING.PRODUCTION
 domain_timezone: US / Eastern
 communities:
@@ -236,14 +236,14 @@ actions:
         """Test validation fails with invalid warehouse_size."""
         yaml_content = """
 deployment_version: 0.0.5
-domain_code: BS
+domain_code: XY
 warehouse:
   auto_suspend: 120
   max_cluster_count: 4
   scaling_policy: STANDARD
   warehouse_size: INVALID_SIZE
   warehouse_type: SNOWPARK-OPTIMIZED
-internal_stage: GENERIC_REPORTING.BS_005.REPORTING
+internal_stage: GENERIC_REPORTING.XY_123.REPORTING
 external_stage: GENERIC_REPORTING.REPORTING.PRODUCTION
 domain_timezone: US / Eastern
 communities:

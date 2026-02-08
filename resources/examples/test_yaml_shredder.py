@@ -14,7 +14,7 @@ from yaml_shredder.table_generator import TableGenerator
 def main():
     """Test all YAML shredder components."""
     # Use one MPM file for testing
-    yaml_file = Path("resources/master-mpm/BS/BS_005-mpm.yaml")
+    yaml_file = Path("resources/master-mpm/XY/XY_123-mpm.yaml")
 
     print(f"\n{'=' * 60}")
     print("YAML SHREDDER - COMPREHENSIVE TEST")

@@ -18,7 +18,7 @@ pytestmark = pytest.mark.skipif(
 @pytest.fixture
 def valid_yaml_path():
     """Path to valid YAML test file."""
-    return Path(__file__).parent.parent / "resources" / "master-mpm" / "BS" / "BS_005-mpm.yaml"
+    return Path(__file__).parent.parent / "resources" / "master-mpm" / "XY" / "XY_123-mpm.yaml"
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ class TestMPMConfigProperties:
 
     def test_domain_code(self, mpm_config):
         """Test domain_code property."""
-        assert mpm_config.domain_code == "BS"
+        assert mpm_config.domain_code == "XY"
 
     def test_warehouse_config(self, mpm_config):
         """Test warehouse_config property."""
@@ -48,7 +48,7 @@ class TestMPMConfigProperties:
 
     def test_internal_stage(self, mpm_config):
         """Test internal_stage property."""
-        assert mpm_config.internal_stage == "GENERIC_REPORTING.BS_005.REPORTING"
+        assert mpm_config.internal_stage == "GENERIC_REPORTING.XY_123.REPORTING"
 
     def test_external_stage(self, mpm_config):
         """Test external_stage property."""
@@ -62,10 +62,10 @@ class TestMPMConfigProperties:
         """Test communities property."""
         communities = mpm_config.communities
         assert len(communities) == 2
-        assert communities[0]["id"] == 8571101
-        assert communities[0]["name"] == "Baha_Mar_Casino"
-        assert communities[1]["id"] == 8421102
-        assert communities[1]["name"] == "Atlantis_Paradise_Island_Atlantis_Casino"
+        assert communities[0]["id"] == 1001
+        assert communities[0]["name"] == "Region_Alpha"
+        assert communities[1]["id"] == 1002
+        assert communities[1]["name"] == "Region_Beta"
 
     def test_actions_list(self, mpm_config):
         """Test actions property."""
@@ -106,13 +106,13 @@ class TestDeploymentInfo:
         deployment = mpm_config.get_deployment_info()
 
         assert deployment["deployment_version"] == "0.0.5"
-        assert deployment["domain_code"] == "BS"
+        assert deployment["domain_code"] == "XY"
         # Access warehouse fields from nested object
         assert deployment["warehouse"]["auto_suspend"] == 120
         assert deployment["warehouse"]["max_cluster_count"] == 4
         assert deployment["warehouse"]["scaling_policy"] == "STANDARD"
         assert deployment["warehouse"]["warehouse_size"] == "MEDIUM"
-        assert deployment["internal_stage"] == "GENERIC_REPORTING.BS_005.REPORTING"
+        assert deployment["internal_stage"] == "GENERIC_REPORTING.XY_123.REPORTING"
         assert deployment["external_stage"] == "GENERIC_REPORTING.REPORTING.PRODUCTION"
 
 
@@ -142,11 +142,11 @@ class TestCommunitiesList:
         assert communities[0]["deployment_version"] == "0.0.5"
         assert communities[0]["domain_code"] == "BS"
         assert communities[0]["community_id"] == 8571101
-        assert communities[0]["community_name"] == "Baha_Mar_Casino"
+        assert communities[0]["community_name"] == "Region_Alpha"
 
         # Second community
         assert communities[1]["community_id"] == 8421102
-        assert communities[1]["community_name"] == "Atlantis_Paradise_Island_Atlantis_Casino"
+        assert communities[1]["community_name"] == "Region_Beta"
 
 
 class TestSensorActions:
@@ -278,8 +278,8 @@ class TestReportActions:
         )
 
         assert community_report is not None
-        assert "Baha_Mar_Casino" in community_report["communities"]
-        assert "Atlantis_Paradise_Island_Atlantis_Casino" in community_report["communities"]
+        assert "Region_Alpha" in community_report["communities"]
+        assert "Region_Beta" in community_report["communities"]
 
     def test_report_with_parents(self, mpm_config):
         """Test report action with parent dependencies."""

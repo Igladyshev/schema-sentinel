@@ -52,7 +52,7 @@ class YAMLComparator:
 
         # Generate tables from YAML structure
         table_gen = TableGenerator()
-        tables = table_gen.generate_tables(data, root_table_name=root_table_name)
+        tables = table_gen.generate_tables(data, root_table_name=root_table_name, source_file=yaml_path)
 
         log.info(f"Generated {len(tables)} tables from {yaml_path.name}")
 

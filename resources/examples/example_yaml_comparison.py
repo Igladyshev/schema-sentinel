@@ -24,8 +24,8 @@ def main():
         return
 
     # Select two YAML files to compare
-    yaml1 = master_mpm_dir / "AZ_005-mpm.yaml"
-    yaml2 = master_mpm_dir / "CO_005-mpm.yaml"
+    yaml1 = master_mpm_dir / "XY_123-mpm.yaml"
+    yaml2 = master_mpm_dir / "CD_789-mpm.yaml"
 
     if not yaml1.exists() or not yaml2.exists():
         print("Error: Required YAML files not found")
@@ -66,11 +66,11 @@ def main():
     print()
     print("Generated files:")
     print("  - yaml_comparison_report.md (Comparison report)")
-    print("  - temp_dbs/AZ_005-mpm.db (Database from File 1)")
-    print("  - temp_dbs/CO_005-mpm.db (Database from File 2)")
+    print("  - temp_dbs/XY_123-mpm.db (Database from File 1)")
+    print("  - temp_dbs/CD_789-mpm.db (Database from File 2)")
     print()
     print("You can inspect the databases using:")
-    print("  sqlite3 temp_dbs/AZ_005-mpm.db")
+    print("  sqlite3 temp_dbs/XY_123-mpm.db")
     print("  .tables")
     print("  SELECT * FROM deployment;")
 
