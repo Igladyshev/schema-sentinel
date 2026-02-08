@@ -4,21 +4,21 @@ import json
 from pathlib import Path
 
 import click
-import yaml
+import yaml as yaml_lib
 
 
 def load_yaml_or_json(file_path: Path) -> dict:
     """Load YAML or JSON file and validate it's a dictionary."""
     with open(file_path) as f:
         if file_path.suffix.lower() in [".yaml", ".yml"]:
-            data = yaml.safe_load(f)
+            data = yaml_lib.safe_load(f)
         elif file_path.suffix.lower() == ".json":
             data = json.load(f)
         else:
             try:
                 f.seek(0)
-                data = yaml.safe_load(f)
-            except yaml.YAMLError:
+                data = yaml_lib.safe_load(f)
+            except yaml_lib.YAMLError:
                 f.seek(0)
                 data = json.load(f)
 
@@ -37,36 +37,17 @@ def main():
 
 
 # =============================================================================
-# Schema Comparison Commands
+# YAML Command Group - YAML/JSON Processing
 # =============================================================================
 
 
-@main.command()
-@click.argument("database")
-@click.option("--env", "-e", default="dev", help="Environment (dev, staging, prod)")
-def extract(database: str, env: str):
-    """Extract metadata from a Snowflake database."""
-    click.echo(f"Extracting metadata from {database} in {env} environment...")
-    # Add implementation
+@main.group()
+def yaml():
+    """YAML/JSON processing commands - analyze, transform, load, and compare."""
+    pass
 
 
-@main.command()
-@click.argument("source")
-@click.argument("target")
-@click.option("--output", "-o", default="comparison_report", help="Output file name")
-@click.option("--format", "-f", "fmt", default="md", type=click.Choice(["md", "html", "json"]), help="Output format")
-def compare(source: str, target: str, output: str, fmt: str):
-    """Compare two schema snapshots."""
-    click.echo(f"Comparing {source} with {target}...")
-    # Add implementation
-
-
-# =============================================================================
-# YAML Shredder Commands
-# =============================================================================
-
-
-@main.command()
+@yaml.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file for analysis JSON")
 def analyze(input_file: Path, output: Path | None):
@@ -81,15 +62,24 @@ def analyze(input_file: Path, output: Path | None):
     analyzer.print_summary(analysis)
 
     if output:
+        # Convert analysis dict to be JSON-serializable (handles tuple keys)
+        def make_json_serializable(obj):
+            if isinstance(obj, dict):
+                return {str(k): make_json_serializable(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [make_json_serializable(item) for item in obj]
+            return obj
+
+        serializable_analysis = make_json_serializable(analysis)
         with open(output, "w") as f:
-            json.dump(analysis, f, indent=2)
+            json.dump(serializable_analysis, f, indent=2)
         click.echo(f"\n✓ Analysis saved to: {output}")
 
 
-@main.command()
+@yaml.command(name="schema")
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file for schema JSON")
-def schema(input_file: Path, output: Path | None):
+def generate_schema(input_file: Path, output: Path | None):
     """Generate JSON schema from YAML/JSON file."""
     from yaml_shredder.schema_generator import SchemaGenerator
 
@@ -115,7 +105,7 @@ def schema(input_file: Path, output: Path | None):
         click.echo(f"\n{json.dumps(schema_dict, indent=2)}")
 
 
-@main.command()
+@yaml.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--output", "-o", type=click.Path(path_type=Path), help="Output directory for tables")
 @click.option(
@@ -135,15 +125,19 @@ def tables(input_file: Path, output: Path | None, fmt: str, root_name: str):
 
     if output:
         output_dir = Path(output)
-        table_gen.save_tables(output_dir, format=fmt)
-        click.echo(f"\n✓ Tables saved to: {output_dir}")
+        try:
+            table_gen.save_tables(output_dir, format=fmt)
+            click.echo(f"\n✓ Tables saved to: {output_dir}")
+        except Exception as e:
+            click.echo(f"\n✗ Error saving tables: {e}", err=True)
+            raise
     else:
         for table_name, df in tables_dict.items():
             click.echo(f"\n{table_name}:")
             click.echo(df.head(3).to_string(index=False))
 
 
-@main.command()
+@yaml.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file for DDL")
 @click.option(
@@ -175,7 +169,7 @@ def ddl(input_file: Path, output: Path | None, dialect: str, root_name: str):
         ddl_gen.print_ddl()
 
 
-@main.command()
+@yaml.command()
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--database", "-db", required=True, type=click.Path(path_type=Path), help="SQLite database file")
 @click.option("--root-name", "-r", default="ROOT", help="Name for the root table")
@@ -212,7 +206,7 @@ def load(input_file: Path, database: Path, root_name: str, if_exists: str, creat
     loader.disconnect()
 
 
-@main.command(name="shred")
+@yaml.command(name="shred")
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--database", "-db", required=True, type=click.Path(path_type=Path), help="SQLite database file")
 @click.option("--root-name", "-r", default="ROOT", help="Name for the root table")
@@ -282,6 +276,98 @@ def shred_all(input_file: Path, database: Path, root_name: str, ddl_output: Path
     click.echo("✓ COMPLETE!")
     click.echo(f"{'=' * 70}")
     click.echo(f"Database: {database}")
+
+
+@yaml.command(name="compare")
+@click.argument("yaml1", type=click.Path(exists=True, path_type=Path))
+@click.argument("yaml2", type=click.Path(exists=True, path_type=Path))
+@click.option("--output", "-o", type=click.Path(path_type=Path), help="Output path for comparison report (markdown)")
+@click.option(
+    "--db-dir", type=click.Path(path_type=Path), default="./temp_dbs", help="Directory for temporary databases"
+)
+@click.option("--keep-dbs", is_flag=True, help="Keep temporary SQLite databases after comparison")
+@click.option("--root-name", default="root", help="Root table name for both YAML files")
+def compare_yaml(yaml1: Path, yaml2: Path, output: Path | None, db_dir: Path, keep_dbs: bool, root_name: str):
+    """Compare two YAML files by converting them to SQLite databases.
+
+    This command loads two YAML files into separate SQLite databases,
+    compares their table structures and data, and generates a detailed
+    comparison report in markdown format.
+
+    Examples:
+
+        # Compare two YAML files and display report
+        schema-sentinel compare-yaml file1.yaml file2.yaml
+
+        # Save comparison report to file
+        schema-sentinel compare-yaml file1.yaml file2.yaml -o comparison.md
+
+        # Keep databases for inspection
+        schema-sentinel compare-yaml file1.yaml file2.yaml --keep-dbs
+    """
+    from schema_sentinel.yaml_comparator import YAMLComparator
+
+    click.echo("Comparing YAML files:")
+    click.echo(f"  File 1: {yaml1}")
+    click.echo(f"  File 2: {yaml2}")
+    click.echo()
+
+    comparator = YAMLComparator(output_dir=db_dir)
+
+    try:
+        report = comparator.compare_yaml_files(
+            yaml1_path=yaml1,
+            yaml2_path=yaml2,
+            output_report=output,
+            keep_dbs=keep_dbs,
+            root_table_name=root_name,
+        )
+
+        if output:
+            click.echo(f"✓ Comparison report saved to: {output}")
+        else:
+            click.echo(report)
+
+        if keep_dbs:
+            db1_name = yaml1.stem + ".db"
+            db2_name = yaml2.stem + ".db"
+            click.echo(f"\nDatabases kept in {db_dir}:")
+            click.echo(f"  - {db1_name}")
+            click.echo(f"  - {db2_name}")
+    except Exception as e:
+        click.echo(f"✗ Error: {e}", err=True)
+        raise click.Abort() from e
+
+
+# =============================================================================
+# Schema Command Group - Snowflake Schema Management
+# =============================================================================
+
+
+@main.group()
+def schema():
+    """Snowflake schema extraction and comparison commands."""
+    pass
+
+
+@schema.command()
+@click.argument("database")
+@click.option("--env", "-e", default="dev", help="Environment (dev, staging, prod)")
+def extract(database: str, env: str):
+    """Extract metadata from a Snowflake database."""
+    click.echo(f"Extracting metadata from {database} in {env} environment...")
+    # Add implementation
+
+
+@schema.command()
+@click.argument("source")
+@click.argument("target")
+@click.option("--output", "-o", default="comparison_report", help="Output file name")
+@click.option("--format", "-f", "fmt", default="md", type=click.Choice(["md", "html", "json"]), help="Output format")
+def compare(source: str, target: str, output: str, fmt: str):
+    """Compare two Snowflake schema snapshots."""
+    click.echo(f"Comparing {source} with {target}...")
+    # Add implementation
 
 
 if __name__ == "__main__":

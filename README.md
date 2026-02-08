@@ -17,7 +17,8 @@ Perfect for **data engineers**, **analytics teams**, and **DBAs** working with c
 - **🗄️ Multi-Database DDL Generation** - Generate SQL DDL for Snowflake, PostgreSQL, MySQL, and SQLite
 - **⚡ Data Loading** - Load transformed data directly into SQLite databases with automatic indexing
 - **🔍 Structure Analysis** - Analyze and identify nested structures, arrays, and potential table candidates
-- **💻 CLI & Python API** - Command-line interface and Python API for seamless integration
+- **� YAML Comparison** - Compare two YAML files by converting to databases and analyzing structural/data differences
+- **�💻 CLI & Python API** - Command-line interface and Python API for seamless integration
 
 ### Schema Comparison (Bonus)
 - **📋 Metadata Extraction** - Extract complete schema information from Snowflake databases
@@ -35,6 +36,7 @@ Perfect for **data engineers**, **analytics teams**, and **DBAs** working with c
 - **Schema Discovery** - Automatically infer schemas from example data
 - **Multi-Source Integration** - Combine data from different YAML/JSON sources
 - **Data Versioning** - Track changes in configuration files over time
+- **Configuration Drift Detection** - Compare YAML configs across environments to identify differences
 
 ### Schema Comparison Use Cases
 - **Environment Synchronization** - Ensure dev, staging, and production schemas are aligned
@@ -72,21 +74,43 @@ source .venv/bin/activate  # Linux/macOS or .venv\Scripts\activate on Windows
 uv pip install -e ".[dev,jupyter]"
 ```
 
-### Quick Start - YAML Shredder
+### Quick Start - YAML Processing
 
 #### Command Line Interface
-```bash
-# Complete workflow: YAML → Tables → DDL → SQLite
-uv run python yaml_shredder_cli.py all config.yaml -db output.db -r CONFIG
 
-# Analyze structure only
-uv run python yaml_shredder_cli.py analyze config.yaml
+Schema Sentinel provides organized command groups for different tasks:
+
+**YAML Processing Commands** (`schema-sentinel yaml`)
+```bash
+# Analyze YAML structure
+uv run schema-sentinel yaml analyze config.yaml
+
+# Generate JSON schema
+uv run schema-sentinel yaml schema config.yaml -o schema.json
 
 # Generate relational tables
-uv run python yaml_shredder_cli.py tables config.yaml -o output/ -f csv
+uv run schema-sentinel yaml tables config.yaml -o output/ -f csv
 
 # Generate SQL DDL
-uv run python yaml_shredder_cli.py ddl config.yaml -o schema.sql -d snowflake
+uv run schema-sentinel yaml ddl config.yaml -o schema.sql -d snowflake
+
+# Load data into SQLite
+uv run schema-sentinel yaml load config.yaml -db output.db -r CONFIG
+
+# Complete workflow: analyze → tables → DDL → load
+uv run schema-sentinel yaml shred config.yaml -db output.db -r CONFIG
+
+# Compare two YAML files
+uv run schema-sentinel yaml compare file1.yaml file2.yaml -o comparison.md
+```
+
+**Schema Management Commands** (`schema-sentinel schema`)
+```bash
+# Extract Snowflake schema metadata
+uv run schema-sentinel schema extract MY_DATABASE --env prod
+
+# Compare two schema snapshots
+uv run schema-sentinel schema compare snapshot1 snapshot2 -o report.md
 ```
 
 #### Python API
@@ -104,6 +128,27 @@ ddl = ddl_gen.generate_ddl(tables, table_gen.relationships)
 # Load into SQLite
 loader = SQLiteLoader("output.db")
 loader.load_tables(tables)
+```
+
+#### YAML Comparison
+Python API:
+```python
+from pathlib import Path
+from schema_sentinel.yaml_comparator import YAMLComparator
+
+# Create comparator
+comparator = YAMLComparator(output_dir=Path("./temp_dbs"))
+
+# Compare YAML files
+report = comparator.compare_yaml_files(
+    yaml1_path=Path("config1.yaml"),
+    yaml2_path=Path("config2.yaml"),
+    output_report=Path("comparison.md"),
+    keep_dbs=False,  # Clean up temporary databases
+    root_table_name="root"
+)
+
+print(report)
 ```
 
 ### Configuration (For Schema Comparison)
