@@ -4,21 +4,21 @@ import json
 from pathlib import Path
 
 import click
-import yaml
+import yaml as yaml_lib
 
 
 def load_yaml_or_json(file_path: Path) -> dict:
     """Load YAML or JSON file and validate it's a dictionary."""
     with open(file_path) as f:
         if file_path.suffix.lower() in [".yaml", ".yml"]:
-            data = yaml.safe_load(f)
+            data = yaml_lib.safe_load(f)
         elif file_path.suffix.lower() == ".json":
             data = json.load(f)
         else:
             try:
                 f.seek(0)
-                data = yaml.safe_load(f)
-            except yaml.YAMLError:
+                data = yaml_lib.safe_load(f)
+            except yaml_lib.YAMLError:
                 f.seek(0)
                 data = json.load(f)
 
@@ -45,55 +45,6 @@ def main():
 def yaml():
     """YAML/JSON processing commands - analyze, transform, load, and compare."""
     pass
-
-
-@yaml.command()
-@click.argument("input_file", type=click.Path(exists=True, path_type=Path))
-@click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file for analysis JSON")
-def analyze(input_file: Path, output: Path | None):
-    """Analyze YAML/JSON structure and identify nested elements."""
-    from yaml_shredder.structure_analyzer import StructureAnalyzer
-
-    click.echo(f"Analyzing: {input_file}")
-    data = load_yaml_or_json(input_file)
-
-    analyzer = StructureAnalyzer()
-    analysis = analyzer.analyze(data)
-    analyzer.print_summary(analysis)
-
-    if output:
-        with open(output, "w") as f:
-            json.dump(analysis, f, indent=2)
-        click.echo(f"\n✓ Analysis saved to: {output}")
-
-
-@yaml.command()
-@click.argument("input_file", type=click.Path(exists=True, path_type=Path))
-@click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file for schema JSON")
-def schema(input_file: Path, output: Path | None):
-    """Generate JSON schema from YAML/JSON file."""
-    from yaml_shredder.schema_generator import SchemaGenerator
-
-    click.echo(f"Generating schema from: {input_file}")
-
-    generator = SchemaGenerator()
-    if input_file.suffix.lower() == ".json":
-        generator.add_json_file(input_file)
-    else:
-        generator.add_yaml_file(input_file)
-
-    schema_dict = generator.generate_schema()
-    stats = generator.get_stats()
-
-    click.echo("\n✓ Schema generated:")
-    click.echo(f"  Properties: {stats['schema_properties']}")
-    click.echo(f"  Required fields: {stats['required_fields']}")
-
-    if output:
-        generator.save_schema(output)
-        click.echo(f"\n✓ Schema saved to: {output}")
-    else:
-        click.echo(f"\n{json.dumps(schema_dict, indent=2)}")
 
 
 @yaml.command()

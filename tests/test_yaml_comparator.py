@@ -87,7 +87,9 @@ def test_load_yaml_to_db(sample_yaml_files, temp_dir):
     conn.close()
 
     assert len(tables) > 0
-    assert "deployment" in tables
+    # TableGenerator creates separate tables for nested arrays
+    assert "DEPLOYMENT_SERVERS" in tables
+    assert "DEPLOYMENT_DATABASES" in tables
 
 
 def test_get_table_info(sample_yaml_files, temp_dir):
@@ -100,12 +102,14 @@ def test_get_table_info(sample_yaml_files, temp_dir):
 
     assert isinstance(table_info, dict)
     assert len(table_info) > 0
-    assert "deployment" in table_info
+    # TableGenerator creates separate tables for nested arrays
+    assert "DEPLOYMENT_SERVERS" in table_info
+    assert "DEPLOYMENT_DATABASES" in table_info
 
-    # Check schema DataFrame structure
-    deployment_schema = table_info["deployment"]
-    assert "name" in deployment_schema.columns
-    assert "type" in deployment_schema.columns
+    # Check schema DataFrame structure for one of the tables
+    servers_schema = table_info["DEPLOYMENT_SERVERS"]
+    assert "name" in servers_schema.columns
+    assert "type" in servers_schema.columns
 
 
 def test_get_row_counts(sample_yaml_files, temp_dir):
