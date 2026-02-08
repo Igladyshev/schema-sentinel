@@ -115,7 +115,6 @@ def test_depth_2_two_level_flattening(nested_dict_data):
 
     # Root scalars go to descriptor table
     assert "ROOT" in tables
-    root_table = tables["ROOT"]
 
     # Root-level dicts become separate tables, flattened one level
     assert "DEPLOYMENT" in tables
