@@ -62,8 +62,17 @@ def analyze(input_file: Path, output: Path | None):
     analyzer.print_summary(analysis)
 
     if output:
+        # Convert analysis dict to be JSON-serializable (handles tuple keys)
+        def make_json_serializable(obj):
+            if isinstance(obj, dict):
+                return {str(k): make_json_serializable(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [make_json_serializable(item) for item in obj]
+            return obj
+
+        serializable_analysis = make_json_serializable(analysis)
         with open(output, "w") as f:
-            json.dump(analysis, f, indent=2)
+            json.dump(serializable_analysis, f, indent=2)
         click.echo(f"\n✓ Analysis saved to: {output}")
 
 
@@ -116,8 +125,12 @@ def tables(input_file: Path, output: Path | None, fmt: str, root_name: str):
 
     if output:
         output_dir = Path(output)
-        table_gen.save_tables(output_dir, format=fmt)
-        click.echo(f"\n✓ Tables saved to: {output_dir}")
+        try:
+            table_gen.save_tables(output_dir, format=fmt)
+            click.echo(f"\n✓ Tables saved to: {output_dir}")
+        except Exception as e:
+            click.echo(f"\n✗ Error saving tables: {e}", err=True)
+            raise
     else:
         for table_name, df in tables_dict.items():
             click.echo(f"\n{table_name}:")
