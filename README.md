@@ -17,7 +17,8 @@ Perfect for **data engineers**, **analytics teams**, and **DBAs** working with c
 - **🗄️ Multi-Database DDL Generation** - Generate SQL DDL for Snowflake, PostgreSQL, MySQL, and SQLite
 - **⚡ Data Loading** - Load transformed data directly into SQLite databases with automatic indexing
 - **🔍 Structure Analysis** - Analyze and identify nested structures, arrays, and potential table candidates
-- **💻 CLI & Python API** - Command-line interface and Python API for seamless integration
+- **� YAML Comparison** - Compare two YAML files by converting to databases and analyzing structural/data differences
+- **�💻 CLI & Python API** - Command-line interface and Python API for seamless integration
 
 ### Schema Comparison (Bonus)
 - **📋 Metadata Extraction** - Extract complete schema information from Snowflake databases
@@ -35,6 +36,7 @@ Perfect for **data engineers**, **analytics teams**, and **DBAs** working with c
 - **Schema Discovery** - Automatically infer schemas from example data
 - **Multi-Source Integration** - Combine data from different YAML/JSON sources
 - **Data Versioning** - Track changes in configuration files over time
+- **Configuration Drift Detection** - Compare YAML configs across environments to identify differences
 
 ### Schema Comparison Use Cases
 - **Environment Synchronization** - Ensure dev, staging, and production schemas are aligned
@@ -104,6 +106,38 @@ ddl = ddl_gen.generate_ddl(tables, table_gen.relationships)
 # Load into SQLite
 loader = SQLiteLoader("output.db")
 loader.load_tables(tables)
+```
+
+#### YAML Comparison
+```bash
+# Compare two YAML files and generate report
+uv run schema-sentinel compare-yaml config1.yaml config2.yaml -o comparison.md
+
+# Keep databases for inspection
+uv run schema-sentinel compare-yaml config1.yaml config2.yaml --keep-dbs
+
+# Custom root table name
+uv run schema-sentinel compare-yaml deploy1.yaml deploy2.yaml --root-name deployment
+```
+
+Python API:
+```python
+from pathlib import Path
+from schema_sentinel.yaml_comparator import YAMLComparator
+
+# Create comparator
+comparator = YAMLComparator(output_dir=Path("./temp_dbs"))
+
+# Compare YAML files
+report = comparator.compare_yaml_files(
+    yaml1_path=Path("config1.yaml"),
+    yaml2_path=Path("config2.yaml"),
+    output_report=Path("comparison.md"),
+    keep_dbs=False,  # Clean up temporary databases
+    root_table_name="root"
+)
+
+print(report)
 ```
 
 ### Configuration (For Schema Comparison)

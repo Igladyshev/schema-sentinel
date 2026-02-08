@@ -284,5 +284,66 @@ def shred_all(input_file: Path, database: Path, root_name: str, ddl_output: Path
     click.echo(f"Database: {database}")
 
 
+@main.command()
+@click.argument("yaml1", type=click.Path(exists=True, path_type=Path))
+@click.argument("yaml2", type=click.Path(exists=True, path_type=Path))
+@click.option("--output", "-o", type=click.Path(path_type=Path), help="Output path for comparison report (markdown)")
+@click.option(
+    "--db-dir", type=click.Path(path_type=Path), default="./temp_dbs", help="Directory for temporary databases"
+)
+@click.option("--keep-dbs", is_flag=True, help="Keep temporary SQLite databases after comparison")
+@click.option("--root-name", default="root", help="Root table name for both YAML files")
+def compare_yaml(yaml1: Path, yaml2: Path, output: Path | None, db_dir: Path, keep_dbs: bool, root_name: str):
+    """Compare two YAML files by converting them to SQLite databases.
+
+    This command loads two YAML files into separate SQLite databases,
+    compares their table structures and data, and generates a detailed
+    comparison report in markdown format.
+
+    Examples:
+
+        # Compare two YAML files and display report
+        schema-sentinel compare-yaml file1.yaml file2.yaml
+
+        # Save comparison report to file
+        schema-sentinel compare-yaml file1.yaml file2.yaml -o comparison.md
+
+        # Keep databases for inspection
+        schema-sentinel compare-yaml file1.yaml file2.yaml --keep-dbs
+    """
+    from schema_sentinel.yaml_comparator import YAMLComparator
+
+    click.echo("Comparing YAML files:")
+    click.echo(f"  File 1: {yaml1}")
+    click.echo(f"  File 2: {yaml2}")
+    click.echo()
+
+    comparator = YAMLComparator(output_dir=db_dir)
+
+    try:
+        report = comparator.compare_yaml_files(
+            yaml1_path=yaml1,
+            yaml2_path=yaml2,
+            output_report=output,
+            keep_dbs=keep_dbs,
+            root_table_name=root_name,
+        )
+
+        if output:
+            click.echo(f"✓ Comparison report saved to: {output}")
+        else:
+            click.echo(report)
+
+        if keep_dbs:
+            db1_name = yaml1.stem + ".db"
+            db2_name = yaml2.stem + ".db"
+            click.echo(f"\nDatabases kept in {db_dir}:")
+            click.echo(f"  - {db1_name}")
+            click.echo(f"  - {db2_name}")
+    except Exception as e:
+        click.echo(f"✗ Error: {e}", err=True)
+        raise click.Abort()
+
+
 if __name__ == "__main__":
     main()
