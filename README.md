@@ -16,8 +16,7 @@ Perfect for **data engineers**, **analytics teams**, and **DBAs** working with c
 - **📊 Relational Table Conversion** - Convert deeply nested YAML/JSON into normalized relational tables with automatic relationship mapping
 - **🗄️ Multi-Database DDL Generation** - Generate SQL DDL for Snowflake, PostgreSQL, MySQL, and SQLite
 - **⚡ Data Loading** - Load transformed data directly into SQLite databases with automatic indexing
-- **🔍 Structure Analysis** - Analyze and identify nested structures, arrays, and potential table candidates
-- **� YAML Comparison** - Compare two YAML files by converting to databases and analyzing structural/data differences
+- **🔍 Structure Analysis** - Analyze and identify nested structures, arrays, and potential table candidates- **📄 Markdown Documentation** - Generate comprehensive markdown documentation from YAML files with table schemas and data- **� YAML Comparison** - Compare two YAML files by converting to databases and analyzing structural/data differences
 - **�💻 CLI & Python API** - Command-line interface and Python API for seamless integration
 
 ### Schema Comparison (Bonus)
@@ -100,6 +99,9 @@ uv run schema-sentinel yaml load config.yaml -db output.db -r CONFIG
 # Complete workflow: analyze → tables → DDL → load
 uv run schema-sentinel yaml shred config.yaml -db output.db -r CONFIG
 
+# Generate markdown documentation
+uv run schema-sentinel yaml doc config.yaml -o docs/
+
 # Compare two YAML files
 uv run schema-sentinel yaml compare file1.yaml file2.yaml -o comparison.md
 ```
@@ -116,6 +118,8 @@ uv run schema-sentinel schema compare snapshot1 snapshot2 -o report.md
 #### Python API
 ```python
 from yaml_shredder import TableGenerator, DDLGenerator, SQLiteLoader
+from yaml_shredder.doc_generator import generate_doc_from_yaml
+from pathlib import Path
 
 # Load and convert YAML to tables
 table_gen = TableGenerator()
@@ -128,6 +132,14 @@ ddl = ddl_gen.generate_ddl(tables, table_gen.relationships)
 # Load into SQLite
 loader = SQLiteLoader("output.db")
 loader.load_tables(tables)
+
+# Generate markdown documentation
+output_path = generate_doc_from_yaml(
+    yaml_path=Path("config.yaml"),
+    output_dir=Path("docs/"),
+    max_depth=None,  # Full flattening (or 0 for no flattening, 1 for first level)
+    keep_db=False    # Remove temporary database after generation
+)
 ```
 
 #### YAML Comparison
