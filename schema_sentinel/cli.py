@@ -67,10 +67,10 @@ def analyze(input_file: Path, output: Path | None):
         click.echo(f"\n✓ Analysis saved to: {output}")
 
 
-@yaml.command()
+@yaml.command(name="schema")
 @click.argument("input_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--output", "-o", type=click.Path(path_type=Path), help="Output file for schema JSON")
-def schema(input_file: Path, output: Path | None):
+def generate_schema(input_file: Path, output: Path | None):
     """Generate JSON schema from YAML/JSON file."""
     from yaml_shredder.schema_generator import SchemaGenerator
 
