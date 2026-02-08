@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.2] - 2026-02-08
+
+### Added
+- **YAML Comparator**: Compare two YAML files by loading them into SQLite databases
+  - Structural comparison (tables, schemas, row counts)
+  - Data comparison with detailed statistics
+  - Markdown report generation
+  - CLI command: `schema-sentinel yaml compare`
+  - Python API for programmatic access
+- **CLI Test Suite**: Comprehensive tests for all CLI commands (40+ test cases)
+  - Tests for all yaml group commands
+  - Tests for schema group commands
+  - Error handling and validation tests
+  - Integration workflow tests
+
+### Changed
+- **CLI Organization**: Reorganized commands into logical groups
+  - `yaml` group: analyze, schema, tables, ddl, load, shred, compare (7 commands)
+  - `schema` group: extract, compare (2 commands)
+  - Improved command structure and discoverability
+- **Documentation**: Updated README with new CLI structure and YAML comparison examples
+
+### Fixed
+- Fixed yaml module shadowing issue in CLI
+- Fixed numpy int64 to Python int conversion in comparator
+- Fixed function name conflicts between commands
+- Fixed JSON serialization for complex analysis results
+- Improved error handling and exception chaining
+
+## [3.0.1] - 2026-02-07
+
+### Fixed
+- Minor bug fixes and improvements
+
 ## [3.0.0] - 2026-02-07
 
 ### Added
