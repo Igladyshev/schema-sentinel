@@ -115,7 +115,7 @@ class YAMLComparator:
             for table_name in table_names:
                 count_query = f"SELECT COUNT(*) as count FROM {table_name}"
                 count_df = pd.read_sql_query(count_query, conn)
-                row_counts[table_name] = count_df["count"].iloc[0]
+                row_counts[table_name] = int(count_df["count"].iloc[0])
 
             return row_counts
         finally:
