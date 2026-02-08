@@ -319,6 +319,72 @@ def shred_all(
     click.echo(f"Database: {database}")
 
 
+@yaml.command(name="doc")
+@click.argument("input_file", type=click.Path(exists=True, path_type=Path))
+@click.option(
+    "--output-dir",
+    "-o",
+    type=click.Path(path_type=Path),
+    default="resources/metadata-doc",
+    help="Output directory for markdown documentation",
+)
+@click.option("--root-name", "-r", default="ROOT", help="Name for the root table")
+@click.option(
+    "--max-depth",
+    type=int,
+    default=None,
+    help="Maximum depth for flattening (0=none, 1=first level, None=all levels)",
+)
+@click.option("--keep-db", is_flag=True, help="Keep the temporary SQLite database file")
+def generate_doc(
+    input_file: Path,
+    output_dir: Path,
+    root_name: str,
+    max_depth: int | None,
+    keep_db: bool,
+):
+    """Generate markdown documentation from YAML/JSON file.
+
+    This command converts a YAML/JSON file into a SQLite database and generates
+    comprehensive markdown documentation showing all tables with their schemas
+    and data.
+
+    Examples:
+
+        # Generate documentation for a YAML file
+        uv run schema-sentinel yaml doc config.yaml
+
+        # Specify custom output directory
+        uv run schema-sentinel yaml doc config.yaml -o docs/
+
+        # Keep the temporary database file
+        uv run schema-sentinel yaml doc config.yaml --keep-db
+
+        # Control flattening depth
+        uv run schema-sentinel yaml doc config.yaml --max-depth 1
+    """
+    from yaml_shredder.doc_generator import generate_doc_from_yaml
+
+    click.echo(f"Generating documentation from: {input_file}")
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        output_path = generate_doc_from_yaml(
+            yaml_path=input_file, output_dir=output_dir, root_name=root_name, max_depth=max_depth, keep_db=keep_db
+        )
+
+        click.echo(f"\n✓ Documentation generated: {output_path}")
+
+        if keep_db:
+            db_path = output_dir / f"{input_file.stem}.db"
+            click.echo(f"✓ Database kept: {db_path}")
+
+    except Exception as e:
+        click.echo(f"✗ Error: {e}", err=True)
+        raise click.Abort() from e
+
+
 @yaml.command(name="compare")
 @click.argument("yaml1", type=click.Path(exists=True, path_type=Path))
 @click.argument("yaml2", type=click.Path(exists=True, path_type=Path))
