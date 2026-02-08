@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.4] - 2026-02-08
+
+### Added
+- **Markdown Documentation Generator**: Generate comprehensive markdown documentation from YAML files
+  - `MarkdownDocGenerator` class for converting SQLite databases to markdown tables
+  - `generate_doc_from_yaml()` convenience function for end-to-end workflow
+  - CLI command: `schema-sentinel yaml doc` with options for output directory, max-depth, and database retention
+  - Automatic table schema and data rendering in markdown format
+  - Smart handling: JSON objects and arrays printed in full, other long values truncated
+  - Output: Named after source file, placed in `resources/metadata-doc/` by default
+  - Comprehensive test suite with 13 test cases covering all functionality
+
+### Changed
+- **Documentation Tables**: Enhanced markdown table generation
+  - JSON objects (starting with `{` or `[`) are never truncated
+  - Comma-separated arrays/lists are never truncated
+  - Regular long text values still truncated at 50 characters for readability
+
 ## [3.0.3] - 2026-02-08
 
 ### Added

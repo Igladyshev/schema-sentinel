@@ -348,6 +348,48 @@ def test_yaml_compare_missing_file(runner, sample_yaml):
     assert result.exit_code != 0
 
 
+def test_yaml_doc_help(runner):
+    """Test yaml doc command help."""
+    result = runner.invoke(main, ["yaml", "doc", "--help"])
+    assert result.exit_code == 0
+    assert "Generate markdown documentation" in result.output
+
+
+def test_yaml_doc(runner, sample_yaml, tmp_path):
+    """Test yaml doc command."""
+    output_dir = tmp_path / "docs"
+    result = runner.invoke(main, ["yaml", "doc", str(sample_yaml), "-o", str(output_dir)])
+    assert result.exit_code == 0
+    assert "Documentation generated" in result.output
+    # Check that markdown file was created
+    md_file = output_dir / f"{sample_yaml.stem}.md"
+    assert md_file.exists()
+    # Check that database was removed (default behavior)
+    db_file = output_dir / f"{sample_yaml.stem}.db"
+    assert not db_file.exists()
+
+
+def test_yaml_doc_keep_db(runner, sample_yaml, tmp_path):
+    """Test yaml doc command with database preservation."""
+    output_dir = tmp_path / "docs"
+    result = runner.invoke(main, ["yaml", "doc", str(sample_yaml), "-o", str(output_dir), "--keep-db"])
+    assert result.exit_code == 0
+    # Check that both markdown and database exist
+    md_file = output_dir / f"{sample_yaml.stem}.md"
+    db_file = output_dir / f"{sample_yaml.stem}.db"
+    assert md_file.exists()
+    assert db_file.exists()
+
+
+def test_yaml_doc_with_max_depth(runner, sample_yaml, tmp_path):
+    """Test yaml doc command with max depth."""
+    output_dir = tmp_path / "docs"
+    result = runner.invoke(main, ["yaml", "doc", str(sample_yaml), "-o", str(output_dir), "--max-depth", "1"])
+    assert result.exit_code == 0
+    md_file = output_dir / f"{sample_yaml.stem}.md"
+    assert md_file.exists()
+
+
 # =============================================================================
 # Schema Command Group Tests
 # =============================================================================
