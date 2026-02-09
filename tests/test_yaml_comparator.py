@@ -228,3 +228,76 @@ def test_missing_yaml_file(temp_dir):
 
     with pytest.raises(FileNotFoundError):
         comparator.load_yaml_to_db(Path("nonexistent.yaml"))
+
+
+def test_table_names_with_special_characters(temp_dir, tmp_path):
+    """Test that table names with hyphens and other special characters are handled correctly."""
+    # Create YAML files with structures that will generate table names with hyphens
+    yaml1 = tmp_path / "DC_005-mpm.yaml"
+    yaml1.write_text("""
+DC_005-MPM:
+  version: 1.0
+  deployment:
+    environment: production
+  communities:
+    - name: community1
+      id: 1
+    - name: community2
+      id: 2
+  actions:
+    - action_id: A1
+      description: First action
+    - action_id: A2
+      description: Second action
+""")
+
+    yaml2 = tmp_path / "CO_005-mpm.yaml"
+    yaml2.write_text("""
+CO_005-MPM:
+  version: 1.1
+  deployment:
+    environment: staging
+  actions:
+    - action_id: A1
+      description: Modified action
+    - action_id: A3
+      description: New action
+""")
+
+    comparator = YAMLComparator(output_dir=temp_dir)
+
+    # This should not raise any SQL syntax errors
+    db1_path = comparator.load_yaml_to_db(yaml1)
+    db2_path = comparator.load_yaml_to_db(yaml2)
+
+    # Verify databases exist
+    assert db1_path.exists()
+    assert db2_path.exists()
+
+    # Get table info - this will test the PRAGMA table_info query with special chars
+    table_info1 = comparator.get_table_info(db1_path)
+    table_info2 = comparator.get_table_info(db2_path)
+
+    # Verify we can get table info
+    assert isinstance(table_info1, dict)
+    assert isinstance(table_info2, dict)
+    assert len(table_info1) > 0
+    assert len(table_info2) > 0
+
+    # Get row counts - this will test the SELECT COUNT query with special chars
+    row_counts1 = comparator.get_row_counts(db1_path)
+    row_counts2 = comparator.get_row_counts(db2_path)
+
+    # Verify we can get row counts
+    assert isinstance(row_counts1, dict)
+    assert isinstance(row_counts2, dict)
+    assert len(row_counts1) > 0
+    assert len(row_counts2) > 0
+
+    # Test full comparison workflow
+    comparison = comparator.compare_databases(db1_path, db2_path)
+
+    # Verify comparison completed successfully
+    assert "db1_name" in comparison
+    assert "db2_name" in comparison
+    assert "common_tables" in comparison
