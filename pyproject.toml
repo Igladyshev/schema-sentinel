@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "schema-sentinel"
-version = "3.0.5"
+version = "3.0.6"
 description = "Data processing toolkit: YAML/JSON to relational tables, schema comparison, and metadata management"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
