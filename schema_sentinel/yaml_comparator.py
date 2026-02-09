@@ -87,7 +87,7 @@ class YAMLComparator:
             # Get schema for each table
             table_schemas = {}
             for table_name in table_names:
-                schema_query = f"PRAGMA table_info({table_name})"
+                schema_query = f'PRAGMA table_info("{table_name}")'
                 schema_df = pd.read_sql_query(schema_query, conn)
                 table_schemas[table_name] = schema_df
 
@@ -114,7 +114,7 @@ class YAMLComparator:
             # Get row count for each table
             row_counts = {}
             for table_name in table_names:
-                count_query = f"SELECT COUNT(*) as count FROM {table_name}"
+                count_query = f'SELECT COUNT(*) as count FROM "{table_name}"'
                 count_df = pd.read_sql_query(count_query, conn)
                 row_counts[table_name] = int(count_df["count"].iloc[0])
 

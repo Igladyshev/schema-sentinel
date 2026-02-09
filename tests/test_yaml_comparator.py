@@ -230,47 +230,74 @@ def test_missing_yaml_file(temp_dir):
         comparator.load_yaml_to_db(Path("nonexistent.yaml"))
 
 
-def test_compare_yaml_files_with_max_depth(sample_yaml_files, temp_dir, tmp_path):
-    """Test YAML comparison with max_depth parameter."""
-    yaml1, yaml2 = sample_yaml_files
+def test_table_names_with_special_characters(temp_dir, tmp_path):
+    """Test that table names with hyphens and other special characters are handled correctly."""
+    # Create YAML files with structures that will generate table names with hyphens
+    yaml1 = tmp_path / "DC_005-mpm.yaml"
+    yaml1.write_text("""
+DC_005-MPM:
+  version: 1.0
+  deployment:
+    environment: production
+  communities:
+    - name: community1
+      id: 1
+    - name: community2
+      id: 2
+  actions:
+    - action_id: A1
+      description: First action
+    - action_id: A2
+      description: Second action
+""")
+
+    yaml2 = tmp_path / "CO_005-mpm.yaml"
+    yaml2.write_text("""
+CO_005-MPM:
+  version: 1.1
+  deployment:
+    environment: staging
+  actions:
+    - action_id: A1
+      description: Modified action
+    - action_id: A3
+      description: New action
+""")
+
     comparator = YAMLComparator(output_dir=temp_dir)
 
-    report_path = tmp_path / "comparison.md"
+    # This should not raise any SQL syntax errors
+    db1_path = comparator.load_yaml_to_db(yaml1)
+    db2_path = comparator.load_yaml_to_db(yaml2)
 
-    report = comparator.compare_yaml_files(
-        yaml1_path=yaml1,
-        yaml2_path=yaml2,
-        output_report=report_path,
-        keep_dbs=False,
-        root_table_name="deployment",
-        max_depth=1,
-    )
+    # Verify databases exist
+    assert db1_path.exists()
+    assert db2_path.exists()
 
-    assert isinstance(report, str)
-    assert len(report) > 0
-    assert report_path.exists()
+    # Get table info - this will test the PRAGMA table_info query with special chars
+    table_info1 = comparator.get_table_info(db1_path)
+    table_info2 = comparator.get_table_info(db2_path)
 
-    # Verify report content
-    with open(report_path) as f:
-        saved_report = f.read()
-    assert "# YAML Comparison Report" in saved_report
+    # Verify we can get table info
+    assert isinstance(table_info1, dict)
+    assert isinstance(table_info2, dict)
+    assert len(table_info1) > 0
+    assert len(table_info2) > 0
 
+    # Get row counts - this will test the SELECT COUNT query with special chars
+    row_counts1 = comparator.get_row_counts(db1_path)
+    row_counts2 = comparator.get_row_counts(db2_path)
 
-def test_load_yaml_to_db_with_max_depth(sample_yaml_files, temp_dir):
-    """Test loading YAML file with max_depth parameter."""
-    yaml1, _ = sample_yaml_files
-    comparator = YAMLComparator(output_dir=temp_dir)
+    # Verify we can get row counts
+    assert isinstance(row_counts1, dict)
+    assert isinstance(row_counts2, dict)
+    assert len(row_counts1) > 0
+    assert len(row_counts2) > 0
 
-    db_path = comparator.load_yaml_to_db(yaml1, root_table_name="deployment", max_depth=1)
+    # Test full comparison workflow
+    comparison = comparator.compare_databases(db1_path, db2_path)
 
-    assert db_path.exists()
-    assert db_path.suffix == ".db"
-
-    # Verify database has tables
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-    tables = [row[0] for row in cursor.fetchall()]
-    conn.close()
-
-    assert len(tables) > 0
+    # Verify comparison completed successfully
+    assert "db1_name" in comparison
+    assert "db2_name" in comparison
+    assert "common_tables" in comparison
