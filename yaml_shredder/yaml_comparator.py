@@ -430,7 +430,8 @@ class YAMLComparator:
         )
 
         # Run data comparison (new)
-        data_output = output_report.with_suffix(".data.md") if output_report else None
+        output_path = Path(output_report) if output_report else None
+        data_output = output_path.with_suffix(".data.md") if output_path else None
         data_comparison = self.compare_data(
             yaml1_path=yaml1_path,
             yaml2_path=yaml2_path,
@@ -441,8 +442,7 @@ class YAMLComparator:
         )
 
         # Save combined report if requested
-        if output_report:
-            output_path = Path(output_report)
+        if output_path:
             comparer = DataComparer()
             data_report = comparer.generate_comparison_report(data_comparison)
 

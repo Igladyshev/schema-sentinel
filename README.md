@@ -16,8 +16,11 @@ Perfect for **data engineers**, **analytics teams**, and **DBAs** working with c
 - **📊 Relational Table Conversion** - Convert deeply nested YAML/JSON into normalized relational tables with automatic relationship mapping
 - **🗄️ Multi-Database DDL Generation** - Generate SQL DDL for Snowflake, PostgreSQL, MySQL, and SQLite
 - **⚡ Data Loading** - Load transformed data directly into SQLite databases with automatic indexing
-- **🔍 Structure Analysis** - Analyze and identify nested structures, arrays, and potential table candidates- **📄 Markdown Documentation** - Generate comprehensive markdown documentation from YAML files with table schemas and data- **� YAML Comparison** - Compare two YAML files by converting to databases and analyzing structural/data differences
-- **�💻 CLI & Python API** - Command-line interface and Python API for seamless integration
+- **🔍 Structure Analysis** - Analyze and identify nested structures, arrays, and potential table candidates
+- **📄 Markdown Documentation** - Generate comprehensive markdown documentation from YAML files with table schemas and data
+- **🔃 YAML Comparison** - Compare two YAML files with schema comparison and row-level data diff
+- **🔑 Primary Key Detection** - Auto-detect primary keys (id, code, name columns) for intelligent data matching
+- **💻 CLI & Python API** - Command-line interface and Python API for seamless integration
 
 ### Schema Comparison (Bonus)
 - **📋 Metadata Extraction** - Extract complete schema information from Snowflake databases
@@ -102,8 +105,11 @@ uv run schema-sentinel yaml shred config.yaml -db output.db -r CONFIG
 # Generate markdown documentation
 uv run schema-sentinel yaml doc config.yaml -o docs/
 
-# Compare two YAML files
+# Compare two YAML files (schema only)
 uv run schema-sentinel yaml compare file1.yaml file2.yaml -o comparison.md
+
+# Compare with row-level data diff (auto primary key detection)
+uv run schema-sentinel yaml compare file1.yaml file2.yaml --data -o comparison.md
 ```
 
 **Schema Management Commands** (`schema-sentinel schema`)
@@ -143,24 +149,48 @@ output_path = generate_doc_from_yaml(
 ```
 
 #### YAML Comparison
-Python API:
+
+**CLI:**
+```bash
+# Schema comparison only (table structures, row counts)
+uv run schema-sentinel yaml compare config1.yaml config2.yaml
+
+# Full comparison with row-level data diff (auto primary key detection)
+uv run schema-sentinel yaml compare config1.yaml config2.yaml --data -o comparison.md
+```
+
+**Python API:**
 ```python
 from pathlib import Path
-from schema_sentinel.yaml_comparator import YAMLComparator
+from yaml_shredder import YAMLComparator
 
 # Create comparator
 comparator = YAMLComparator(output_dir=Path("./temp_dbs"))
 
-# Compare YAML files
+# Schema comparison only
 report = comparator.compare_yaml_files(
     yaml1_path=Path("config1.yaml"),
     yaml2_path=Path("config2.yaml"),
     output_report=Path("comparison.md"),
-    keep_dbs=False,  # Clean up temporary databases
+    keep_dbs=False,
     root_table_name="root"
 )
 
-print(report)
+# Full comparison with row-level data diff
+full_report = comparator.compare_yaml_files_full(
+    yaml1_path=Path("config1.yaml"),
+    yaml2_path=Path("config2.yaml"),
+    output_report=Path("comparison.md"),
+    keep_dbs=False,
+    root_table_name="root"
+)
+
+# Data comparison only (between existing databases)
+data_report = comparator.compare_data(
+    db1_path=Path("db1.db"),
+    db2_path=Path("db2.db")
+)
+print(data_report)
 ```
 
 ### Configuration (For Schema Comparison)
