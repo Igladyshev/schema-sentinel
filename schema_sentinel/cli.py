@@ -400,8 +400,16 @@ def generate_doc(
     default=None,
     help="Max depth for flattening (0=none, 1=keep variants, 2+=flatten variants, None=flatten all)",
 )
+@click.option("--data", "-d", is_flag=True, help="Include row-level data comparison with primary key detection")
 def compare_yaml(
-    yaml1: Path, yaml2: Path, output: Path | None, db_dir: Path, keep_dbs: bool, root_name: str, max_depth: int | None
+    yaml1: Path,
+    yaml2: Path,
+    output: Path | None,
+    db_dir: Path,
+    keep_dbs: bool,
+    root_name: str,
+    max_depth: int | None,
+    data: bool,
 ):
     """Compare two YAML files by converting them to SQLite databases.
 
@@ -411,33 +419,50 @@ def compare_yaml(
 
     Examples:
 
-        # Compare two YAML files and display report
-        schema-sentinel compare-yaml file1.yaml file2.yaml
+        # Compare two YAML files (schema only)
+        schema-sentinel yaml compare file1.yaml file2.yaml
+
+        # Include row-level data comparison with auto primary key detection
+        schema-sentinel yaml compare file1.yaml file2.yaml --data
 
         # Save comparison report to file
-        schema-sentinel compare-yaml file1.yaml file2.yaml -o comparison.md
+        schema-sentinel yaml compare file1.yaml file2.yaml -o comparison.md -d
 
         # Keep databases for inspection
-        schema-sentinel compare-yaml file1.yaml file2.yaml --keep-dbs
+        schema-sentinel yaml compare file1.yaml file2.yaml --keep-dbs
     """
     from schema_sentinel.yaml_comparator import YAMLComparator
 
     click.echo("Comparing YAML files:")
     click.echo(f"  File 1: {yaml1}")
     click.echo(f"  File 2: {yaml2}")
+    if data:
+        click.echo("  Mode: Full comparison (schema + data)")
+    else:
+        click.echo("  Mode: Schema comparison only")
     click.echo()
 
     comparator = YAMLComparator(output_dir=db_dir)
 
     try:
-        report = comparator.compare_yaml_files(
-            yaml1_path=yaml1,
-            yaml2_path=yaml2,
-            output_report=output,
-            keep_dbs=keep_dbs,
-            root_table_name=root_name,
-            max_depth=max_depth,
-        )
+        if data:
+            report = comparator.compare_yaml_files_full(
+                yaml1_path=yaml1,
+                yaml2_path=yaml2,
+                output_report=output,
+                keep_dbs=keep_dbs,
+                root_table_name=root_name,
+                max_depth=max_depth,
+            )
+        else:
+            report = comparator.compare_yaml_files(
+                yaml1_path=yaml1,
+                yaml2_path=yaml2,
+                output_report=output,
+                keep_dbs=keep_dbs,
+                root_table_name=root_name,
+                max_depth=max_depth,
+            )
 
         if output:
             click.echo(f"✓ Comparison report saved to: {output}")

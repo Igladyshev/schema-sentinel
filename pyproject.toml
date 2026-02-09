@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "schema-sentinel"
-version = "3.0.4"
+version = "3.0.5"
 description = "Data processing toolkit: YAML/JSON to relational tables, schema comparison, and metadata management"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
@@ -69,6 +69,7 @@ dependencies = [
     "python-dotenv>=1.2.1",
     "jsonschema>=4.0.0",
     "genson>=1.2.2",
+    "pyyaml>=6.0.3",
 ]
 
 [project.urls]
@@ -127,6 +128,10 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 addopts = "-v --cov=schema_sentinel --cov-report=term-missing"
+filterwarnings = [
+    "ignore:unclosed database:ResourceWarning",
+    "ignore::sqlalchemy.exc.MovedIn20Warning",
+]
 
 [tool.mypy]
 python_version = "3.13"
