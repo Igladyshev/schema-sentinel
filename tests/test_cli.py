@@ -348,6 +348,29 @@ def test_yaml_compare_missing_file(runner, sample_yaml):
     assert result.exit_code != 0
 
 
+def test_yaml_compare_with_max_depth(runner, sample_yaml, sample_yaml2, tmp_path):
+    """Test yaml compare with max-depth option."""
+    output_file = tmp_path / "comparison.md"
+    result = runner.invoke(
+        main,
+        [
+            "yaml",
+            "compare",
+            str(sample_yaml),
+            str(sample_yaml2),
+            "-o",
+            str(output_file),
+            "--max-depth",
+            "1",
+        ],
+    )
+    assert result.exit_code == 0
+    assert output_file.exists()
+    # Verify report content
+    report_content = output_file.read_text()
+    assert "YAML Comparison Report" in report_content
+
+
 def test_yaml_doc_help(runner):
     """Test yaml doc command help."""
     result = runner.invoke(main, ["yaml", "doc", "--help"])

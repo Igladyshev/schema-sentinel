@@ -228,3 +228,50 @@ def test_missing_yaml_file(temp_dir):
 
     with pytest.raises(FileNotFoundError):
         comparator.load_yaml_to_db(Path("nonexistent.yaml"))
+
+
+def test_compare_yaml_files_with_max_depth(sample_yaml_files, temp_dir, tmp_path):
+    """Test YAML comparison with max_depth parameter."""
+    yaml1, yaml2 = sample_yaml_files
+    comparator = YAMLComparator(output_dir=temp_dir)
+
+    report_path = tmp_path / "comparison.md"
+
+    report = comparator.compare_yaml_files(
+        yaml1_path=yaml1,
+        yaml2_path=yaml2,
+        output_report=report_path,
+        keep_dbs=False,
+        root_table_name="deployment",
+        max_depth=1,
+    )
+
+    assert isinstance(report, str)
+    assert len(report) > 0
+    assert report_path.exists()
+
+    # Verify report content
+    with open(report_path) as f:
+        saved_report = f.read()
+    assert "# YAML Comparison Report" in saved_report
+
+
+def test_load_yaml_to_db_with_max_depth(sample_yaml_files, temp_dir):
+    """Test loading YAML file with max_depth parameter."""
+    yaml1, _ = sample_yaml_files
+    comparator = YAMLComparator(output_dir=temp_dir)
+
+    db_path = comparator.load_yaml_to_db(yaml1, root_table_name="deployment", max_depth=1)
+
+    assert db_path.exists()
+    assert db_path.suffix == ".db"
+
+    # Verify database has tables
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    tables = [row[0] for row in cursor.fetchall()]
+    conn.close()
+
+    assert len(tables) > 0
+
