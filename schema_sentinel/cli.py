@@ -394,7 +394,15 @@ def generate_doc(
 )
 @click.option("--keep-dbs", is_flag=True, help="Keep temporary SQLite databases after comparison")
 @click.option("--root-name", default="root", help="Root table name for both YAML files")
-def compare_yaml(yaml1: Path, yaml2: Path, output: Path | None, db_dir: Path, keep_dbs: bool, root_name: str):
+@click.option(
+    "--max-depth",
+    type=int,
+    default=None,
+    help="Max depth for flattening (0=none, 1=keep variants, 2+=flatten variants, None=flatten all)",
+)
+def compare_yaml(
+    yaml1: Path, yaml2: Path, output: Path | None, db_dir: Path, keep_dbs: bool, root_name: str, max_depth: int | None
+):
     """Compare two YAML files by converting them to SQLite databases.
 
     This command loads two YAML files into separate SQLite databases,
@@ -428,6 +436,7 @@ def compare_yaml(yaml1: Path, yaml2: Path, output: Path | None, db_dir: Path, ke
             output_report=output,
             keep_dbs=keep_dbs,
             root_table_name=root_name,
+            max_depth=max_depth,
         )
 
         if output:

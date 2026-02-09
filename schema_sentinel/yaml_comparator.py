@@ -27,12 +27,13 @@ class YAMLComparator:
         self.output_dir = output_dir or Path("./temp_dbs")
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def load_yaml_to_db(self, yaml_path: Path, root_table_name: str = "root") -> Path:
+    def load_yaml_to_db(self, yaml_path: Path, root_table_name: str = "root", max_depth: int | None = None) -> Path:
         """Load a YAML file into a SQLite database.
 
         Args:
             yaml_path: Path to the YAML file
             root_table_name: Name for the root table
+            max_depth: Maximum depth for flattening nested dictionaries
 
         Returns:
             Path to the created SQLite database
@@ -51,7 +52,7 @@ class YAMLComparator:
             data = yaml.safe_load(f)
 
         # Generate tables from YAML structure
-        table_gen = TableGenerator()
+        table_gen = TableGenerator(max_depth=max_depth)
         tables = table_gen.generate_tables(data, root_table_name=root_table_name, source_file=yaml_path)
 
         log.info(f"Generated {len(tables)} tables from {yaml_path.name}")
@@ -285,6 +286,7 @@ class YAMLComparator:
         output_report: Path | None = None,
         keep_dbs: bool = False,
         root_table_name: str = "root",
+        max_depth: int | None = None,
     ) -> str:
         """Complete workflow: load two YAML files, compare, and generate report.
 
@@ -294,6 +296,7 @@ class YAMLComparator:
             output_report: Optional path to save the comparison report
             keep_dbs: Whether to keep the temporary SQLite databases
             root_table_name: Name for the root table in both databases
+            max_depth: Maximum depth for flattening nested dictionaries
 
         Returns:
             Markdown formatted comparison report
@@ -301,8 +304,8 @@ class YAMLComparator:
         log.info(f"Comparing {yaml1_path.name} with {yaml2_path.name}")
 
         # Load YAML files into databases
-        db1_path = self.load_yaml_to_db(yaml1_path, root_table_name=root_table_name)
-        db2_path = self.load_yaml_to_db(yaml2_path, root_table_name=root_table_name)
+        db1_path = self.load_yaml_to_db(yaml1_path, root_table_name=root_table_name, max_depth=max_depth)
+        db2_path = self.load_yaml_to_db(yaml2_path, root_table_name=root_table_name, max_depth=max_depth)
 
         # Compare databases
         comparison = self.compare_databases(db1_path, db2_path)
