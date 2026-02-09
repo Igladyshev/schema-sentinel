@@ -274,4 +274,3 @@ def test_load_yaml_to_db_with_max_depth(sample_yaml_files, temp_dir):
     conn.close()
 
     assert len(tables) > 0
-

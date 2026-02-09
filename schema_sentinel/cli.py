@@ -400,7 +400,9 @@ def generate_doc(
     default=None,
     help="Max depth for flattening (0=none, 1=keep variants, 2+=flatten variants, None=flatten all)",
 )
-def compare_yaml(yaml1: Path, yaml2: Path, output: Path | None, db_dir: Path, keep_dbs: bool, root_name: str, max_depth: int | None):
+def compare_yaml(
+    yaml1: Path, yaml2: Path, output: Path | None, db_dir: Path, keep_dbs: bool, root_name: str, max_depth: int | None
+):
     """Compare two YAML files by converting them to SQLite databases.
 
     This command loads two YAML files into separate SQLite databases,
