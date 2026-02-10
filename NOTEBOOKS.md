@@ -29,7 +29,7 @@ This notebook provides a comprehensive, hands-on guide to using Schema Sentinel'
 1. **Structure Analysis** - Analyze nested YAML/JSON structures
 2. **Table Generation** - Convert nested data into normalized relational tables
 3. **Database Loading** - Store tables in SQLite with indexes
-4. **DDL Generation** - Create SQL schemas for multiple database dialects (Snowflake, PostgreSQL, MySQL)
+4. **DDL Generation** - Create SQL schemas for Snowflake (example pattern can be adapted to other database dialects)
 5. **YAML Comparison** - Compare two YAML files to detect configuration drift
 6. **Report Generation** - Generate detailed markdown comparison reports
 7. **Documentation Generation** - Auto-generate markdown docs from YAML files
