@@ -71,7 +71,7 @@ jupyter notebook notebooks/YAML_Shredder_Demo.ipynb
    - Should display nested element counts and types
 
 4. **Check Section 5 (Table Generation)**
-   - Verify tables are generated (CONFIG, SERVICES, etc.)
+   - Verify tables are generated (e.g., CONFIG_V1, CONFIG_V2, SERVICES, etc.)
    - Check table schemas are displayed correctly
 
 5. **Check Section 6 (SQLite Loading)**
