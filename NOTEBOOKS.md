@@ -96,8 +96,8 @@ jupyter notebook notebooks/YAML_Shredder_Demo.ipynb
    - Check list of generated files
 
 10. **Verify temp files are created**
-    - The notebook creates files in `/tmp/yaml_shredder_demo/`
-    - Check that config files, databases, and reports are created
+   - The notebook creates files in the system temporary directory (for example, `/tmp/yaml_shredder_demo/` on most Linux systems, under the directory returned by `tempfile.gettempdir()`)
+   - Check that config files, databases, and reports are created
 
 ### What reviewers should look for:
 
