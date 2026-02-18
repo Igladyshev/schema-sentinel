@@ -3,7 +3,7 @@
 ## Profile & Tech Stack
 - **Primary Language:** Python 3.13+
 - **Data Platforms:** Snowflake, PostgreSQL, MySQL, SQLite
-- **Tools:** SQL, YAML, GitLab CI/CD, Schema Management, GitHub Actions
+- **Tools:** SQL, YAML, GitHub Actions CI/CD, Schema Management
 - **Testing Framework:** pytest
 - **Documentation:** Google-style docstrings, Markdown for README and docs
 - **Style Guide:** PEP 8 with some project-specific conventions
