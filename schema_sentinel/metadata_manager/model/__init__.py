@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import logging as log
+import warnings
 from abc import abstractmethod
 
 import pandas as pd
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.exc import MovedIn20Warning
 
-from schema_sentinel.config import get_config
+warnings.filterwarnings("ignore", category=MovedIn20Warning)  # Suppress SQLAlchemy 2.0 warning
+from sqlalchemy.ext.declarative import declarative_base  # noqa: E402
+
+from schema_sentinel.config import get_config  # noqa: E402
 
 # Get configuration manager instance
 _config = get_config()
@@ -55,9 +59,6 @@ def drop_environment(s: str) -> str:
     for x in ["US_NONPROD_", "US_NON_PROD_", "US_DEV_", "US_CERT_", "US_PROD_"]:
         if x in s:
             return s.replace(x, "")
-
-
-Base = declarative_base()
 
 
 class CommonBase(Base):

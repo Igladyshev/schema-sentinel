@@ -3,8 +3,12 @@
 *.comparison.md
 *_comparison_*.md
 
+# Metadata documentation output (generated, not versioned)
+resources/metadata-doc/*
+!resources/metadata-doc/.gitkeep
+
 # Old proprietary references (keep for history)
-/resources/SDP v.0.1.1(dev) -> SDP v.0.1.3(dev)).md
+/resources/*.md
 /resources/SDP v.0.1.3(dev).md
 /resources/SDP v.0.1.3(dev) -> SDP v.0.1.1(dev)).md
 /resources/SDP v.0.1.4(cert) -> SDP v.0.1.4(non_prod)).md
@@ -139,7 +143,7 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 # Notebooks may contain proprietary data or analysis
-notebooks/
+#notebooks/
 !notebooks/.gitkeep
 
 # IPython

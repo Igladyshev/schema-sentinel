@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.6] - 2026-02-09
+
+### Added
+- **Row-Level Data Comparison**: Full data comparison between YAML files with field-level change detection
+  - `DataComparer` class for comparing tables with automatic primary key detection
+  - `PrimaryKeyDetector` class detecting id, code, name, uuid columns as primary keys
+  - `TableMatcher` class handling singular/plural table name matching
+  - Reports added, removed, and modified rows with specific field changes
+  - CLI flag `--data` / `-d` for `schema-sentinel yaml compare` command
+  - Python API: `compare_data()` and `compare_yaml_files_full()` methods in `YAMLComparator`
+  - Comprehensive test suite with 23 test cases for data comparison
+
+### Changed
+- **Package Organization**: Consolidated YAML functionality into `yaml_shredder` package
+  - Moved `YAMLComparator` from `schema_sentinel` to `yaml_shredder` package
+  - `schema_sentinel.yaml_comparator` now re-exports from `yaml_shredder` for backward compatibility
+  - Updated exports in `yaml_shredder/__init__.py`
+- **Documentation**: Updated README.md and YAML_SHREDDER_CLI.md with data comparison examples
+
+### Fixed
+- Fixed `output_report` parameter handling for string/Path compatibility in `compare_yaml_files_full()`
+- Suppressed SQLAlchemy 2.0 `MovedIn20Warning` deprecation warnings
+- Added pytest warning filters for SQLite resource warnings during imports
+
 ## [3.0.4] - 2026-02-08
 
 ### Added

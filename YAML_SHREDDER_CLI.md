@@ -99,6 +99,34 @@ uv run python yaml_shredder_cli.py all input.yaml \
   -d sqlite
 ```
 
+### `compare`
+Compare two YAML files by loading into SQLite and analyzing differences.
+
+```bash
+# Schema comparison only (tables, columns, row counts)
+uv run schema-sentinel yaml compare file1.yaml file2.yaml -o comparison.md
+
+# Full comparison with row-level data diff
+uv run schema-sentinel yaml compare file1.yaml file2.yaml --data -o comparison.md
+
+# Keep databases for manual inspection
+uv run schema-sentinel yaml compare file1.yaml file2.yaml --data --keep-dbs
+```
+
+Options:
+- `--output, -o`: Output path for markdown report
+- `--db-dir`: Directory for temporary databases (default: ./temp_dbs)
+- `--keep-dbs`: Keep temporary SQLite databases after comparison
+- `--root-name`: Root table name for YAML files (default: root)
+- `--max-depth`: Max depth for flattening dictionaries
+- `--data, -d`: Include row-level data comparison with primary key detection
+
+**Data Comparison Features:**
+- Auto-detects primary keys (id, code, name, uuid columns)
+- Matches tables with similar names (singular/plural handling)
+- Reports added, removed, and modified rows
+- Shows field-level changes for modified rows
+
 ## Examples
 
 ### Example 1: Complete Workflow - YAML to Database
