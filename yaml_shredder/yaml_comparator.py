@@ -1,6 +1,6 @@
 """YAML Comparator for comparing YAML files.
 
-Compares two YAML files by loading them into SQLite databases and comparing their structure and data.
+Compares two YAML files by loading them into SQLite or DuckDB databases and comparing their structure and data.
 """
 
 import logging
@@ -11,26 +11,28 @@ import pandas as pd
 import yaml
 
 from yaml_shredder.data_comparer import DataComparer
-from yaml_shredder.data_loader import SQLiteLoader
+from yaml_shredder.data_loader import DuckDBLoader, SQLiteLoader
 from yaml_shredder.table_generator import TableGenerator
 
 log = logging.getLogger(__name__)
 
 
 class YAMLComparator:
-    """Compare two YAML files by converting them to SQLite databases and comparing schemas/data."""
+    """Compare two YAML files by converting them to SQLite or DuckDB databases and comparing schemas/data."""
 
-    def __init__(self, output_dir: Path | None = None):
+    def __init__(self, output_dir: Path | None = None, use_duckdb: bool = False):
         """Initialize the YAML comparator.
 
         Args:
-            output_dir: Directory to store temporary SQLite databases. Defaults to ./temp_dbs/
+            output_dir: Directory to store temporary databases. Defaults to ./temp_dbs/
+            use_duckdb: If True, use DuckDB instead of SQLite (faster for complex data)
         """
         self.output_dir = output_dir or Path("./temp_dbs")
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.use_duckdb = use_duckdb
 
     def load_yaml_to_db(self, yaml_path: Path, root_table_name: str = "root", max_depth: int | None = None) -> Path:
-        """Load a YAML file into a SQLite database.
+        """Load a YAML file into a SQLite or DuckDB database.
 
         Args:
             yaml_path: Path to the YAML file
@@ -38,16 +40,17 @@ class YAMLComparator:
             max_depth: Maximum depth for flattening nested dictionaries
 
         Returns:
-            Path to the created SQLite database
+            Path to the created database
         """
         yaml_path = Path(yaml_path)
         if not yaml_path.exists():
             raise FileNotFoundError(f"YAML file not found: {yaml_path}")
 
         # Create database path based on YAML filename
-        db_path = self.output_dir / f"{yaml_path.stem}.db"
+        db_ext = ".duckdb" if self.use_duckdb else ".db"
+        db_path = self.output_dir / f"{yaml_path.stem}{db_ext}"
 
-        log.info(f"Loading {yaml_path} into {db_path}")
+        log.info(f"Loading {yaml_path} into {db_path} (using {'DuckDB' if self.use_duckdb else 'SQLite'})")
 
         # Load YAML data
         with open(yaml_path) as f:
@@ -59,8 +62,12 @@ class YAMLComparator:
 
         log.info(f"Generated {len(tables)} tables from {yaml_path.name}")
 
-        # Load tables into SQLite
-        loader = SQLiteLoader(db_path)
+        # Load tables into chosen database
+        if self.use_duckdb:
+            loader = DuckDBLoader(db_path)
+        else:
+            loader = SQLiteLoader(db_path)
+
         loader.connect()
         try:
             loader.load_tables(tables, if_exists="replace", create_indexes=True)
@@ -71,65 +78,95 @@ class YAMLComparator:
         return db_path
 
     def get_table_info(self, db_path: Path) -> dict[str, pd.DataFrame]:
-        """Get schema information for all tables in a SQLite database.
+        """Get schema information for all tables in SQLite or DuckDB database.
 
         Args:
-            db_path: Path to the SQLite database
+            db_path: Path to the database
 
         Returns:
             Dictionary mapping table names to their schema DataFrames
         """
-        conn = sqlite3.connect(db_path)
-        try:
-            # Get list of tables
-            tables_query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
-            tables_df = pd.read_sql_query(tables_query, conn)
-            table_names = tables_df["name"].tolist()
+        if self.use_duckdb:
+            # Use DuckDB
+            loader = DuckDBLoader(db_path)
+            loader.connect()
+            try:
+                table_names = loader.list_tables()
+                table_schemas = {}
+                for table_name in table_names:
+                    schema_df = loader.get_table_info(table_name)
+                    table_schemas[table_name] = schema_df
+                return table_schemas
+            finally:
+                loader.disconnect()
+        else:
+            # Use SQLite
+            conn = sqlite3.connect(db_path)
+            try:
+                # Get list of tables
+                tables_query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+                tables_df = pd.read_sql_query(tables_query, conn)
+                table_names = tables_df["name"].tolist()
 
-            # Get schema for each table
-            table_schemas = {}
-            for table_name in table_names:
-                schema_query = f'PRAGMA table_info("{table_name}")'
-                schema_df = pd.read_sql_query(schema_query, conn)
-                table_schemas[table_name] = schema_df
+                # Get schema for each table
+                table_schemas = {}
+                for table_name in table_names:
+                    schema_query = f'PRAGMA table_info("{table_name}")'
+                    schema_df = pd.read_sql_query(schema_query, conn)
+                    table_schemas[table_name] = schema_df
 
-            return table_schemas
-        finally:
-            conn.close()
+                return table_schemas
+            finally:
+                conn.close()
 
     def get_row_counts(self, db_path: Path) -> dict[str, int]:
-        """Get row counts for all tables in a SQLite database.
+        """Get row counts for all tables in SQLite or DuckDB database.
 
         Args:
-            db_path: Path to the SQLite database
+            db_path: Path to the database
 
         Returns:
             Dictionary mapping table names to their row counts
         """
-        conn = sqlite3.connect(db_path)
-        try:
-            # Get list of tables
-            tables_query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
-            tables_df = pd.read_sql_query(tables_query, conn)
-            table_names = tables_df["name"].tolist()
+        if self.use_duckdb:
+            # Use DuckDB
+            loader = DuckDBLoader(db_path)
+            loader.connect()
+            try:
+                table_names = loader.list_tables()
+                row_counts = {}
+                for table_name in table_names:
+                    count_result = loader.query(f'SELECT COUNT(*) as count FROM "{table_name}"')
+                    row_counts[table_name] = int(count_result["count"].iloc[0])
+                return row_counts
+            finally:
+                loader.disconnect()
+        else:
+            # Use SQLite
+            conn = sqlite3.connect(db_path)
+            try:
+                # Get list of tables
+                tables_query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+                tables_df = pd.read_sql_query(tables_query, conn)
+                table_names = tables_df["name"].tolist()
 
-            # Get row count for each table
-            row_counts = {}
-            for table_name in table_names:
-                count_query = f'SELECT COUNT(*) as count FROM "{table_name}"'
-                count_df = pd.read_sql_query(count_query, conn)
-                row_counts[table_name] = int(count_df["count"].iloc[0])
+                # Get row count for each table
+                row_counts = {}
+                for table_name in table_names:
+                    count_query = f'SELECT COUNT(*) as count FROM "{table_name}"'
+                    count_df = pd.read_sql_query(count_query, conn)
+                    row_counts[table_name] = int(count_df["count"].iloc[0])
 
-            return row_counts
-        finally:
-            conn.close()
+                return row_counts
+            finally:
+                conn.close()
 
     def compare_databases(self, db1_path: Path, db2_path: Path) -> dict:
-        """Compare two SQLite databases.
+        """Compare two databases (SQLite or DuckDB).
 
         Args:
-            db1_path: Path to the first SQLite database
-            db2_path: Path to the second SQLite database
+            db1_path: Path to the first database
+            db2_path: Path to the second database
 
         Returns:
             Dictionary containing comparison results
