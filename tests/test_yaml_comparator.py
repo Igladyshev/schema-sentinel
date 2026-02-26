@@ -4,6 +4,7 @@ import sqlite3
 from pathlib import Path
 
 import pytest
+import yaml
 
 from schema_sentinel.yaml_comparator import YAMLComparator
 
@@ -301,3 +302,115 @@ CO_005-MPM:
     assert "db1_name" in comparison
     assert "db2_name" in comparison
     assert "common_tables" in comparison
+
+
+def test_sync_yaml_files_report_only(temp_dir, tmp_path):
+    """Test sync workflow creates detailed markdown report in report-only mode."""
+    left_file = tmp_path / "left.yaml"
+    right_file = tmp_path / "right.yaml"
+    report_file = tmp_path / "sync_report.md"
+
+    left_file.write_text(
+        """
+root:
+  app:
+    name: app-a
+    replicas: 2
+  feature:
+    enabled: true
+"""
+    )
+    right_file.write_text(
+        """
+root:
+  app:
+    name: app-b
+    replicas: 1
+  feature:
+    enabled: false
+"""
+    )
+
+    comparator = YAMLComparator(output_dir=temp_dir)
+    result = comparator.sync_yaml_files(
+        left_file=left_file,
+        right_file=right_file,
+        output_report=report_file,
+        merge_direction="none",
+        root_table_name="root",
+    )
+
+    assert report_file.exists()
+    assert result["report_path"] == report_file
+    assert "YAML Sync Discrepancy Details" in result["report"]
+    assert "Different Values" in result["report"]
+    assert result["merged_outputs"] == {}
+
+
+def test_sync_yaml_files_schema_validation(temp_dir, tmp_path):
+    """Test sync workflow fails when schemas are different."""
+    left_file = tmp_path / "left.yaml"
+    right_file = tmp_path / "right.yaml"
+
+    left_file.write_text(
+        """
+root:
+  app:
+    name: app-a
+    replicas: 2
+"""
+    )
+    right_file.write_text(
+        """
+root:
+  app:
+    name: app-b
+    ports:
+      - 8080
+"""
+    )
+
+    comparator = YAMLComparator(output_dir=temp_dir)
+
+    with pytest.raises(ValueError, match="same schema"):
+        comparator.sync_yaml_files(left_file=left_file, right_file=right_file)
+
+
+def test_sync_yaml_files_left_to_right_merge(temp_dir, tmp_path):
+    """Test left-to-right sync merge updates right content from left source."""
+    left_file = tmp_path / "left.yaml"
+    right_file = tmp_path / "right.yaml"
+    report_file = tmp_path / "sync_report.md"
+
+    left_file.write_text(
+        """
+root:
+  app:
+    name: canonical
+    replicas: 3
+"""
+    )
+    right_file.write_text(
+        """
+root:
+  app:
+    name: drifted
+    replicas: 1
+"""
+    )
+
+    comparator = YAMLComparator(output_dir=temp_dir)
+    result = comparator.sync_yaml_files(
+        left_file=left_file,
+        right_file=right_file,
+        output_report=report_file,
+        merge_direction="left-to-right",
+        root_table_name="root",
+    )
+
+    with open(right_file) as f:
+        merged_right = yaml.safe_load(f)
+
+    assert merged_right["root"]["app"]["name"] == "canonical"
+    assert merged_right["root"]["app"]["replicas"] == 3
+    assert "right" in result["merged_outputs"]

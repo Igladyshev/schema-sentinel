@@ -91,6 +91,7 @@ def test_yaml_group_help(runner):
     assert "load" in result.output
     assert "shred" in result.output
     assert "compare" in result.output
+    assert "sync" in result.output
 
 
 def test_yaml_analyze_help(runner):
@@ -369,6 +370,83 @@ def test_yaml_compare_with_max_depth(runner, sample_yaml, sample_yaml2, tmp_path
     # Verify report content
     report_content = output_file.read_text()
     assert "YAML Comparison Report" in report_content
+
+
+def test_yaml_sync_help(runner):
+    """Test yaml sync command help."""
+    result = runner.invoke(main, ["yaml", "sync", "--help"])
+    assert result.exit_code == 0
+    assert "Validate, compare, and optionally merge" in result.output
+
+
+def test_yaml_sync_report_only(runner, sample_yaml, sample_yaml2, tmp_path):
+    """Test yaml sync report-only mode."""
+    output_file = tmp_path / "sync_report.md"
+    result = runner.invoke(
+        main,
+        [
+            "yaml",
+            "sync",
+            str(sample_yaml),
+            str(sample_yaml2),
+            "-o",
+            str(output_file),
+        ],
+    )
+    assert result.exit_code == 0
+    assert output_file.exists()
+    report = output_file.read_text()
+    assert "YAML Sync Discrepancy Details" in report
+    assert "Merge" in report
+
+
+def test_yaml_sync_left_to_right_merge(runner, tmp_path):
+    """Test yaml sync left-to-right merge updates right file."""
+    left_file = tmp_path / "left.yaml"
+    right_file = tmp_path / "right.yaml"
+    report_file = tmp_path / "sync_report.md"
+
+    left_file.write_text(
+        """
+root:
+  app:
+    name: service-a
+    replicas: 2
+  features:
+    flag1: true
+"""
+    )
+    right_file.write_text(
+        """
+root:
+  app:
+    name: service-b
+    replicas: 1
+  features:
+    flag1: false
+"""
+    )
+
+    result = runner.invoke(
+        main,
+        [
+            "yaml",
+            "sync",
+            str(left_file),
+            str(right_file),
+            "-o",
+            str(report_file),
+            "--merge-direction",
+            "left-to-right",
+            "--yes",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert report_file.exists()
+    right_content = right_file.read_text()
+    assert "service-a" in right_content
+    assert "replicas: 2" in right_content
 
 
 def test_yaml_doc_help(runner):

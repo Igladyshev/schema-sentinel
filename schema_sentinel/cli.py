@@ -480,6 +480,101 @@ def compare_yaml(
         raise click.Abort() from e
 
 
+@yaml.command(name="sync")
+@click.argument("left_file", type=click.Path(exists=True, path_type=Path))
+@click.argument("right_file", type=click.Path(exists=True, path_type=Path))
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(path_type=Path),
+    help="Output path for sync discrepancy markdown report",
+)
+@click.option(
+    "--merge-direction",
+    default="none",
+    type=click.Choice(["none", "left-to-right", "right-to-left", "both"]),
+    help="Optional merge direction to apply after validation and comparison",
+)
+@click.option("--left-output", type=click.Path(path_type=Path), help="Optional output path for merged left file")
+@click.option("--right-output", type=click.Path(path_type=Path), help="Optional output path for merged right file")
+@click.option("--yes", is_flag=True, help="Skip merge confirmation prompt")
+@click.option(
+    "--db-dir",
+    type=click.Path(path_type=Path),
+    default="./temp_dbs",
+    help="Directory for temporary databases used by schema comparison",
+)
+@click.option("--keep-dbs", is_flag=True, help="Keep temporary SQLite databases after sync")
+@click.option("--root-name", default="root", help="Root table name for both files")
+@click.option(
+    "--max-depth",
+    type=int,
+    default=None,
+    help="Max depth for flattening (0=none, 1=keep variants, 2+=flatten variants, None=flatten all)",
+)
+def sync_yaml(
+    left_file: Path,
+    right_file: Path,
+    output: Path | None,
+    merge_direction: str,
+    left_output: Path | None,
+    right_output: Path | None,
+    yes: bool,
+    db_dir: Path,
+    keep_dbs: bool,
+    root_name: str,
+    max_depth: int | None,
+):
+    """Validate, compare, and optionally merge two YAML/JSON files.
+
+    This command enforces schema equality between left and right files,
+    generates a detailed markdown discrepancy report, and can merge content
+    in one direction or both directions.
+    """
+    from schema_sentinel.yaml_comparator import YAMLComparator
+
+    click.echo("Running YAML sync:")
+    click.echo(f"  Left:  {left_file}")
+    click.echo(f"  Right: {right_file}")
+    click.echo(f"  Merge direction: {merge_direction}")
+
+    if merge_direction != "none" and not yes:
+        confirmed = click.confirm(
+            f"Apply merge direction '{merge_direction}'? This can overwrite target file(s).",
+            default=False,
+        )
+        if not confirmed:
+            click.echo("Merge cancelled. Running report-only mode.")
+            merge_direction = "none"
+
+    comparator = YAMLComparator(output_dir=db_dir)
+
+    try:
+        result = comparator.sync_yaml_files(
+            left_file=left_file,
+            right_file=right_file,
+            output_report=output,
+            merge_direction=merge_direction,
+            keep_dbs=keep_dbs,
+            root_table_name=root_name,
+            max_depth=max_depth,
+            left_output=left_output,
+            right_output=right_output,
+        )
+        click.echo(f"✓ Sync discrepancy report saved to: {result['report_path']}")
+
+        merged_outputs = result.get("merged_outputs", {})
+        if merged_outputs:
+            click.echo("✓ Merge completed for:")
+            for side, path in merged_outputs.items():
+                click.echo(f"  - {side}: {path}")
+        else:
+            click.echo("✓ No merge applied (report-only mode)")
+    except Exception as e:
+        click.echo(f"✗ Error: {e}", err=True)
+        raise click.Abort() from e
+
+
 # =============================================================================
 # Schema Command Group - Snowflake Schema Management
 # =============================================================================

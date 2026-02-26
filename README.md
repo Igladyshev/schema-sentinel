@@ -209,8 +209,8 @@ SNOWFLAKE_SCHEMAS=PUBLIC,ANALYTICS  # Optional
 ## 📖 Documentation
 
 ### YAML Shredder
-- **[YAML Shredder CLI Guide](YAML_SHREDDER_CLI.md)** - Complete CLI reference and examples
-- **[Notebooks Guide](NOTEBOOKS.md)** - Jupyter notebooks for data comparison and analysis
+- **[YAML Shredder CLI Guide](resources/documents/YAML_SHREDDER_CLI.md)** - Complete CLI reference and examples
+- **[Notebooks Guide](resources/documents/NOTEBOOKS.md)** - Jupyter notebooks for data comparison and analysis
 - Generic Table Comparison - See `MPM Comparison and Migration.ipynb` for examples
 
 ### General Documentation
@@ -222,11 +222,11 @@ SNOWFLAKE_SCHEMAS=PUBLIC,ANALYTICS  # Optional
   - [Security Guide](wiki/Security.md) - Security best practices
   - [Future Development Plan](wiki/Future-Development-Plan.md) - Roadmap and upcoming features
 - [Installation & Setup Guide](README.md#-quick-start)
-- [Development Guide](DEVELOPMENT.md) - Detailed development instructions
-- [Contributing Guide](CONTRIBUTING.md) - How to contribute
-- [Security Policy](SECURITY.md) - Security guidelines and reporting
-- [Changelog](CHANGELOG.md) - Version history
-- [Production Checklist](PRODUCTION_CHECKLIST.md) - Production readiness guide
+- [Development Guide](resources/documents/DEVELOPMENT.md) - Detailed development instructions
+- [Contributing Guide](resources/documents/CONTRIBUTING.md) - How to contribute
+- [Security Policy](resources/documents/SECURITY.md) - Security guidelines and reporting
+- [Changelog](resources/documents/CHANGELOG.md) - Version history
+- [Production Checklist](resources/documents/PRODUCTION_CHECKLIST.md) - Production readiness guide
 
 ## 🛠️ Development
 
@@ -367,7 +367,7 @@ We welcome contributions! This is an open source project and we'd love your help
 8. **Push to branch** (`git push origin feature/amazing-feature`)
 9. **Open a Pull Request** to merge into `dev` branch
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines and [BRANCHING.md](BRANCHING.md) for our branching strategy.
+See [CONTRIBUTING.md](resources/documents/CONTRIBUTING.md) for detailed guidelines and [BRANCHING.md](resources/documents/BRANCHING.md) for our branching strategy.
 
 ### Development Guidelines
 
@@ -383,7 +383,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## 🔒 Security
 
-Security is a top priority. Please see [SECURITY.md](SECURITY.md) for:
+Security is a top priority. Please see [SECURITY.md](resources/documents/SECURITY.md) for:
 - Reporting vulnerabilities
 - Security best practices
 - Credential management guidelines
@@ -417,6 +417,50 @@ This project is being actively developed and prepared for production use. We're 
 - **v3.0.0** - Web UI, multi-user support, RBAC, CI/CD integration
 
 📋 See the detailed [Future Development Plan](wiki/Future-Development-Plan.md) for comprehensive roadmap and planned features
+
+## 📚 References
+
+This section lists the key markdown documentation files in the repository:
+
+- Project README: [README.md](README.md)
+
+- Root documentation (in resources/documents/):
+    - [Branching Strategy](resources/documents/BRANCHING.md)
+    - [Branch Rules Setup](resources/documents/BRANCH_RULES_SETUP.md)
+    - [Changelog](resources/documents/CHANGELOG.md)
+    - [Contributing Guide](resources/documents/CONTRIBUTING.md)
+    - [Development Guide](resources/documents/DEVELOPMENT.md)
+    - [Notebooks Guide](resources/documents/NOTEBOOKS.md)
+    - [Pre-Release Checklist](resources/documents/PRE_RELEASE_CHECKLIST.md)
+    - [Production Checklist](resources/documents/PRODUCTION_CHECKLIST.md)
+    - [PR Description Template](resources/documents/PR_DESCRIPTION.md)
+    - [Security Policy](resources/documents/SECURITY.md)
+    - [YAML Shredder CLI Guide](resources/documents/YAML_SHREDDER_CLI.md)
+
+- Wiki documentation:
+    - [Wiki README](wiki/README.md)
+    - [Home](wiki/Home.md)
+    - [Getting Started](wiki/Getting-Started.md)
+    - [Architecture](wiki/Architecture.md)
+    - [Development](wiki/Development.md)
+    - [Contributing](wiki/Contributing.md)
+    - [Security](wiki/Security.md)
+    - [Future Development Plan](wiki/Future-Development-Plan.md)
+
+- Tests documentation:
+    - [Tests README](tests/README.md)
+
+- GitHub metadata and templates:
+    - [Copilot Instructions](.github/copilot-instructions.md)
+    - [Ruleset README](.github/rulesets/README.md)
+    - [Pull Request Template](.github/pull_request_template.md)
+
+- Datacompy report templates:
+    - [Header Template](resources/datacompy/templates/header.md)
+    - [Row Summary Template](resources/datacompy/templates/row_summary.md)
+    - [Favorite Column Summary Template](resources/datacompy/templates/fav_column_summary.md)
+    - [Column Comparison Template](resources/datacompy/templates/column_comparison.md)
+    - [Column Summary Template](resources/datacompy/templates/column_summary.md)
 
 ## 💬 Support & Community
 

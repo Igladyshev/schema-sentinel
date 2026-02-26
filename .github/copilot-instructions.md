@@ -11,7 +11,7 @@
 
 ## Workflow & Validation Requirements
 - **Tooling:** This project uses `uv` for dependency and task management.
-- **Mandatory Checks:** After making any code changes, YOU MUST verify the changes by running:
+- **Mandatory Checks:** After making any code changes, **and code changes only**, YOU MUST verify the changes by running:
   1. `uv run ruff check --fix .` (to lint and auto-fix issues)
   2. `uv run ruff format` (to ensure consistent styling)
 - **Zero-Error Policy:** Do not consider a task "Done" or "Complete" if there are remaining Ruff linting errors or formatting inconsistencies.
@@ -26,3 +26,5 @@
 ## Documentation
 - Use Google-style docstrings.
 - Always include a brief "How it works" comment for complex SQL transformations.
+- Don't add any of *_PLAN.md or *_SUMMARY.md files into the git - I don't want to clog the repository with this intermediate documents
+- Keep main README.md up to date and maintain updates in pre-commit

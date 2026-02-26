@@ -3,9 +3,12 @@
 Compares two YAML files by loading them into SQLite or DuckDB databases and comparing their structure and data.
 """
 
+import json
 import logging
 import sqlite3
+from copy import deepcopy
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import yaml
@@ -317,6 +320,372 @@ class YAMLComparator:
             log.info(f"Report saved to {output_path}")
 
         return report
+
+    def _load_structured_file(self, file_path: Path) -> dict[str, Any]:
+        """Load a YAML or JSON file and validate root type.
+
+        Args:
+            file_path: File path to load
+
+        Returns:
+            Parsed dictionary data
+
+        Raises:
+            FileNotFoundError: If file doesn't exist
+            ValueError: If file content is invalid for sync
+        """
+        file_path = Path(file_path)
+        if not file_path.exists():
+            raise FileNotFoundError(f"File not found: {file_path}")
+        if not file_path.is_file():
+            raise ValueError(f"Path is not a file: {file_path}")
+        if file_path.stat().st_size == 0:
+            raise ValueError(f"File is empty: {file_path}")
+
+        allowed_extensions = {".yaml", ".yml", ".json"}
+        suffix = file_path.suffix.lower()
+        if suffix and suffix not in allowed_extensions:
+            raise ValueError(
+                f"Unsupported file extension for sync: {file_path.suffix}. Supported extensions: .yaml, .yml, .json"
+            )
+
+        with open(file_path) as f:
+            if suffix == ".json":
+                try:
+                    data = json.load(f)
+                except json.JSONDecodeError as exc:
+                    raise ValueError(f"Invalid JSON file: {file_path}") from exc
+            else:
+                try:
+                    data = yaml.safe_load(f)
+                except yaml.YAMLError as exc:
+                    raise ValueError(f"Invalid YAML file: {file_path}") from exc
+
+        if data is None:
+            raise ValueError(f"File contains no data: {file_path}")
+        if not isinstance(data, dict):
+            raise ValueError(f"File {file_path} must contain a dictionary at root level, got {type(data).__name__}")
+
+        return data
+
+    def _schema_signature(self, node: Any) -> dict[str, Any]:
+        """Build a deterministic schema signature for nested structures."""
+        if isinstance(node, dict):
+            return {
+                "type": "dict",
+                "keys": {key: self._schema_signature(value) for key, value in sorted(node.items())},
+            }
+        if isinstance(node, list):
+            item_signatures = [self._schema_signature(item) for item in node]
+            unique_signatures = sorted(
+                {json.dumps(signature, sort_keys=True, separators=(",", ":")) for signature in item_signatures}
+            )
+            return {
+                "type": "list",
+                "items": [json.loads(signature) for signature in unique_signatures],
+            }
+        return {"type": type(node).__name__}
+
+    def _validate_sync_inputs(self, left_file: Path, right_file: Path) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Validate sync inputs and ensure schema compatibility."""
+        left_path = Path(left_file)
+        right_path = Path(right_file)
+
+        if left_path.resolve() == right_path.resolve():
+            raise ValueError("left_file and right_file must be different files")
+
+        left_data = self._load_structured_file(left_path)
+        right_data = self._load_structured_file(right_path)
+
+        left_schema = self._schema_signature(left_data)
+        right_schema = self._schema_signature(right_data)
+
+        if left_schema != right_schema:
+            raise ValueError(
+                "Input files do not share the same schema. "
+                "Run comparison report to inspect structural differences before merge."
+            )
+
+        return left_data, right_data
+
+    def _path_to_str(self, path: tuple[str, ...]) -> str:
+        """Convert a path tuple to a display string."""
+        if not path:
+            return "$"
+        return "$." + ".".join(path)
+
+    def _collect_discrepancies(
+        self,
+        left_node: Any,
+        right_node: Any,
+        path: tuple[str, ...],
+        discrepancies: dict[str, list[dict[str, Any]]],
+    ) -> None:
+        """Recursively collect node-level discrepancies between two structures."""
+        if isinstance(left_node, dict) and isinstance(right_node, dict):
+            left_keys = set(left_node)
+            right_keys = set(right_node)
+
+            for key in sorted(left_keys - right_keys):
+                discrepancies["missing_in_right"].append(
+                    {
+                        "path": self._path_to_str(path + (str(key),)),
+                        "node": left_node[key],
+                    }
+                )
+
+            for key in sorted(right_keys - left_keys):
+                discrepancies["missing_in_left"].append(
+                    {
+                        "path": self._path_to_str(path + (str(key),)),
+                        "node": right_node[key],
+                    }
+                )
+
+            for key in sorted(left_keys & right_keys):
+                self._collect_discrepancies(
+                    left_node[key],
+                    right_node[key],
+                    path + (str(key),),
+                    discrepancies,
+                )
+            return
+
+        if isinstance(left_node, list) and isinstance(right_node, list):
+            max_len = max(len(left_node), len(right_node))
+            for index in range(max_len):
+                segment = f"[{index}]"
+                if index >= len(right_node):
+                    discrepancies["missing_in_right"].append(
+                        {
+                            "path": self._path_to_str(path + (segment,)),
+                            "node": left_node[index],
+                        }
+                    )
+                    continue
+                if index >= len(left_node):
+                    discrepancies["missing_in_left"].append(
+                        {
+                            "path": self._path_to_str(path + (segment,)),
+                            "node": right_node[index],
+                        }
+                    )
+                    continue
+                self._collect_discrepancies(left_node[index], right_node[index], path + (segment,), discrepancies)
+            return
+
+        if left_node != right_node:
+            discrepancies["different_values"].append(
+                {
+                    "path": self._path_to_str(path),
+                    "left": left_node,
+                    "right": right_node,
+                    "left_type": type(left_node).__name__,
+                    "right_type": type(right_node).__name__,
+                }
+            )
+
+    def _format_value(self, value: Any) -> str:
+        """Format Python value for markdown report blocks."""
+        return yaml.safe_dump(value, sort_keys=True, allow_unicode=True, default_flow_style=False).rstrip()
+
+    def _build_sync_markdown_report(
+        self,
+        left_file: Path,
+        right_file: Path,
+        base_report: str,
+        discrepancies: dict[str, list[dict[str, Any]]],
+        merge_direction: str,
+        merged_outputs: dict[str, Path],
+    ) -> str:
+        """Build markdown report for sync discrepancies and merge summary."""
+        lines = [base_report, "", "---", "", "# YAML Sync Discrepancy Details", ""]
+        lines.append("## Inputs")
+        lines.append("")
+        lines.append(f"- **Left file:** `{left_file}`")
+        lines.append(f"- **Right file:** `{right_file}`")
+        lines.append("")
+        lines.append("## Node Difference Summary")
+        lines.append("")
+        lines.append(f"- **Missing in right:** {len(discrepancies['missing_in_right'])}")
+        lines.append(f"- **Missing in left:** {len(discrepancies['missing_in_left'])}")
+        lines.append(f"- **Different values:** {len(discrepancies['different_values'])}")
+        lines.append("")
+
+        if discrepancies["missing_in_right"]:
+            lines.append("## Nodes Missing in Right")
+            lines.append("")
+            for item in discrepancies["missing_in_right"]:
+                lines.append(f"### `{item['path']}`")
+                lines.append("")
+                lines.append("```yaml")
+                lines.append(self._format_value(item["node"]))
+                lines.append("```")
+                lines.append("")
+
+        if discrepancies["missing_in_left"]:
+            lines.append("## Nodes Missing in Left")
+            lines.append("")
+            for item in discrepancies["missing_in_left"]:
+                lines.append(f"### `{item['path']}`")
+                lines.append("")
+                lines.append("```yaml")
+                lines.append(self._format_value(item["node"]))
+                lines.append("```")
+                lines.append("")
+
+        if discrepancies["different_values"]:
+            lines.append("## Different Values")
+            lines.append("")
+            for item in discrepancies["different_values"]:
+                lines.append(f"### `{item['path']}`")
+                lines.append("")
+                lines.append(f"- **Left type:** `{item['left_type']}`")
+                lines.append(f"- **Right type:** `{item['right_type']}`")
+                lines.append("")
+                lines.append("**Left value:**")
+                lines.append("```yaml")
+                lines.append(self._format_value(item["left"]))
+                lines.append("```")
+                lines.append("")
+                lines.append("**Right value:**")
+                lines.append("```yaml")
+                lines.append(self._format_value(item["right"]))
+                lines.append("```")
+                lines.append("")
+
+        lines.append("## Merge")
+        lines.append("")
+        lines.append(f"- **Direction:** `{merge_direction}`")
+        if merged_outputs:
+            lines.append("- **Updated files:**")
+            for side, path in merged_outputs.items():
+                lines.append(f"  - `{side}`: `{path}`")
+        else:
+            lines.append("- **Updated files:** none (report-only mode)")
+        lines.append("")
+
+        return "\n".join(lines)
+
+    def _merge_structures(self, source: Any, target: Any) -> Any:
+        """Merge source into target recursively with source winning conflicts."""
+        if isinstance(source, dict) and isinstance(target, dict):
+            merged = deepcopy(target)
+            for key, source_value in source.items():
+                if key in merged:
+                    merged[key] = self._merge_structures(source_value, merged[key])
+                else:
+                    merged[key] = deepcopy(source_value)
+            return merged
+
+        if isinstance(source, list):
+            return deepcopy(source)
+
+        return deepcopy(source)
+
+    def _write_structured_file(self, path: Path, data: dict[str, Any]) -> None:
+        """Write merged data preserving YAML/JSON based on file extension."""
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if path.suffix.lower() == ".json":
+            with open(path, "w") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+                f.write("\n")
+            return
+
+        with open(path, "w") as f:
+            yaml.safe_dump(data, f, sort_keys=False, allow_unicode=True)
+
+    def sync_yaml_files(
+        self,
+        left_file: Path,
+        right_file: Path,
+        output_report: Path | None = None,
+        merge_direction: str = "none",
+        keep_dbs: bool = False,
+        root_table_name: str = "root",
+        max_depth: int | None = None,
+        left_output: Path | None = None,
+        right_output: Path | None = None,
+    ) -> dict[str, Any]:
+        """Validate, compare, report differences, and optionally merge two YAML/JSON files.
+
+        Args:
+            left_file: Path to the left YAML/JSON file
+            right_file: Path to the right YAML/JSON file
+            output_report: Optional path for markdown report
+            merge_direction: Merge direction: none, left-to-right, right-to-left, both
+            keep_dbs: Whether to keep temporary comparison databases
+            root_table_name: Root table name for database comparison workflow
+            max_depth: Maximum flattening depth for DB comparison
+            left_output: Optional output path for left result (for merges affecting left)
+            right_output: Optional output path for right result (for merges affecting right)
+
+        Returns:
+            Dict with report content, report path, discrepancies, and merged output paths
+        """
+        allowed_directions = {"none", "left-to-right", "right-to-left", "both"}
+        if merge_direction not in allowed_directions:
+            raise ValueError(
+                f"Invalid merge_direction: {merge_direction}. Expected one of: none, left-to-right, right-to-left, both"
+            )
+
+        left_path = Path(left_file)
+        right_path = Path(right_file)
+        left_data, right_data = self._validate_sync_inputs(left_path, right_path)
+
+        schema_report = self.compare_yaml_files(
+            yaml1_path=left_path,
+            yaml2_path=right_path,
+            output_report=None,
+            keep_dbs=keep_dbs,
+            root_table_name=root_table_name,
+            max_depth=max_depth,
+        )
+
+        discrepancies: dict[str, list[dict[str, Any]]] = {
+            "missing_in_right": [],
+            "missing_in_left": [],
+            "different_values": [],
+        }
+        self._collect_discrepancies(left_data, right_data, (), discrepancies)
+
+        merged_outputs: dict[str, Path] = {}
+        if merge_direction in {"left-to-right", "both"}:
+            merged_right = self._merge_structures(left_data, right_data)
+            right_target = Path(right_output) if right_output else right_path
+            self._write_structured_file(right_target, merged_right)
+            merged_outputs["right"] = right_target
+
+        if merge_direction in {"right-to-left", "both"}:
+            merged_left = self._merge_structures(right_data, left_data)
+            left_target = Path(left_output) if left_output else left_path
+            self._write_structured_file(left_target, merged_left)
+            merged_outputs["left"] = left_target
+
+        report_path = (
+            Path(output_report) if output_report else Path(f"{left_path.stem}_vs_{right_path.stem}_sync_report.md")
+        )
+        report = self._build_sync_markdown_report(
+            left_file=left_path,
+            right_file=right_path,
+            base_report=schema_report,
+            discrepancies=discrepancies,
+            merge_direction=merge_direction,
+            merged_outputs=merged_outputs,
+        )
+
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(report_path, "w") as f:
+            f.write(report)
+
+        return {
+            "report": report,
+            "report_path": report_path,
+            "discrepancies": discrepancies,
+            "merge_direction": merge_direction,
+            "merged_outputs": merged_outputs,
+        }
 
     def compare_yaml_files(
         self,
