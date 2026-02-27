@@ -412,7 +412,73 @@ class YAMLComparator:
         """Convert a path tuple to a display string."""
         if not path:
             return "$"
-        return "$." + ".".join(path)
+        path_str = "$"
+        for segment in path:
+            if segment.startswith("["):
+                path_str += segment
+            else:
+                path_str += f".{segment}"
+        return path_str
+
+    def _find_list_identifier_key(self, left_items: list[Any], right_items: list[Any]) -> str | None:
+        """Find a key suitable as a stable identifier across list items.
+
+        Examines dict items from both lists to find a key with scalar values
+        that are unique within at least one side, preferring common
+        identifier patterns (e.g. ``*_code``, ``*_id``, ``name``).
+
+        Args:
+            left_items: Items from the left list.
+            right_items: Items from the right list.
+
+        Returns:
+            Key name to use as identifier, or None when no suitable key exists.
+        """
+        all_dicts = [item for item in (list(left_items) + list(right_items)) if isinstance(item, dict)]
+        if not all_dicts:
+            return None
+
+        # Keys present in every dict item
+        common_keys: set[str] = set(all_dicts[0].keys())
+        for item in all_dicts[1:]:
+            common_keys &= set(item.keys())
+
+        if not common_keys:
+            return None
+
+        def _is_identifier_in(items: list[Any], key: str) -> bool:
+            """Check if key has unique scalar values within a single list."""
+            dicts = [item for item in items if isinstance(item, dict)]
+            if not dicts:
+                return False
+            values = [item.get(key) for item in dicts]
+            return all(isinstance(v, (str, int, float)) for v in values) and len({str(v) for v in values}) == len(dicts)
+
+        # Keep only keys that are a valid identifier on at least one side
+        candidates: list[str] = [
+            key for key in common_keys if _is_identifier_in(left_items, key) or _is_identifier_in(right_items, key)
+        ]
+
+        if not candidates:
+            return None
+
+        # Prefer keys matching common identifier patterns
+        _priority_suffixes = ("_code", "_id", "_key", "_name")
+        _priority_exact = {"name", "id", "code", "key"}
+        for key in sorted(candidates):
+            if key in _priority_exact or any(key.endswith(s) for s in _priority_suffixes):
+                return key
+
+        return sorted(candidates)[0]
+
+    def _list_path_segment(self, index: int, node: Any | None = None, identifier_key: str | None = None) -> str:
+        """Build a list path segment, preferring stable identifiers when available."""
+        if identifier_key and isinstance(node, dict):
+            value = node.get(identifier_key)
+            if value is not None:
+                return f"[{value}]"
+
+        return f"[{index}]"
 
     def _collect_discrepancies(
         self,
@@ -452,9 +518,11 @@ class YAMLComparator:
             return
 
         if isinstance(left_node, list) and isinstance(right_node, list):
+            identifier_key = self._find_list_identifier_key(left_node, right_node)
             max_len = max(len(left_node), len(right_node))
             for index in range(max_len):
-                segment = f"[{index}]"
+                node_for_path = left_node[index] if index < len(left_node) else right_node[index]
+                segment = self._list_path_segment(index, node_for_path, identifier_key)
                 if index >= len(right_node):
                     discrepancies["missing_in_right"].append(
                         {

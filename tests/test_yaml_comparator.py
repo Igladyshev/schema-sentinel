@@ -414,3 +414,56 @@ root:
     assert merged_right["root"]["app"]["name"] == "canonical"
     assert merged_right["root"]["app"]["replicas"] == 3
     assert "right" in result["merged_outputs"]
+
+
+def test_sync_discrepancy_paths_use_identifier_key(temp_dir, tmp_path):
+    """Test sync discrepancy paths use a dynamic identifier key instead of list index."""
+    left_file = tmp_path / "left.yaml"
+    right_file = tmp_path / "right.yaml"
+    report_file = tmp_path / "sync_report.md"
+
+    left_file.write_text(
+        """
+root:
+  actions:
+    - action_code: ACT_100
+      parents:
+        - etl.ROSI.player
+        - etl.ROSI.businessactivity
+  servers:
+    - name: web01
+      ip: 10.0.0.1
+    - name: web02
+      ip: 10.0.0.2
+"""
+    )
+    right_file.write_text(
+        """
+root:
+  actions:
+    - action_code: ACT_100
+      parents:
+        - player
+        - etl.ROSI.businessactivity
+  servers:
+    - name: web01
+      ip: 10.0.0.99
+    - name: web02
+      ip: 10.0.0.2
+"""
+    )
+
+    comparator = YAMLComparator(output_dir=temp_dir)
+    result = comparator.sync_yaml_files(
+        left_file=left_file,
+        right_file=right_file,
+        output_report=report_file,
+        merge_direction="none",
+        root_table_name="root",
+    )
+
+    diff_paths = [item["path"] for item in result["discrepancies"]["different_values"]]
+    # actions list uses action_code as identifier
+    assert "$.root.actions[ACT_100].parents[0]" in diff_paths
+    # servers list uses name as identifier
+    assert "$.root.servers[web01].ip" in diff_paths
